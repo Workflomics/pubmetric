@@ -18,7 +18,7 @@ To use this code, ensure you have the following dependencies installed:
 Python packages listed in the `requirements.txt` file. You can install them using the following command: pip install -r requirements.txt 
 
 
-Cytoscape software, which can be downloaded from (https://cytoscape.org/). Please make sure Cytoscape is open and running when executing the code.
+Cytoscape software, which can be downloaded from [https://cytoscape.org/](https://cytoscape.org/). Please make sure Cytoscape is open and running when executing the code.
 
 
 ## License
