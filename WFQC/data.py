@@ -12,8 +12,7 @@ import json
 import aiohttp              # Used for aggregating requests into single session
 import nest_asyncio         # For jupyter asyncio compatibility 
 nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
-import jsonpath_ng as jp
-
+import jsonpath_ng as jp    # TODO: import jsonpath_ng.ext      # More efficient json processing look into if actually computationally more efficient 
 
 # TODO: import jsonpath_ng.ext      # More efficient json processing look into if actually computationally more efficient 
 import requests             # For single API requests 
@@ -162,9 +161,7 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
             # Check if tool is already in library 
             if doi in doi_library: 
                 doi_pmid = doi_library[doi] 
-                print("doi already in library")
                 tool["pmid"] = doi_pmid
-                print(tool["pmid"])
                 continue
             
             # Otherwise access NCBI API
@@ -174,7 +171,6 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
             result = await aggregate_requests(session, url)
             try:
                 doi_pmid = str(result.get('esearchresult').get('idlist')[0])
-                print(doi_pmid)
                 if str(doi_pmid) == 'null': #this does not feel optimal 
                     doi_pmid = None
             except:

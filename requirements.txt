@@ -7,8 +7,7 @@ pandas
 tqdm==4.66.2
 numpy
 matplotlib
-json
 nest_asyncio
-jsonpath_ng
+jsonpath-ng
 ruamel.yaml
 cwl_utils

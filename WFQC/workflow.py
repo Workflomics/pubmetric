@@ -13,7 +13,7 @@ import sys
 import matplotlib.pyplot as plt
 import json
 
-def parse_workflows(cwl_file):
+def parse_workflows(cwl_file,cvsfile):
     # Import CWL Object
     cwl_obj = load_document_by_uri(cwl_file)
 
@@ -38,7 +38,7 @@ def parse_workflows(cwl_file):
                     pairwise_connections.add((tool_id, next_target.split("_")[0]))
 
     # Read CSV file containing tool information
-    csv_filename = 'biotools_metadata_topic_0121_20240507.csv' #TODO: this should NOT be hardcoded
+    csv_filename = cvsfile 
     f = pd.read_csv(csv_filename)
 
     # Retrieve PMID values for pairwise connections, this should be bio.tools ids instead? 

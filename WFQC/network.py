@@ -18,7 +18,7 @@ import jsonpath_ng as jp
 import igraph               # Used to create te citationa graph 
 
 
-import toolcitation.fetchtools
+import WFQC.data
 
 
 def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, loadData=True, filePath='', outpath = None, inpath = '', saveFiles=True): # TODO: I just threw  code into this function- improve
@@ -54,7 +54,7 @@ def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, 
 
     # Retrieve the data 
     # run the asynchronous function for single session requests 
-    result = asyncio.run(toolcitation.fetchtools.get_biotools_metadata(topicID=topicID)) 
+    result = asyncio.run(WFQC.data.get_biotools_metadata(topicID=topicID)) 
     pmids = result['pmid'].tolist() # should I use numpy for all my lists? 
 
     # Randomly picks out a subset of the pmids
@@ -105,7 +105,7 @@ def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, 
         for pmid in tqdm(pmids, desc="Processing PMIDs"): 
             pmid = str(pmid) # EuropePMC requires str            
     
-            citations = toolcitation.fetchtools.europepmc(pmid, page_size=1000)
+            citations = WFQC.data.europepmc(pmid, page_size=1000)
             for citation in citations:
                 edges.append((pmid, str(citation['id']))) # TODO: this is the wring way around? shoudl be citation to pmid, no? 
                 if pmid not in included_tools:
