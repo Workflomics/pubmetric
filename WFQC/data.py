@@ -16,6 +16,7 @@ import jsonpath_ng as jp    # TODO: import jsonpath_ng.ext      # More efficient
 
 # TODO: import jsonpath_ng.ext      # More efficient json processing look into if actually computationally more efficient 
 import requests             # For single API requests 
+import pickle
 
 
 #TODO: all of the descriptions - Where do I put default value? 
@@ -35,7 +36,7 @@ async def aggregate_requests(session, url):
     async with session.get(url) as response:
         return await response.json()
     
-async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format. Check if there is any reason to have it 
+async def get_biotools_metadata(outpath, topicID="topic_0121"):  # TODO: I removed format. Check if there is any reason to have it 
                                                         # TODO: should add parameter for optional forced retrieval - even if csv file, still recreate it 
                                                         # TODO: Currently no timing - add tracker
     """
@@ -101,6 +102,10 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
             # TODO: Do I need to check? what happens if no response for page == 1? Maybe try/except instead
             # Checking if there are any tools, if 
 
+            # To record nr of tools with primary
+            no_primary_publications = 0 
+            nr_publications = []
+
             if 'list' in biotool_data: 
                 biotools_lst = biotool_data['list']
                 
@@ -108,8 +113,9 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
                     name = tool.get('name') 
                     publications = tool.get('publication') # does this cause a problem if there is no publication? 
                     topic = tool.get('topic')
-                    
-                    if isinstance(publications, list): # ahh how many ifs will it bee aahh 
+               
+                    if isinstance(publications, list): 
+                        nr_publications.append(len(publications))
                         try:
                             for publication in publications:
                                 if publication.get('type')[0] == 'Primary':
@@ -117,7 +123,9 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
                                     break
                         except:
                             primary_publication = publications[0] # pick first then 
+                            no_primary_publications += 1
                     else:
+                        nr_publications.append(1)
                         primary_publication = publications
                         
 
@@ -142,6 +150,11 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
                 print(f'Error while fetching tool names from page {page}')
                 break
     
+    print("Nr of tools without a primary publication tag:", no_primary_publications)
+    print("Largest number of publications for a tool: ",max(nr_publications))
+    print("Nr of tools with pmid in bio.tools: ",len(all_tool_data))
+    print("Nr of tools without pmid (with doi): ", len(doi_tools))
+
     # Download pmids from dois
     doi_library_filename = 'doi_pmid_library.json' # TODO: Make it customisable 
     try: 
@@ -152,8 +165,6 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
         doi_library = {} # {doi: pmid}, should I perhaps do {name: [pmid doi ]} instead?
 
     library_updates = False
-
-
     async with aiohttp.ClientSession() as session: 
         for tool in tqdm(doi_tools, desc="Fetching pmids from dois."):
             doi = tool["doi"]
@@ -184,8 +195,12 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
 
     if library_updates:
         print(f"Writing new doi, pmid pairs to file {doi_library_filename}")
-        with open(doi_library_filename, 'w') as f:
+        with open(doi_library_filename, 'w') as f: # will this not overwrite what was in there? 
             json.dump(doi_library, f)
+    
+    """ nr_publications"""
+    with open(f'{outpath}/nr_publications.pkl', 'wb') as f:
+        pickle.dump(nr_publications, f)
 
     # Convert list of dictionaries to dataframe
     df_pmid = pd.DataFrame(all_tool_data)
@@ -193,9 +208,12 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
 
 
     #drop column doi, and drop all rows with "pmid == None" and concatenate them. TODO: maybe export to logfile which ones did not have pmid or doi pmid 
-    df_doi.drop(columns=["doi"], inplace=True)
+    df_doi.drop(columns=["doi"], inplace=True) # do I need to do =, or is doi still there otherwise?
     
     df_doi = df_doi.dropna(subset=["pmid"])
+    nr_doi_id_pmids = len(df_doi.dropna(subset=["pmid"]))
+    print('Nr of tools whose pmid could be identified using the doi:', nr_doi_id_pmids )
+
     df = pd.concat([df_pmid, df_doi], axis=0, ignore_index=True)
     # Save dataframe to file
     df.to_csv(csv_filename, index=False)
@@ -203,7 +221,7 @@ async def get_biotools_metadata(topicID="topic_0121"):  # TODO: I removed format
     # If there were any pages, check how many tools were retrieved and how many tools had pmids
     if biotool_data: 
         nr_tools = int(biotool_data['count']) 
-        nr_included_tools = len(all_tool_data) + len(doi_tools)
+        nr_included_tools = len(all_tool_data) + nr_doi_id_pmids
         print(f'Found {nr_included_tools} out of a total of {nr_tools} tools with PMIDS.')
 
     return df

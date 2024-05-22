@@ -21,7 +21,7 @@ import igraph               # Used to create te citationa graph
 import WFQC.data
 
 
-def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, loadData=True, filePath='', outpath = None, inpath = '', saveFiles=True): # TODO: I just threw  code into this function- improve
+def create_citation_network(topicID="topic_0121", testSize='', randomSeed=42, loadData=True, filePath='', outpath = None, inpath = '', saveFiles=True): # TODO: I just threw  code into this function- improve
     
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph
@@ -52,19 +52,7 @@ def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, 
    
         
 
-    # Retrieve the data 
-    # run the asynchronous function for single session requests 
-    result = asyncio.run(WFQC.data.get_biotools_metadata(topicID=topicID)) 
-    pmids = result['pmid'].tolist() # should I use numpy for all my lists? 
 
-    # Randomly picks out a subset of the pmids
-    if testSize: 
-        if not loadData:  
-            print(f"Creating test-cocitation network of size {testSize}. Random seed is {randomSeed}.")
-        np.random.seed(randomSeed)
-        pmids = np.random.choice(pmids,testSize)
-    else:
-        testSize = '' # temp for the creation of files, so they dotn ahve none in name 
     
     # Edge creation 
     # Load previously created data or recreate it
@@ -82,6 +70,8 @@ def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, 
                 G = pickle.load(f) 
             with open(tool_path, 'rb') as f:
                 included_tools = pickle.load(f) 
+
+
         else:
             print(f"Files not found. Please check that '{edge_path}', '{graph_path}' and '{tool_path}' are in your current directory and run again. Or set loadData = False, to create the files. ")
             return 
@@ -94,11 +84,24 @@ def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, 
             outpath =  f'out_{datetime.now().strftime("%Y%m%d%H%M")}'
             os.mkdir(outpath)
 
+        # Retrieve the data 
+        # run the asynchronous function for single session requests 
+        result = asyncio.run(WFQC.data.get_biotools_metadata(outpath=outpath, topicID=topicID)) 
+        pmids = result['pmid'].tolist() # should I use numpy for all my lists? 
+
+        # Randomly picks out a subset of the pmids
+        if testSize != '': 
+            print(f"Creating test-cocitation network of size {testSize}. Random seed is {randomSeed}.")
+            np.random.seed(randomSeed)
+            pmids = np.random.choice(pmids,testSize)
+
+
         # edge creation using europepmc
         print("Downloading citation data from Europepmc.")
         
         # Creates a list of the tools that actually have citations, otherwise they are not included in the graph. 
         included_tools = []  
+        nr_citations ={}
         edges = []
 
         # Get citations for each tool, and generate edges between them. 
@@ -106,32 +109,47 @@ def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, 
             pmid = str(pmid) # EuropePMC requires str            
     
             citations = WFQC.data.europepmc(pmid, page_size=1000)
+
+            nr_citations[pmid] = len(citations)
             for citation in citations:
                 edges.append((pmid, str(citation['id']))) # TODO: this is the wring way around? shoudl be citation to pmid, no? 
                 if pmid not in included_tools:
                     included_tools.append(pmid) 
-        
+
         print("Creating citation graph using igraph.")
         
         # Finding unique edges by converting list to a set (because tuples are hashable) and back to list.
         # TODO: better way?
+
         unq_edges =  list(set(edges)) 
         print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
 
         # Creating a directed graph with unique edges
         G = igraph.Graph.TupleList(unq_edges, directed=True)
 
+
         # Removing disconnected vertices (that are not tools) that do not have information value for the (current) metric
         # TODO: improve edge removal?
         print("Removing citations with degree less or equal to 1 (Non co-citations).")
-        vertices_to_remove = [v.index for v in G.vs if v.degree() <= 1 and v['name'] not in included_tools] 
+        vertices_to_remove = [v.index for v in G.vs if v.degree() <= 1 and v['name'] not in included_tools] # OBS?!is name actually name? 
         G.delete_vertices(vertices_to_remove)
         vertices_to_remove = [v.index for v in G.vs if v.degree() == 0 ] # second run to remove the copletely detatched ones after first run sicne they wont give info anyways. 
         G.delete_vertices(vertices_to_remove) # This will remove isolated tools as well 
 
+        ## Adding stats about node degrees:
+        #TODO test
+        node_degrees = G.degree(G.vs)
+        node_names = [v['name'] for v in G.vs]
+        node_degree_dict = dict(zip(node_names, node_degrees))
+        print( 10, node_degree_dict)
+
+
         # Updating included_tools to only contain lists that are in the graph  
         included_tools = [tool for tool in included_tools if tool in G.vs['name']] 
 
+
+        # Thresholding graph and removing nodes with too high node degrees?
+        
 
         # Saving edges, graph and tools included in the graph 
 
@@ -140,10 +158,12 @@ def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, 
             edge_path = f'{outpath}/edges{testSize}.pkl'
             graph_path = f'{outpath}/graph{testSize}.pkl'
             tool_path = f'{outpath}/tools{testSize}.pkl'
+            nr_citations_path = f'{outpath}/nr_citations{testSize}.pkl'
+            node_degree_dict_path = f'{outpath}/node_degree_dict{testSize}.pkl'
 
             print(f"Saving data to '{edge_path}', '{graph_path}' and '{tool_path}'.") # sould make these filenames dynamic
             # and save them 
-            #Do this nicer later? 
+            #Do this nicer later? TODO: perhaps save them all in a json instead
             with open(edge_path, 'wb') as f:
                 pickle.dump(unq_edges, f)
 
@@ -151,7 +171,14 @@ def create_citation_network(topicID="topic_0121", testSize=None, randomSeed=42, 
                 pickle.dump(G, f)
 
             with open(tool_path, 'wb') as f:
-                pickle.dump(included_tools, f)    
+                pickle.dump(included_tools, f)  
+
+            with open(nr_citations_path, 'wb') as f:
+                pickle.dump(nr_citations, f)
+
+            with open(node_degree_dict_path, 'wb') as f:
+                pickle.dump(node_degree_dict, f)
+
 
     # returns a graph and the pmids of the tools included in the graph (tools connected by cocitations)
     return G, included_tools 
