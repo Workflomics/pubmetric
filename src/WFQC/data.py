@@ -158,7 +158,7 @@ async def get_pmids(topicID):
 
     return pmid_tools, doi_tools, no_primary_publications, nr_publications, nr_tools
 
-def get_biotools_metadata(outpath, topicID="topic_0121"):  # TODO: I removed format. Check if there is any reason to have it 
+def get_tool_metadata(outpath, topicID="topic_0121"):  # TODO: I removed format. Check if there is any reason to have it 
                                                         # TODO: should add parameter for optional forced retrieval - even if csv file, still recreate it 
                                                         # TODO: Currently no timing - add tracker
     """
