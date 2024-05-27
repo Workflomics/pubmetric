@@ -1,4 +1,6 @@
-def comet(graph, workflows): # cocitation metric 
+import igraph
+
+def sum_metric(graph, workflows): # cocitation metric 
 
     """
     Calculates the cocitation  metric for a given workflow and a given cocitation graph
@@ -29,3 +31,20 @@ def comet(graph, workflows): # cocitation metric
     # maybe call this one "support", since that is basically what we have. 
 
     return sum(score_list)/len(score_list), score_list
+
+def path_metric(G, workflow, included_tools): #TODO: how normalise this?
+    # shortest path == shortest path of the subpaths. Thus:
+
+    shortest_paths = []
+
+    for edge in workflow:
+        source = edge[0]
+        target = edge[1]
+
+        if source in included_tools and target in included_tools:
+            shortest_paths.append(igraph.GraphBase.get_shortest_paths(source, to = target))
+        else:
+            shortest_paths.append(None)
+
+
+    return shortest_paths

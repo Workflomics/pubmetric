@@ -52,92 +52,9 @@ def download_data(outpath, testSize, randomSeed, topicID):
     return edges, nr_citations, included_tools
 
 
-def old_cocitation_edge_graph(edges, included_tools):
-    # Finding unique edges by converting list to a set (because tuples are hashable) and back to list.
-    unq_edges = list(set(edges))
-    print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
 
-    # Creating a directed graph with unique edges
-    G = igraph.Graph.TupleList(unq_edges, directed=True)
+def cocitation_graph(G, vertices, inverted_weights = True): # generate cocitation graph: TODO change function names 
 
-    # Dictionary to keep track of co-citation counts between tool nodes
-    co_citation_counts = {}
-
-    # Iterate through each vertex in the graph
-    for vertex in G.vs:
-        if vertex['name'] not in included_tools:
-            neighbours = vertex.neighbors()
-            tool_neighbours = [n for n in neighbours if n['name'] in included_tools]
-
-            for i in range(len(tool_neighbours)):
-                for j in range(i + 1, len(tool_neighbours)):
-                    tool1 = tool_neighbours[i]['name']
-                    tool2 = tool_neighbours[j]['name']
-                    if tool1 > tool2:
-                        tool1, tool2 = tool2, tool1  # Ensure consistent ordering, names are numbers (pmids)
-
-                    if (tool1, tool2) not in co_citation_counts:
-                        co_citation_counts[(tool1, tool2)] = 0
-                    co_citation_counts[(tool1, tool2)] += 1
-
-    # Create edges for the new co-citation graph
-    co_citation_edges = [(tool1, tool2, weight) for (tool1, tool2), weight in co_citation_counts.items()]
-    
-    G_co_citation = igraph.Graph.TupleList(co_citation_edges, directed=False, edge_attrs=['weight'])
-
-    # Stats about node degrees:
-    node_degrees = G_co_citation.degree(G_co_citation.vs)
-    node_names = [v['name'] for v in G_co_citation.vs]
-    node_degree_dict = dict(zip(node_names, node_degrees))
-
-    # Updating included_tools to only contain lists that are in the graph
-    included_tools = [tool for tool in included_tools if tool in G_co_citation.vs['name']]
-
-    return G_co_citation, included_tools, node_degree_dict, unq_edges
-
-
-def cocitation_edge_graph(edges, included_tools):
-    # Finding unique edges by converting list to a set (because tuples are hashable) and back to list.
-    # TODO: better way?
-    unq_edges =  list(set(edges)) 
-    
-    print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
-
-    # Creating a directed graph with unique edges
-    G = igraph.Graph.TupleList(unq_edges, directed=True)
-
-    # Removing disconnected vertices (that are not tools) that do not have information value for the (current) metric
-    print("Removing citations with degree less or equal to 1 (Non co-citations).")
-    vertices_to_remove = [v.index for v in G.vs if v.degree() <= 1 and v['name'] not in included_tools] # OBS?!is name actually name? 
-    G.delete_vertices(vertices_to_remove)
-    vertices_to_remove = [v.index for v in G.vs if v.degree() == 0 ] # second run to remove the copletely detatched ones after first run sicne they wont give info anyways. 
-    G.delete_vertices(vertices_to_remove) # This will remove isolated tools as well 
-
-
-    ## Stats about node degrees:
-    node_degrees = G.degree(G.vs)
-    node_names = [v['name'] for v in G.vs]
-    node_degree_dict = dict(zip(node_names, node_degrees))
-
-    # Updating included_tools to only contain lists that are in the graph  
-    included_tools = [tool for tool in included_tools if tool in G.vs['name']] 
-
-
-    # Thresholding graph and removing non tool nodes with node degrees greater than 20
-    threshold = 20
-    vertices_to_remove = [v for v in G.vs if v.degree() > threshold and v['name'] not in included_tools]
-    G.delete_vertices(vertices_to_remove)
-
-    print(f'Number of vertices removed with threshold {threshold}: {len(vertices_to_remove)}')
-
-    # CONVERT G to cocitation graph
-
-    return G, included_tools, node_degree_dict, unq_edges
-
-
-
-def cocitation(G, vertices): # generate cocitation graph: TODO change function names 
-    all_vertices = G.vs['name']
     edges = [] # lsit of edges in new graph
     for i in range(len(vertices)):
         for j in range(i+1, len(vertices)):
@@ -152,11 +69,14 @@ def cocitation(G, vertices): # generate cocitation graph: TODO change function n
             original_neighbors_of_first = [G.vs[id]['name'] for id in neighbors_of_first]
             original_neighbors_of_second = [G.vs[id]['name'] for id in neighbors_of_second]
 
-            if vertices[i] in original_neighbors_of_second or vertices[j] in original_neighbors_of_first:
+            if vertices[i] in original_neighbors_of_second or vertices[j] in original_neighbors_of_first: # do we want these?
                 weight += 1
 
             if weight> 0:
-                edges.append((vertices[i], vertices[j], weight)) # append new edge and the weight
+                if inverted_weights:
+                    edges.append((vertices[i], vertices[j], (1 / weight) *100)) # append new edge and the weight, inverted to reflect closeness
+                else:
+                    edges.append((vertices[i], vertices[j], weight)) # append new edge and the weight, inverted to reflect closeness
     
     CO_G = igraph.Graph.TupleList(edges, directed=False, weights=True)
 
@@ -164,18 +84,18 @@ def cocitation(G, vertices): # generate cocitation graph: TODO change function n
 
 
 
-def cocitation_edge_graph(edges, included_tools):
+def create_graph(edges, included_tools, includeCitationNodes = False):
     # Finding unique edges by converting list to a set (because tuples are hashable) and back to list.
     unq_edges = list(set(edges)) 
     
     print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
 
     # Creating a directed graph with unique edges
-    G = igraph.Graph.TupleList(unq_edges, directed=True)
+    G_raw = igraph.Graph.TupleList(unq_edges, directed=True)
 
 
-    # OBS important!!: Removing self citations first
-    G = G.simplify(multiple=False, loops=False)
+    # Removing self citations
+    G = G_raw.simplify(multiple=True, loops=True, combine_edges=None)
 
     # Removing disconnected vertices (that are not tools) that do not have information value for the (current) metric
     print("Removing citations with degree less or equal to 1 (Non co-citations).")
@@ -189,9 +109,6 @@ def cocitation_edge_graph(edges, included_tools):
     node_names = [v['name'] for v in G.vs]
     node_degree_dict = dict(zip(node_names, node_degrees))
 
-    # Updating included_tools to only contain lists that are in the graph  
-    included_tools = [tool for tool in included_tools if tool in G.vs['name']] 
-
     # Thresholding graph and removing non-tool nodes with node degrees greater than 20
     threshold = 20
     vertices_to_remove = [v for v in G.vs if v.degree() > threshold and v['name'] not in included_tools]
@@ -199,56 +116,59 @@ def cocitation_edge_graph(edges, included_tools):
 
     print(f'Number of vertices removed with threshold {threshold}: {len(vertices_to_remove)}')
 
-
-
+    # Updating included_tools to only contain lists that are in the graph  
+    included_tools = [tool for tool in included_tools if tool in G.vs['name']] 
 
     # Convert G to co-citation graph
-    cocitation_graph = cocitation(G,included_tools)
+    if not includeCitationNodes:
+        G = cocitation_graph(G, included_tools)
+
+
     
 
-    return cocitation_graph, included_tools, node_degree_dict, unq_edges
+    return G, included_tools, node_degree_dict, unq_edges
 
 
 
 
-def cocitation_graph(edges, included_tools):
-        # Finding unique edges by converting list to a set (because tuples are hashable) and back to list.
-        # TODO: better way?
-        unq_edges =  list(set(edges)) 
+# def cocitation_graph(edges, included_tools):
+#         # Finding unique edges by converting list to a set (because tuples are hashable) and back to list.
+#         # TODO: better way?
+#         unq_edges =  list(set(edges)) 
         
-        print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
+#         print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
 
-        # Creating a directed graph with unique edges
-        G = igraph.Graph.TupleList(unq_edges, directed=True)
+#         # Creating a directed graph with unique edges
+#         G = igraph.Graph.TupleList(unq_edges, directed=True)
 
-        # OBS important!!: Removing self citations first
-        G = G.simplify(multiple=False, loops=False)
+#         # OBS important!!: Removing self citations first
+#         G = G.simplify(multiple=False, loops=False)
 
-        # Removing disconnected vertices (that are not tools) that do not have information value for the (current) metric
-        print("Removing citations with degree less or equal to 1 (Non co-citations).")
-        vertices_to_remove = [v.index for v in G.vs if v.degree() <= 1 and v['name'] not in included_tools] # OBS?!is name actually name? 
-        G.delete_vertices(vertices_to_remove)
-        vertices_to_remove = [v.index for v in G.vs if v.degree() == 0 ] # second run to remove the copletely detatched ones after first run sicne they wont give info anyways. 
-        G.delete_vertices(vertices_to_remove) # This will remove isolated tools as well 
-
-
-        ## Stats about node degrees:
-        node_degrees = G.degree(G.vs)
-        node_names = [v['name'] for v in G.vs]
-        node_degree_dict = dict(zip(node_names, node_degrees))
-
-        # Updating included_tools to only contain lists that are in the graph  
-        included_tools = [tool for tool in included_tools if tool in G.vs['name']] 
+#         # Removing disconnected vertices (that are not tools) that do not have information value for the (current) metric
+#         print("Removing citations with degree less or equal to 1 (Non co-citations).")
+#         vertices_to_remove = [v.index for v in G.vs if v.degree() <= 1 and v['name'] not in included_tools] # OBS?!is name actually name? 
+#         G.delete_vertices(vertices_to_remove)
+#         vertices_to_remove = [v.index for v in G.vs if v.degree() == 0 ] # second run to remove the copletely detatched ones after first run sicne they wont give info anyways. 
+#         G.delete_vertices(vertices_to_remove) # This will remove isolated tools as well 
 
 
-        # Thresholding graph and removing non tool nodes with node degrees greater than 20
-        threshold = 20
-        vertices_to_remove = [v for v in G.vs if v.degree() > threshold and v['name'] not in included_tools]
-        G.delete_vertices(vertices_to_remove)
+#         ## Stats about node degrees:
+#         node_degrees = G.degree(G.vs)
+#         node_names = [v['name'] for v in G.vs]
+#         node_degree_dict = dict(zip(node_names, node_degrees))
 
-        print(f'Number of vertices removed with threshold {threshold}: {len(vertices_to_remove)}')
+#         # Updating included_tools to only contain lists that are in the graph  
+#         included_tools = [tool for tool in included_tools if tool in G.vs['name']] 
 
-        return G, included_tools, node_degree_dict, unq_edges
+
+#         # Thresholding graph and removing non tool nodes with node degrees greater than 20
+#         threshold = 20
+#         vertices_to_remove = [v for v in G.vs if v.degree() > threshold and v['name'] not in included_tools]
+#         G.delete_vertices(vertices_to_remove)
+
+#         print(f'Number of vertices removed with threshold {threshold}: {len(vertices_to_remove)}')
+
+#         return G, included_tools, node_degree_dict, unq_edges
 
 
 
@@ -315,10 +235,8 @@ def create_citation_network(topicID="topic_0121", testSize='', randomSeed=42, lo
         # Creating the graph using igraph
         print("Creating citation graph using igraph.")
 
-        if includeCitationNodes:
-            G, included_tools, node_degree_dict, unq_edges =  cocitation_graph(edges, included_tools)
-        else:
-            G, included_tools, node_degree_dict, unq_edges =  cocitation_edge_graph(edges, included_tools)
+        G, included_tools, node_degree_dict, unq_edges =  create_graph(edges, included_tools, includeCitationNodes = includeCitationNodes)
+
       
         # Saving edges, graph and tools included in the graph 
         if saveFiles:
