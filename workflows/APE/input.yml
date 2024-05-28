@@ -1,0 +1,12 @@
+input_1:
+  class: File
+  format: "http://edamontology.org/format_3244" # mzML
+  path: https://raw.githubusercontent.com/Workflomics/DemoKit/main/data/inputs/2021-10-8_Ecoli.mzML
+input_2:
+  class: File
+  format: "http://edamontology.org/format_3781" # PubAnnotation format
+  path: set_full_path_to_the_file_with_extension_here
+input_3:
+  class: File
+  format: "http://edamontology.org/format_1929" # FASTA
+  path: https://raw.githubusercontent.com/Workflomics/DemoKit/main/data/inputs/up00000062.fasta
