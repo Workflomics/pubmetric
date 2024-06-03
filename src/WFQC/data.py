@@ -152,9 +152,7 @@ async def get_pmids(topicID):
                 break
 
     # Record the total nr of tools
-    nr_tools = 0  
-    if biotool_data: 
-        nr_tools = int(biotool_data['count']) 
+    nr_tools = int(biotool_data['count']) if biotool_data and 'count' in biotool_data else 0
 
     return pmid_tools, doi_tools, no_primary_publications, nr_publications, nr_tools
 
