@@ -1,4 +1,4 @@
-from WFQC import data
+from wfqc import data
 import pytest
 import os 
 

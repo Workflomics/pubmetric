@@ -16,12 +16,12 @@ nest_asyncio.apply()        # Automatically takes into account how jupyter handl
 import igraph               # Used to create te citationa graph 
 
 
-import WFQC.data
+import wfqc.data
 
 
 def download_data(outpath, testSize, randomSeed, topicID):
     # Retrieve the data 
-    tool_metadata = WFQC.data.get_tool_metadata(outpath=outpath, topicID=topicID)
+    tool_metadata = wfqc.data.get_tool_metadata(outpath=outpath, topicID=topicID)
     pmids = tool_metadata['pmid'].tolist() # should I use numpy for all my lists? 
 
     # Randomly picks out a subset of the pmids
@@ -41,7 +41,7 @@ def download_data(outpath, testSize, randomSeed, topicID):
     for pmid in tqdm(pmids, desc="Processing PMIDs"): 
         pmid = str(pmid) # EuropePMC requires str            
 
-        citations = WFQC.data.europepmc(pmid, page_size=1000)
+        citations = wfqc.data.europepmc(pmid, page_size=1000)
 
         nr_citations[pmid] = len(citations)
         for citation in citations:
