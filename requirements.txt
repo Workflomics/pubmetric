@@ -11,3 +11,4 @@ nest_asyncio
 jsonpath-ng
 ruamel.yaml
 cwl_utils
+pytest
