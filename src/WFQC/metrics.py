@@ -1,7 +1,9 @@
-def comet(graph, workflows): # cocitation metric 
+import igraph
+
+def sum_metric_citation(graph, workflow): # cocitation metric 
 
     """
-    Calculates the cocitation  metric for a given workflow and a given cocitation graph
+    Calculates the cocitation  metric for a given workflow and a given citation (OBS not cocitation) graph
     
     Parameters
     ----------
@@ -14,7 +16,7 @@ def comet(graph, workflows): # cocitation metric
     # List to  collect pairwise scores
     score_list = [] # TODO: can predefine the list length, does not matter this is temporary?
 
-    for pair in workflows:
+    for pair in workflow:
         cocite_score = 0
         neighbors_of_first = set(graph.neighbors(pair[0]))
         neighbors_of_second = set(graph.neighbors(pair[1]))
@@ -29,3 +31,51 @@ def comet(graph, workflows): # cocitation metric
     # maybe call this one "support", since that is basically what we have. 
 
     return sum(score_list)/len(score_list), score_list
+
+
+
+def path_metric(G, workflow, included_tools): #TODO: how normalise this?
+    # shortest path == shortest path of the subpaths. Thus:
+
+    shortest_paths = []
+
+    for edge in workflow:
+        source = edge[0]
+        target = edge[1]
+
+        if source in included_tools and target in included_tools:
+            shortest_paths.append(G.get_shortest_paths(source, to = target))
+        else:
+            shortest_paths.append(None)
+
+
+    return shortest_paths
+
+
+def sum_metric(G, workflow, included_tools): # cocitation metric 
+
+    # shortest path == shortest path of the subpaths. Thus:
+
+    shortest_paths = []
+
+    for edge in workflow:
+        source = edge[0]
+        target = edge[1]
+
+        if source in included_tools and target in included_tools: # TODO: check: does igraph handle this already?
+            shortest_paths.append(igraph_weighted_shortest_path(G, source, target))
+        else:
+            shortest_paths.append(None) #none?
+        sum_paths = sum([i for i in shortest_paths if i != None])
+    return sum_paths/len(shortest_paths), shortest_paths
+
+
+def igraph_weighted_shortest_path(G, source, target):
+    results = G.get_shortest_paths(source, to=target, weights=G.es["weight"], output="epath")
+    if len(results[0]) > 0:
+        distance = 0
+        for e in results[0]:
+            distance += G.es[e]["weight"]
+        return distance
+    else:
+        return None
