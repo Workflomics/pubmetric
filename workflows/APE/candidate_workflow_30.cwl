@@ -4,51 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_27
-doc: A workflow including the tool(s) msConvert, mzRecal, XTandem, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) PChopper, esimsa2D, ComPIL, multiplierz, ICPLQuant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1937" # genpept
   input_2:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  PChopper_01:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      PChopper_in_1: input_2
+    out: [PChopper_out_1]
+  esimsa2D_02:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      mzRecal_in_1: msConvert_01/msConvert_out_1
-      mzRecal_in_2: input_2
-    out: [mzRecal_out_1]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      esimsa2D_in_1: input_2
+      esimsa2D_in_2: PChopper_01/PChopper_out_1
+      esimsa2D_in_3: input_1
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  ComPIL_03:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      XTandem_in_1: mzRecal_02/mzRecal_out_1
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ComPIL_in_1: input_1
+    out: [ComPIL_out_1]
+  multiplierz_04:
+    run: add-path-to-the-implementation/multiplierz.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: mzRecal_02/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      multiplierz_in_1: esimsa2D_02/esimsa2D_out_2
+      multiplierz_in_2: input_3
+    out: [multiplierz_out_1]
+  ICPLQuant_05:
+    run: add-path-to-the-implementation/ICPLQuant.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      ICPLQuant_in_1: esimsa2D_02/esimsa2D_out_2
+      ICPLQuant_in_2: multiplierz_04/multiplierz_out_1
+      ICPLQuant_in_3: ComPIL_03/ComPIL_out_1
+    out: [ICPLQuant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: ICPLQuant_05/ICPLQuant_out_1

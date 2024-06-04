@@ -4,65 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1731
-doc: A workflow including the tool(s) PeptideProphet, ProteinProphet, XTandem, idconvert, mzRecal, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) msmsEDA, MSiReader, nontarget, OpenSWATH, Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_2000" # selex
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  msmsEDA_01:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      msmsEDA_in_1: input_3
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
+  MSiReader_02:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      MSiReader_in_1: input_1
+      MSiReader_in_2: msmsEDA_01/msmsEDA_out_3
+    out: [MSiReader_out_1, MSiReader_out_2]
+  nontarget_03:
+    run: add-path-to-the-implementation/nontarget.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      nontarget_in_1: input_1
+      nontarget_in_2: input_1
+      nontarget_in_3: MSiReader_02/MSiReader_out_2
+    out: [nontarget_out_1, nontarget_out_2, nontarget_out_3]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      idconvert_in_1: XTandem_03/XTandem_out_1
-    out: [idconvert_out_1]
-  mzRecal_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      OpenSWATH_in_1: input_3
+      OpenSWATH_in_2: input_2
+    out: [OpenSWATH_out_1]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: idconvert_04/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
-    in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: mzRecal_05/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_07:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_02/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_06/PeptideProphet_out_1
-      StPeter_in_3: input_1
-    out: [StPeter_out_1]
+      Mascot Server_in_1: OpenSWATH_04/OpenSWATH_out_1
+      Mascot Server_in_2: nontarget_03/nontarget_out_1
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_07/StPeter_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

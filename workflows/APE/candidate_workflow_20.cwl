@@ -4,49 +4,54 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_17
-doc: A workflow including the tool(s) msConvert, PeptideProphet, ProteinProphet, protXml2IdList, gProfiler.
+doc: A workflow including the tool(s) esimsa2D, esimsa2D, esimsa2D, OpenSWATH, Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3788" # SQL
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1939" # GFF3-seq
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  esimsa2D_01:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      esimsa2D_in_1: input_1
+      esimsa2D_in_2: input_2
+      esimsa2D_in_3: input_2
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  esimsa2D_02:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      esimsa2D_in_1: input_1
+      esimsa2D_in_2: input_2
+      esimsa2D_in_3: input_2
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  esimsa2D_03:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      esimsa2D_in_1: esimsa2D_02/esimsa2D_out_3
+      esimsa2D_in_2: input_2
+      esimsa2D_in_3: esimsa2D_01/esimsa2D_out_2
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_03/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
-  gProfiler_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/gProfiler/gProfiler.cwl
+      OpenSWATH_in_1: input_3
+      OpenSWATH_in_2: esimsa2D_03/esimsa2D_out_2
+    out: [OpenSWATH_out_1]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      gProfiler_in_1: protXml2IdList_04/protXml2IdList_out_1
-    out: [gProfiler_out_1]
+      Mascot Server_in_1: OpenSWATH_04/OpenSWATH_out_1
+      Mascot Server_in_2: input_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3781" # PubAnnotation format
-    outputSource: gProfiler_05/gProfiler_out_1
+    format: "http://edamontology.org/format_3681" # mzTab
+    outputSource: Mascot Server_05/Mascot Server_out_1

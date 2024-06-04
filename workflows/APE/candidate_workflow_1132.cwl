@@ -4,58 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1131
-doc: A workflow including the tool(s) idconvert, idconvert, PeptideProphet, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) MaxQuant, MSiReader, Jtraml, OpenSWATH, Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1628" # ABI
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3620" # xlsx
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  MaxQuant_01:
+    run: add-path-to-the-implementation/MaxQuant.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      MaxQuant_in_1: input_2
+    out: [MaxQuant_out_1, MaxQuant_out_2]
+  MSiReader_02:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: MaxQuant_01/MaxQuant_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
+  Jtraml_03:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Jtraml_in_1: input_1
+    out: [Jtraml_out_1]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: idconvert_02/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenSWATH_in_1: input_3
+      OpenSWATH_in_2: Jtraml_03/Jtraml_out_1
+    out: [OpenSWATH_out_1]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      Mascot Server_in_1: OpenSWATH_04/OpenSWATH_out_1
+      Mascot Server_in_2: MSiReader_02/MSiReader_out_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

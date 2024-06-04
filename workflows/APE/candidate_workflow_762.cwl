@@ -4,58 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_761
-doc: A workflow including the tool(s) PeptideProphet, ProteinProphet, idconvert, Comet, mzRecal, StPeter.
+doc: A workflow including the tool(s) MSiReader, MSiReader, Xtractor, MS-Fit, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3913" # Loom
   input_2:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3244" # mzML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1504" # aaindex
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  MSiReader_01:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      PeptideProphet_in_1: input_2
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: input_2
+    out: [MSiReader_out_1, MSiReader_out_2]
+  MSiReader_02:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      MSiReader_in_1: MSiReader_01/MSiReader_out_2
+      MSiReader_in_2: input_2
+    out: [MSiReader_out_1, MSiReader_out_2]
+  Xtractor_03:
+    run: add-path-to-the-implementation/Xtractor.cwl 
     in:
-      idconvert_in_1: input_2
-    out: [idconvert_out_1]
-  Comet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      Xtractor_in_1: MSiReader_02/MSiReader_out_2
+      Xtractor_in_2: input_3
+      Xtractor_in_3: MSiReader_01/MSiReader_out_2
+    out: [Xtractor_out_1, Xtractor_out_2, Xtractor_out_3]
+  MS-Fit_04:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MS-Fit_in_1: Xtractor_03/Xtractor_out_2
+    out: [MS-Fit_out_1]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: idconvert_03/idconvert_out_1
-    out: [mzRecal_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_02/ProteinProphet_out_1
-      StPeter_in_2: Comet_04/Comet_out_1
-      StPeter_in_3: mzRecal_05/mzRecal_out_1
-    out: [StPeter_out_1]
+      Libra_in_1: MS-Fit_04/MS-Fit_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    outputSource: Libra_05/Libra_out_1

@@ -4,58 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1136
-doc: A workflow including the tool(s) PeptideProphet, idconvert, ProteinProphet, mzRecal, XTandem, StPeter.
+doc: A workflow including the tool(s) mzStar, mzStar, MS-Fit, OpenMS, OpenSWATH.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1996" # pair
   input_2:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3710" # WIFF format
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1641" # affymetrix-exp
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  mzStar_01:
+    run: add-path-to-the-implementation/mzStar.cwl 
     in:
-      PeptideProphet_in_1: input_2
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      mzStar_in_1: input_2
+    out: [mzStar_out_1]
+  mzStar_02:
+    run: add-path-to-the-implementation/mzStar.cwl 
     in:
-      idconvert_in_1: input_2
-    out: [idconvert_out_1]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      mzStar_in_1: input_2
+    out: [mzStar_out_1]
+  MS-Fit_03:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MS-Fit_in_1: input_3
+    out: [MS-Fit_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  XTandem_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      OpenMS_in_1: mzStar_02/mzStar_out_1
+      OpenMS_in_2: mzStar_01/mzStar_out_1
+      OpenMS_in_3: MS-Fit_03/MS-Fit_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: XTandem_05/XTandem_out_1
-      StPeter_in_3: mzRecal_04/mzRecal_out_1
-    out: [StPeter_out_1]
+      OpenSWATH_in_1: OpenMS_04/OpenMS_out_2
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenSWATH_05/OpenSWATH_out_1

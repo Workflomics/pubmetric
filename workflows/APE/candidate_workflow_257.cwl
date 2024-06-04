@@ -4,56 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_256
-doc: A workflow including the tool(s) idconvert, Comet, mzRecal, idconvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) Unipept CLI, InDigestion, protk, XTandemPipeline, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1964" # plain text format (unformatted)
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1972" # NCBI format
   input_3:
     type: File
     format: "http://edamontology.org/format_3655" # pepXML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+  Unipept CLI_01:
+    run: add-path-to-the-implementation/Unipept CLI.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      Unipept CLI_in_1: input_1
+      Unipept CLI_in_2: input_2
+    out: [Unipept CLI_out_1, Unipept CLI_out_2]
+  InDigestion_02:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      InDigestion_in_1: Unipept CLI_01/Unipept CLI_out_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  protk_03:
+    run: add-path-to-the-implementation/protk.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      protk_in_1: InDigestion_02/InDigestion_out_3
+      protk_in_2: input_3
+    out: [protk_out_1, protk_out_2]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      idconvert_in_1: Comet_02/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      XTandemPipeline_in_1: protk_03/protk_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      PeptideProphet_in_1: idconvert_04/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      Libra_in_1: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    outputSource: Libra_05/Libra_out_1

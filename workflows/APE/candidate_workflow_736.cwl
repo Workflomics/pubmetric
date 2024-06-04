@@ -4,60 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_735
-doc: A workflow including the tool(s) XTandem, PeptideProphet, XTandem, ProteinProphet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) OpenSWATH, mzStar, OpenSWATH, OpenMS, OpenSWATH.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3710" # WIFF format
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3246" # TraML
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  OpenSWATH_01:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenSWATH_in_1: input_1
+    out: [OpenSWATH_out_1]
+  mzStar_02:
+    run: add-path-to-the-implementation/mzStar.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      mzStar_in_1: input_1
+    out: [mzStar_out_1]
+  OpenSWATH_03:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenSWATH_in_1: OpenSWATH_01/OpenSWATH_out_1
+      OpenSWATH_in_2: input_3
+    out: [OpenSWATH_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: OpenSWATH_03/OpenSWATH_out_1
+      OpenMS_in_2: mzStar_02/mzStar_out_1
+      OpenMS_in_3: input_2
+    out: [OpenMS_out_1, OpenMS_out_2]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: input_1
-    out: [StPeter_out_1]
+      OpenSWATH_in_1: OpenMS_04/OpenMS_out_2
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenSWATH_05/OpenSWATH_out_1

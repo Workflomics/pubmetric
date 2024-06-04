@@ -4,59 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1540
-doc: A workflow including the tool(s) XTandem, PeptideProphet, idconvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) msmsEDA, MSiReader, nontarget, PECAN (PEptide-Centric Analysis), Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1927" # EMBL format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  msmsEDA_01:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      msmsEDA_in_1: input_3
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
+  MSiReader_02:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      MSiReader_in_1: input_1
+      MSiReader_in_2: msmsEDA_01/msmsEDA_out_3
+    out: [MSiReader_out_1, MSiReader_out_2]
+  nontarget_03:
+    run: add-path-to-the-implementation/nontarget.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      nontarget_in_1: MSiReader_02/MSiReader_out_2
+      nontarget_in_2: input_1
+      nontarget_in_3: MSiReader_02/MSiReader_out_2
+    out: [nontarget_out_1, nontarget_out_2, nontarget_out_3]
+  PECAN (PEptide-Centric Analysis)_04:
+    run: add-path-to-the-implementation/PECAN (PEptide-Centric Analysis).cwl 
     in:
-      PeptideProphet_in_1: idconvert_03/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PECAN (PEptide-Centric Analysis)_in_1: input_3
+      PECAN (PEptide-Centric Analysis)_in_2: input_2
+    out: [PECAN (PEptide-Centric Analysis)_out_1, PECAN (PEptide-Centric Analysis)_out_2]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_02/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      Mascot Server_in_1: nontarget_03/nontarget_out_1
+      Mascot Server_in_2: PECAN (PEptide-Centric Analysis)_04/PECAN (PEptide-Centric Analysis)_out_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

@@ -4,56 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1643
-doc: A workflow including the tool(s) mzRecal, Comet, PeptideProphet, ProteinProphet, protXml2IdList, gProfiler.
+doc: A workflow including the tool(s) PChopper, MyriMatch, OpenMS, DeconTools, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3710" # WIFF format
   input_2:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3311" # RNAML
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  PChopper_01:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      mzRecal_in_1: input_3
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PChopper_in_1: input_2
+    out: [PChopper_out_1]
+  MyriMatch_02:
+    run: add-path-to-the-implementation/MyriMatch.cwl 
     in:
-      Comet_in_1: input_3
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MyriMatch_in_1: input_1
+      MyriMatch_in_2: input_2
+    out: [MyriMatch_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: Comet_02/Comet_out_1
-      PeptideProphet_in_2: mzRecal_01/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: PChopper_01/PChopper_out_1
+      OpenMS_in_3: MyriMatch_02/MyriMatch_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  DeconTools_04:
+    run: add-path-to-the-implementation/DeconTools.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      DeconTools_in_1: input_1
+    out: [DeconTools_out_1]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
-  gProfiler_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/gProfiler/gProfiler.cwl
-    in:
-      gProfiler_in_1: protXml2IdList_05/protXml2IdList_out_1
-    out: [gProfiler_out_1]
+      MSiReader_in_1: DeconTools_04/DeconTools_out_1
+      MSiReader_in_2: OpenMS_03/OpenMS_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3781" # PubAnnotation format
-    outputSource: gProfiler_06/gProfiler_out_1
+    format: "http://edamontology.org/format_3591" # TIFF
+    outputSource: MSiReader_05/MSiReader_out_1

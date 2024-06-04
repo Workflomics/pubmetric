@@ -4,58 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1026
-doc: A workflow including the tool(s) XTandem, Comet, PeptideProphet, msConvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) DeconMSn, DeconMSn, msaccess, XTandemPipeline, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3247" # mzIdentML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3712" # Thermo RAW
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  DeconMSn_01:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      DeconMSn_in_1: input_2
+      DeconMSn_in_2: input_2
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  DeconMSn_02:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      DeconMSn_in_1: input_2
+      DeconMSn_in_2: input_2
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  msaccess_03:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      PeptideProphet_in_1: Comet_02/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  msConvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      msaccess_in_1: DeconMSn_02/DeconMSn_out_3
+      msaccess_in_2: input_1
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      XTandemPipeline_in_1: msaccess_03/msaccess_out_2
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: XTandem_01/XTandem_out_1
-      StPeter_in_3: msConvert_04/msConvert_out_1
-    out: [StPeter_out_1]
+      OpenMS_in_1: DeconMSn_01/DeconMSn_out_1
+      OpenMS_in_2: input_3
+      OpenMS_in_3: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3652" # dta
+    outputSource: OpenMS_05/OpenMS_out_1

@@ -4,49 +4,52 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_15
-doc: A workflow including the tool(s) msConvert, idconvert, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) esimsa, esimsa2D, esimsa2D, MS-Fit, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3653" # pkl
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3813" # SAMPLE file format
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3550" # mhd
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  esimsa_01:
+    run: add-path-to-the-implementation/esimsa.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      esimsa_in_1: input_2
+      esimsa_in_2: input_3
+      esimsa_in_3: input_3
+    out: [esimsa_out_1, esimsa_out_2, esimsa_out_3]
+  esimsa2D_02:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      esimsa2D_in_1: input_2
+      esimsa2D_in_2: input_3
+      esimsa2D_in_3: input_3
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  esimsa2D_03:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      PeptideProphet_in_1: idconvert_02/idconvert_out_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      esimsa2D_in_1: esimsa_01/esimsa_out_3
+      esimsa2D_in_2: esimsa2D_02/esimsa2D_out_1
+      esimsa2D_in_3: input_3
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  MS-Fit_04:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      MS-Fit_in_1: esimsa2D_03/esimsa2D_out_1
+    out: [MS-Fit_out_1]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      Libra_in_1: MS-Fit_04/MS-Fit_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
-    outputSource: protXml2IdList_05/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3655" # pepXML
+    outputSource: Libra_05/Libra_out_1

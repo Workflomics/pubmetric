@@ -4,59 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_757
-doc: A workflow including the tool(s) PeptideProphet, XTandem, Comet, ProteinProphet, mzRecal, StPeter.
+doc: A workflow including the tool(s) ComPIL, PEAKS Q, MSiReader, msConvert, SIM-XL.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3651" # MGF
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1200" # smarts
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  ComPIL_01:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      ComPIL_in_1: input_3
+    out: [ComPIL_out_1]
+  PEAKS Q_02:
+    run: add-path-to-the-implementation/PEAKS Q.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  Comet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PEAKS Q_in_1: ComPIL_01/ComPIL_out_1
+    out: [PEAKS Q_out_1]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: PEAKS Q_02/PEAKS Q_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
+  msConvert_04:
+    run: add-path-to-the-implementation/msConvert.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  mzRecal_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      msConvert_in_1: MSiReader_03/MSiReader_out_2
+    out: [msConvert_out_1]
+  SIM-XL_05:
+    run: add-path-to-the-implementation/SIM-XL.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_03/Comet_out_2
-    out: [mzRecal_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: XTandem_02/XTandem_out_1
-      StPeter_in_3: mzRecal_05/mzRecal_out_1
-    out: [StPeter_out_1]
+      SIM-XL_in_1: input_2
+      SIM-XL_in_2: msConvert_04/msConvert_out_1
+      SIM-XL_in_3: input_1
+    out: [SIM-XL_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3247" # mzIdentML
+    outputSource: SIM-XL_05/SIM-XL_out_1

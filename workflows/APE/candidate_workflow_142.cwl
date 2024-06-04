@@ -4,53 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_141
-doc: A workflow including the tool(s) msConvert, PeptideProphet, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) OBI-Warp, mzStar, EncyclopeDIA, OpenMS, OpenSWATH.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3652" # dta
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  OBI-Warp_01:
+    run: add-path-to-the-implementation/OBI-Warp.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OBI-Warp_in_1: input_3
+    out: [OBI-Warp_out_1]
+  mzStar_02:
+    run: add-path-to-the-implementation/mzStar.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      mzStar_in_1: OBI-Warp_01/OBI-Warp_out_1
+    out: [mzStar_out_1]
+  EncyclopeDIA_03:
+    run: add-path-to-the-implementation/EncyclopeDIA.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      EncyclopeDIA_in_1: input_3
+      EncyclopeDIA_in_2: input_2
+    out: [EncyclopeDIA_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: mzStar_02/mzStar_out_1
+      OpenMS_in_3: EncyclopeDIA_03/EncyclopeDIA_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_02/PeptideProphet_out_1
-      StPeter_in_3: msConvert_01/msConvert_out_1
-    out: [StPeter_out_1]
+      OpenSWATH_in_1: OpenMS_04/OpenMS_out_2
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenSWATH_05/OpenSWATH_out_1

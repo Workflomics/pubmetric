@@ -4,59 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_232
-doc: A workflow including the tool(s) PeptideProphet, ProteinProphet, PeptideProphet, idconvert, mzRecal, StPeter.
+doc: A workflow including the tool(s) CrosstalkDB, CrosstalkDB, pymzML, XTandemPipeline, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3711" # X!Tandem XML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_2352" # BioXSD (XML)
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3752" # CSV
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  CrosstalkDB_01:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      CrosstalkDB_in_1: input_3
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      CrosstalkDB_in_1: CrosstalkDB_01/CrosstalkDB_out_3
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  pymzML_03:
+    run: add-path-to-the-implementation/pymzML.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      pymzML_in_1: CrosstalkDB_02/CrosstalkDB_out_4
+    out: [pymzML_out_1]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  mzRecal_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      XTandemPipeline_in_1: input_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_04/idconvert_out_1
-    out: [mzRecal_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_02/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_05/mzRecal_out_1
-    out: [StPeter_out_1]
+      OpenMS_in_1: pymzML_03/pymzML_out_1
+      OpenMS_in_2: input_2
+      OpenMS_in_3: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: OpenMS_05/OpenMS_out_1

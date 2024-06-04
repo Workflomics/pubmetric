@@ -4,50 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_35
-doc: A workflow including the tool(s) idconvert, mzRecal, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) CrosstalkDB, Graph Extract, mspire-simulator, PECAN (PEptide-Centric Analysis), Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3752" # CSV
   input_3:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+  CrosstalkDB_01:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      CrosstalkDB_in_1: input_2
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  Graph Extract_02:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Graph Extract_in_1: CrosstalkDB_01/CrosstalkDB_out_2
+    out: [Graph Extract_out_1]
+  mspire-simulator_03:
+    run: add-path-to-the-implementation/mspire-simulator.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: mzRecal_02/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      mspire-simulator_in_1: input_3
+    out: [mspire-simulator_out_1]
+  PECAN (PEptide-Centric Analysis)_04:
+    run: add-path-to-the-implementation/PECAN (PEptide-Centric Analysis).cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      PECAN (PEptide-Centric Analysis)_in_1: mspire-simulator_03/mspire-simulator_out_1
+      PECAN (PEptide-Centric Analysis)_in_2: input_1
+    out: [PECAN (PEptide-Centric Analysis)_out_1, PECAN (PEptide-Centric Analysis)_out_2]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      Mascot Server_in_1: Graph Extract_02/Graph Extract_out_1
+      Mascot Server_in_2: PECAN (PEptide-Centric Analysis)_04/PECAN (PEptide-Centric Analysis)_out_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
-    outputSource: protXml2IdList_05/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

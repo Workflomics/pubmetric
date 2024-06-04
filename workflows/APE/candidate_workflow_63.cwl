@@ -4,54 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_62
-doc: A workflow including the tool(s) XTandem, PeptideProphet, ProteinProphet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) Jtraml, CrosstalkDB, MSiReader, XTandemPipeline, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3256" # N-Triples
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3752" # CSV
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3652" # dta
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  Jtraml_01:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Jtraml_in_1: input_1
+    out: [Jtraml_out_1]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      CrosstalkDB_in_1: input_2
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MSiReader_in_1: input_1
+      MSiReader_in_2: CrosstalkDB_02/CrosstalkDB_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      XTandemPipeline_in_1: Jtraml_01/Jtraml_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_04/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      OpenMS_in_1: MSiReader_03/MSiReader_out_2
+      OpenMS_in_2: input_3
+      OpenMS_in_3: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenMS_05/OpenMS_out_1

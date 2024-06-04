@@ -4,52 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_41
-doc: A workflow including the tool(s) XTandem, PeptideProphet, idconvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) ICPL_ESIQuant, PeptideShaker, PChopper, PEAKS DB, PEAKS Q.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3654" # mzXML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3247" # mzIdentML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  ICPL_ESIQuant_01:
+    run: add-path-to-the-implementation/ICPL_ESIQuant.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ICPL_ESIQuant_in_1: input_1
+    out: [ICPL_ESIQuant_out_1]
+  PeptideShaker_02:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      PeptideShaker_in_1: input_3
+      PeptideShaker_in_2: input_2
+      PeptideShaker_in_3: ICPL_ESIQuant_01/ICPL_ESIQuant_out_1
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
+  PChopper_03:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PChopper_in_1: PeptideShaker_02/PeptideShaker_out_2
+    out: [PChopper_out_1]
+  PEAKS DB_04:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      PEAKS DB_in_1: input_1
+      PEAKS DB_in_2: PChopper_03/PChopper_out_1
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  PEAKS Q_05:
+    run: add-path-to-the-implementation/PEAKS Q.cwl 
     in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: idconvert_03/idconvert_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      PEAKS Q_in_1: PEAKS DB_04/PEAKS DB_out_1
+    out: [PEAKS Q_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_2532" # GenBank-HTML
+    outputSource: PEAKS Q_05/PEAKS Q_out_1

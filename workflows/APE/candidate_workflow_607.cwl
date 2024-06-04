@@ -4,57 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_606
-doc: A workflow including the tool(s) msConvert, Comet, msConvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) Jtraml, msaccess, XTandemPipeline, Multi-Q, ComplexBrowser.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3655" # pepXML
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1628" # ABI
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  Jtraml_01:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      Jtraml_in_1: input_2
+    out: [Jtraml_out_1]
+  msaccess_02:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      Comet_in_1: msConvert_01/msConvert_out_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      msaccess_in_1: input_3
+      msaccess_in_2: input_1
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  XTandemPipeline_03:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      XTandemPipeline_in_1: msaccess_02/msaccess_out_2
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Multi-Q_04:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      PeptideProphet_in_1: Comet_02/Comet_out_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Multi-Q_in_1: input_3
+      Multi-Q_in_2: XTandemPipeline_03/XTandemPipeline_out_1
+    out: [Multi-Q_out_1]
+  ComplexBrowser_05:
+    run: add-path-to-the-implementation/ComplexBrowser.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: Comet_02/Comet_out_1
-      StPeter_in_3: msConvert_03/msConvert_out_1
-    out: [StPeter_out_1]
+      ComplexBrowser_in_1: Multi-Q_04/Multi-Q_out_1
+      ComplexBrowser_in_2: Jtraml_01/Jtraml_out_1
+    out: [ComplexBrowser_out_1, ComplexBrowser_out_2, ComplexBrowser_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: ComplexBrowser_05/ComplexBrowser_out_1

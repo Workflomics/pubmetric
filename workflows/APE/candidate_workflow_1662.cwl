@@ -4,55 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1661
-doc: A workflow including the tool(s) msConvert, XTandem, msConvert, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) Percolator, Multi-Q, CrosstalkDB, CrosstalkDB, ComplexBrowser.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3654" # mzXML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3161" # MAGE-ML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3859" # JCAMP-DX
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  Percolator_01:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      Percolator_in_1: input_2
+    out: [Percolator_out_1]
+  Multi-Q_02:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      XTandem_in_1: msConvert_01/msConvert_out_1
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      Multi-Q_in_1: input_1
+      Multi-Q_in_2: Percolator_01/Percolator_out_1
+    out: [Multi-Q_out_1]
+  CrosstalkDB_03:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      CrosstalkDB_in_1: Multi-Q_02/Multi-Q_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  CrosstalkDB_04:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: msConvert_03/msConvert_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      CrosstalkDB_in_1: CrosstalkDB_03/CrosstalkDB_out_3
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  ComplexBrowser_05:
+    run: add-path-to-the-implementation/ComplexBrowser.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
-    in:
-      protXml2IdList_in_1: ProteinProphet_05/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      ComplexBrowser_in_1: input_3
+      ComplexBrowser_in_2: CrosstalkDB_04/CrosstalkDB_out_1
+    out: [ComplexBrowser_out_1, ComplexBrowser_out_2, ComplexBrowser_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: protXml2IdList_06/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: ComplexBrowser_05/ComplexBrowser_out_1

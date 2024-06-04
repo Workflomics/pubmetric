@@ -4,51 +4,52 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_101
-doc: A workflow including the tool(s) mzRecal, XTandem, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) Peppy, OpenMS, dig, InDigestion, X Hunter.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3651" # MGF
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  Peppy_01:
+    run: add-path-to-the-implementation/Peppy.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      Peppy_in_1: input_3
+      Peppy_in_2: input_2
+      Peppy_in_3: input_1
+    out: [Peppy_out_1, Peppy_out_2]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      XTandem_in_1: mzRecal_01/mzRecal_out_1
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_1
+      OpenMS_in_3: Peppy_01/Peppy_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  dig_03:
+    run: add-path-to-the-implementation/dig.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      dig_in_1: OpenMS_02/OpenMS_out_2
+    out: [dig_out_1]
+  InDigestion_04:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      InDigestion_in_1: dig_03/dig_out_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  X Hunter_05:
+    run: add-path-to-the-implementation/X Hunter.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      X Hunter_in_1: input_3
+      X Hunter_in_2: InDigestion_04/InDigestion_out_3
+      X Hunter_in_3: input_3
+    out: [X Hunter_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3252" # OWL Functional Syntax
-    outputSource: protXml2IdList_05/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3711" # X!Tandem XML
+    outputSource: X Hunter_05/X Hunter_out_1

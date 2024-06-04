@@ -4,56 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_371
-doc: A workflow including the tool(s) msConvert, idconvert, mzRecal, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) InDigestion, protk, MR-MSPOLYGRAPH, Percolator, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1392" # DIALIGN format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3655" # pepXML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      InDigestion_in_1: input_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  protk_02:
+    run: add-path-to-the-implementation/protk.cwl 
     in:
-      idconvert_in_1: input_2
-    out: [idconvert_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      protk_in_1: InDigestion_01/InDigestion_out_3
+      protk_in_2: input_3
+    out: [protk_out_1, protk_out_2]
+  MR-MSPOLYGRAPH_03:
+    run: add-path-to-the-implementation/MR-MSPOLYGRAPH.cwl 
     in:
-      mzRecal_in_1: msConvert_01/msConvert_out_1
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MR-MSPOLYGRAPH_in_1: input_2
+      MR-MSPOLYGRAPH_in_2: InDigestion_01/InDigestion_out_3
+    out: [MR-MSPOLYGRAPH_out_1, MR-MSPOLYGRAPH_out_2]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      mzRecal_in_1: mzRecal_03/mzRecal_out_1
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Percolator_in_1: protk_02/protk_out_1
+    out: [Percolator_out_1]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      PeptideProphet_in_1: input_2
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      Quant_in_1: MR-MSPOLYGRAPH_03/MR-MSPOLYGRAPH_out_2
+      Quant_in_2: Percolator_04/Percolator_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

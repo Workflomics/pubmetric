@@ -4,7 +4,7 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1636
-doc: A workflow including the tool(s) PeptideProphet, ProteinProphet, idconvert, mzRecal, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) XTandemPipeline, OpenMS, mspire-simulator, ms-data-core-api, MSiReader.
 
 inputs:
   input_1:
@@ -12,51 +12,41 @@ inputs:
     format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3713" # Mascot .dat file
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  XTandemPipeline_01:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      XTandemPipeline_in_1: input_3
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      OpenMS_in_1: input_2
+      OpenMS_in_2: input_1
+      OpenMS_in_3: XTandemPipeline_01/XTandemPipeline_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  mspire-simulator_03:
+    run: add-path-to-the-implementation/mspire-simulator.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      mspire-simulator_in_1: input_1
+    out: [mspire-simulator_out_1]
+  ms-data-core-api_04:
+    run: add-path-to-the-implementation/ms-data-core-api.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_03/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ms-data-core-api_in_1: mspire-simulator_03/mspire-simulator_out_1
+    out: [ms-data-core-api_out_1]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_02/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      MSiReader_in_1: ms-data-core-api_04/ms-data-core-api_out_1
+      MSiReader_in_2: OpenMS_02/OpenMS_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3591" # TIFF
+    outputSource: MSiReader_05/MSiReader_out_1

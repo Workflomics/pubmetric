@@ -4,59 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1055
-doc: A workflow including the tool(s) PeptideProphet, Comet, ProteinProphet, idconvert, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) nontarget, DeconMSn, mMass, PeptideProphet, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3712" # Thermo RAW
   input_2:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1972" # NCBI format
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_2568" # completely unambiguous pure nucleotide
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  nontarget_01:
+    run: add-path-to-the-implementation/nontarget.cwl 
     in:
-      PeptideProphet_in_1: input_2
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      nontarget_in_1: input_3
+      nontarget_in_2: input_2
+      nontarget_in_3: input_3
+    out: [nontarget_out_1, nontarget_out_2, nontarget_out_3]
+  DeconMSn_02:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      DeconMSn_in_1: input_1
+      DeconMSn_in_2: input_1
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  mMass_03:
+    run: add-path-to-the-implementation/mMass.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      mMass_in_1: DeconMSn_02/DeconMSn_out_2
+      mMass_in_2: nontarget_01/nontarget_out_2
+    out: [mMass_out_1]
+  PeptideProphet_04:
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      idconvert_in_1: Comet_02/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PeptideProphet_in_1: mMass_03/mMass_out_1
+    out: [PeptideProphet_out_1]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      PeptideProphet_in_1: idconvert_04/idconvert_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: input_1
-    out: [StPeter_out_1]
+      Libra_in_1: PeptideProphet_04/PeptideProphet_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    outputSource: Libra_05/Libra_out_1

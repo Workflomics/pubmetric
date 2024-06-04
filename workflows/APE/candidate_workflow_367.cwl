@@ -4,56 +4,53 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_366
-doc: A workflow including the tool(s) msConvert, idconvert, mzRecal, Comet, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) OpenSWATH, Peppy, OpenMS, PeptideShaker, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  OpenSWATH_01:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      OpenSWATH_in_1: input_1
+    out: [OpenSWATH_out_1]
+  Peppy_02:
+    run: add-path-to-the-implementation/Peppy.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      Peppy_in_1: input_1
+      Peppy_in_2: input_3
+      Peppy_in_3: input_2
+    out: [Peppy_out_1, Peppy_out_2]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      mzRecal_in_1: msConvert_01/msConvert_out_1
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  Comet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: input_3
+      OpenMS_in_3: Peppy_02/Peppy_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PeptideShaker_04:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      Comet_in_1: mzRecal_03/mzRecal_out_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PeptideShaker_in_1: input_2
+      PeptideShaker_in_2: OpenMS_03/OpenMS_out_1
+      PeptideShaker_in_3: input_1
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      PeptideProphet_in_1: Comet_04/Comet_out_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      MSiReader_in_1: OpenSWATH_01/OpenSWATH_out_1
+      MSiReader_in_2: PeptideShaker_04/PeptideShaker_out_3
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3620" # xlsx
+    outputSource: MSiReader_05/MSiReader_out_1

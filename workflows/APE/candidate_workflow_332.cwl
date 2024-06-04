@@ -4,58 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_331
-doc: A workflow including the tool(s) Comet, mzRecal, mzRecal, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) InDigestion, protk, XTandem Parser, XTandemPipeline, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3711" # X!Tandem XML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3655" # pepXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3681" # mzTab
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      InDigestion_in_1: input_3
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  protk_02:
+    run: add-path-to-the-implementation/protk.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      protk_in_1: InDigestion_01/InDigestion_out_3
+      protk_in_2: input_2
+    out: [protk_out_1, protk_out_2]
+  XTandem Parser_03:
+    run: add-path-to-the-implementation/XTandem Parser.cwl 
     in:
-      mzRecal_in_1: mzRecal_02/mzRecal_out_1
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      XTandem Parser_in_1: input_1
+    out: [XTandem Parser_out_1, XTandem Parser_out_2]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      mzRecal_in_1: mzRecal_03/mzRecal_out_1
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      XTandemPipeline_in_1: protk_02/protk_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      Quant_in_1: XTandem Parser_03/XTandem Parser_out_2
+      Quant_in_2: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

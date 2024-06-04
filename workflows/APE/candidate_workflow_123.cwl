@@ -4,52 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_122
-doc: A workflow including the tool(s) XTandem, idconvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) PRIDE Toolsuite, PRIDE Toolsuite, MSiReader, OpenSWATH, Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3246" # TraML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  PRIDE Toolsuite_01:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      PRIDE Toolsuite_in_1: input_3
+    out: [PRIDE Toolsuite_out_1]
+  PRIDE Toolsuite_02:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PRIDE Toolsuite_in_1: PRIDE Toolsuite_01/PRIDE Toolsuite_out_1
+    out: [PRIDE Toolsuite_out_1]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      PeptideProphet_in_1: idconvert_02/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: PRIDE Toolsuite_02/PRIDE Toolsuite_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      OpenSWATH_in_1: input_2
+      OpenSWATH_in_2: input_1
+    out: [OpenSWATH_out_1]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: XTandem_01/XTandem_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      Mascot Server_in_1: OpenSWATH_04/OpenSWATH_out_1
+      Mascot Server_in_2: MSiReader_03/MSiReader_out_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3311" # RNAML
+    outputSource: Mascot Server_05/Mascot Server_out_1

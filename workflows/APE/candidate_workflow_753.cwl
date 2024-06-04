@@ -4,59 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_752
-doc: A workflow including the tool(s) PeptideProphet, idconvert, mzRecal, ProteinProphet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) MAFFT (EBI), PChopper, MS-Fit, OpenMS, OpenSWATH.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1641" # affymetrix-exp
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  MAFFT (EBI)_01:
+    run: add-path-to-the-implementation/MAFFT (EBI).cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      MAFFT (EBI)_in_1: input_2
+    out: [MAFFT (EBI)_out_1]
+  PChopper_02:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      PChopper_in_1: MAFFT (EBI)_01/MAFFT (EBI)_out_1
+    out: [PChopper_out_1]
+  MS-Fit_03:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MS-Fit_in_1: input_3
+    out: [MS-Fit_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: PChopper_02/PChopper_out_1
+      OpenMS_in_3: MS-Fit_03/MS-Fit_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_03/mzRecal_out_1
-    out: [StPeter_out_1]
+      OpenSWATH_in_1: OpenMS_04/OpenMS_out_2
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenSWATH_05/OpenSWATH_out_1

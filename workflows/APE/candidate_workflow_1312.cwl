@@ -4,59 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1311
-doc: A workflow including the tool(s) idconvert, XTandem, PeptideProphet, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) dig, EncyclopeDIA, OpenMS, RelEx, qcmetrics.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3311" # RNAML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  dig_01:
+    run: add-path-to-the-implementation/dig.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      dig_in_1: input_1
+    out: [dig_out_1]
+  EncyclopeDIA_02:
+    run: add-path-to-the-implementation/EncyclopeDIA.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      EncyclopeDIA_in_1: input_2
+      EncyclopeDIA_in_2: input_1
+    out: [EncyclopeDIA_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: dig_01/dig_out_1
+      OpenMS_in_3: EncyclopeDIA_02/EncyclopeDIA_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  RelEx_04:
+    run: add-path-to-the-implementation/RelEx.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      RelEx_in_1: OpenMS_03/OpenMS_out_1
+    out: [RelEx_out_1]
+  qcmetrics_05:
+    run: add-path-to-the-implementation/qcmetrics.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      qcmetrics_in_1: RelEx_04/RelEx_out_1
+    out: [qcmetrics_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_2532" # GenBank-HTML
+    outputSource: qcmetrics_05/qcmetrics_out_1

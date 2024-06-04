@@ -4,50 +4,47 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_75
-doc: A workflow including the tool(s) msConvert, XTandem, msConvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) CrosstalkDB, CrosstalkDB, ComPIL, IsobariQ, LimmaRP.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3752" # CSV
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3913" # Loom
   input_3:
     type: File
-    format: "http://edamontology.org/format_2550" # OBO-XML
+    format: "http://edamontology.org/format_3859" # JCAMP-DX
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  CrosstalkDB_01:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      CrosstalkDB_in_1: input_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      XTandem_in_1: msConvert_01/msConvert_out_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      CrosstalkDB_in_1: CrosstalkDB_01/CrosstalkDB_out_3
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  ComPIL_03:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ComPIL_in_1: input_3
+    out: [ComPIL_out_1]
+  IsobariQ_04:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: msConvert_03/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      IsobariQ_in_1: ComPIL_03/ComPIL_out_1
+    out: [IsobariQ_out_1]
+  LimmaRP_05:
+    run: add-path-to-the-implementation/LimmaRP.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      LimmaRP_in_1: CrosstalkDB_02/CrosstalkDB_out_3
+      LimmaRP_in_2: IsobariQ_04/IsobariQ_out_1
+    out: [LimmaRP_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: LimmaRP_05/LimmaRP_out_1

@@ -4,58 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1057
-doc: A workflow including the tool(s) PeptideProphet, idconvert, ProteinProphet, mzRecal, Comet, StPeter.
+doc: A workflow including the tool(s) MeroX, CrosstalkDB, MSiReader, PEAKS DB, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3654" # mzXML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3651" # MGF
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  MeroX_01:
+    run: add-path-to-the-implementation/MeroX.cwl 
     in:
-      PeptideProphet_in_1: input_2
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      MeroX_in_1: input_3
+      MeroX_in_2: input_2
+    out: [MeroX_out_1]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      idconvert_in_1: input_2
-    out: [idconvert_out_1]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      CrosstalkDB_in_1: MeroX_01/MeroX_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MSiReader_in_1: input_1
+      MSiReader_in_2: CrosstalkDB_02/CrosstalkDB_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
+  PEAKS DB_04:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      mzRecal_in_1: input_3
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  Comet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PEAKS DB_in_1: input_3
+      PEAKS DB_in_2: input_2
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      Comet_in_1: mzRecal_04/mzRecal_out_1
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: Comet_05/Comet_out_1
-      StPeter_in_3: input_3
-    out: [StPeter_out_1]
+      OpenMS_in_1: MSiReader_03/MSiReader_out_2
+      OpenMS_in_2: input_2
+      OpenMS_in_3: PEAKS DB_04/PEAKS DB_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3652" # dta
+    outputSource: OpenMS_05/OpenMS_out_1

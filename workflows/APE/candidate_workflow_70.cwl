@@ -4,54 +4,52 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_67
-doc: A workflow including the tool(s) PeptideProphet, XTandem, ProteinProphet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) PEAKS DB, OpenMS, PeptideShaker, PChopper, PEP-SiteFinder.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1476" # PDB
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3651" # MGF
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  PEAKS DB_01:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      PEAKS DB_in_1: input_3
+      PEAKS DB_in_2: input_2
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_2
+      OpenMS_in_3: PEAKS DB_01/PEAKS DB_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PeptideShaker_03:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PeptideShaker_in_1: input_2
+      PeptideShaker_in_2: OpenMS_02/OpenMS_out_1
+      PeptideShaker_in_3: input_3
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
+  PChopper_04:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      PChopper_in_1: PeptideShaker_03/PeptideShaker_out_2
+    out: [PChopper_out_1]
+  PEP-SiteFinder_05:
+    run: add-path-to-the-implementation/PEP-SiteFinder.cwl 
     in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_04/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      PEP-SiteFinder_in_1: PChopper_04/PChopper_out_1
+      PEP-SiteFinder_in_2: input_1
+    out: [PEP-SiteFinder_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_1476" # PDB
+    outputSource: PEP-SiteFinder_05/PEP-SiteFinder_out_1

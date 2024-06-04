@@ -4,57 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_316
-doc: A workflow including the tool(s) XTandem, XTandem, idconvert, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) multiplierz, MSiReader, CPM, MS-Fit, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3713" # Mascot .dat file
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  multiplierz_01:
+    run: add-path-to-the-implementation/multiplierz.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      multiplierz_in_1: input_3
+      multiplierz_in_2: input_1
+    out: [multiplierz_out_1]
+  MSiReader_02:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: multiplierz_01/multiplierz_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
+  CPM_03:
+    run: add-path-to-the-implementation/CPM.cwl 
     in:
-      idconvert_in_1: XTandem_02/XTandem_out_1
-    out: [idconvert_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      CPM_in_1: MSiReader_02/MSiReader_out_2
+      CPM_in_2: input_3
+    out: [CPM_out_1, CPM_out_2]
+  MS-Fit_04:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: idconvert_03/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MS-Fit_in_1: CPM_03/CPM_out_2
+    out: [MS-Fit_out_1]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      Quant_in_1: input_2
+      Quant_in_2: MS-Fit_04/MS-Fit_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

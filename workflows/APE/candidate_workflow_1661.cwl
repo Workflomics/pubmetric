@@ -4,56 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1660
-doc: A workflow including the tool(s) Comet, idconvert, mzRecal, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) XTandem Parser, TopPIC, XTandemPipeline, Multi-Q, CrosstalkDB.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_2:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3711" # X!Tandem XML
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  XTandem Parser_01:
+    run: add-path-to-the-implementation/XTandem Parser.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      XTandem Parser_in_1: input_3
+    out: [XTandem Parser_out_1, XTandem Parser_out_2]
+  TopPIC_02:
+    run: add-path-to-the-implementation/TopPIC.cwl 
     in:
-      idconvert_in_1: Comet_01/Comet_out_1
-    out: [idconvert_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      TopPIC_in_1: XTandem Parser_01/XTandem Parser_out_2
+      TopPIC_in_2: input_2
+    out: [TopPIC_out_1, TopPIC_out_2]
+  XTandemPipeline_03:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      XTandemPipeline_in_1: TopPIC_02/TopPIC_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Multi-Q_04:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Multi-Q_in_1: input_1
+      Multi-Q_in_2: XTandemPipeline_03/XTandemPipeline_out_1
+    out: [Multi-Q_out_1]
+  CrosstalkDB_05:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
-    in:
-      protXml2IdList_in_1: ProteinProphet_05/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      CrosstalkDB_in_1: Multi-Q_04/Multi-Q_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: protXml2IdList_06/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3752" # CSV
+    outputSource: CrosstalkDB_05/CrosstalkDB_out_1

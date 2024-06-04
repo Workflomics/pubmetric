@@ -4,58 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1022
-doc: A workflow including the tool(s) mzRecal, XTandem, PeptideProphet, idconvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) InDigestion, MyriMatch, OpenMS, PRIDE Toolsuite, MS-GF+.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3016" # VCF
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      InDigestion_in_1: input_2
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  MyriMatch_02:
+    run: add-path-to-the-implementation/MyriMatch.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MyriMatch_in_1: input_1
+      MyriMatch_in_2: InDigestion_01/InDigestion_out_3
+    out: [MyriMatch_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: mzRecal_01/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: input_3
+      OpenMS_in_3: MyriMatch_02/MyriMatch_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PRIDE Toolsuite_04:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PRIDE Toolsuite_in_1: input_3
+    out: [PRIDE Toolsuite_out_1]
+  MS-GF+_05:
+    run: add-path-to-the-implementation/MS-GF+.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: idconvert_04/idconvert_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      MS-GF+_in_1: OpenMS_03/OpenMS_out_1
+      MS-GF+_in_2: PRIDE Toolsuite_04/PRIDE Toolsuite_out_1
+    out: [MS-GF+_out_1, MS-GF+_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
+    outputSource: MS-GF+_05/MS-GF+_out_1

@@ -4,57 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_347
-doc: A workflow including the tool(s) Comet, mzRecal, Comet, msConvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) PIA - Protein Inference Algorithms, msaccess, XTandemPipeline, OpenMS, PeptideShaker.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3702" # MSF
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3651" # MGF
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  PIA - Protein Inference Algorithms_01:
+    run: add-path-to-the-implementation/PIA - Protein Inference Algorithms.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      PIA - Protein Inference Algorithms_in_1: input_2
+    out: [PIA - Protein Inference Algorithms_out_1, PIA - Protein Inference Algorithms_out_2]
+  msaccess_02:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  Comet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      msaccess_in_1: input_3
+      msaccess_in_2: PIA - Protein Inference Algorithms_01/PIA - Protein Inference Algorithms_out_1
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  XTandemPipeline_03:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      Comet_in_1: mzRecal_02/mzRecal_out_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      XTandemPipeline_in_1: msaccess_02/msaccess_out_2
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_1
+      OpenMS_in_3: XTandemPipeline_03/XTandemPipeline_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PeptideShaker_05:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      PeptideProphet_in_1: Comet_03/Comet_out_1
-      PeptideProphet_in_2: msConvert_04/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      PeptideShaker_in_1: input_1
+      PeptideShaker_in_2: OpenMS_04/OpenMS_out_1
+      PeptideShaker_in_3: input_3
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3579" # JPG
+    outputSource: PeptideShaker_05/PeptideShaker_out_1

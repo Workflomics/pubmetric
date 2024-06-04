@@ -4,57 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_774
-doc: A workflow including the tool(s) Comet, idconvert, PeptideProphet, msConvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) dig, protk, protk, Percolator, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3578" # IDAT
   input_2:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3655" # pepXML
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  dig_01:
+    run: add-path-to-the-implementation/dig.cwl 
     in:
-      Comet_in_1: input_3
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      dig_in_1: input_2
+    out: [dig_out_1]
+  protk_02:
+    run: add-path-to-the-implementation/protk.cwl 
     in:
-      idconvert_in_1: Comet_01/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      protk_in_1: input_2
+      protk_in_2: input_3
+    out: [protk_out_1, protk_out_2]
+  protk_03:
+    run: add-path-to-the-implementation/protk.cwl 
     in:
-      PeptideProphet_in_1: idconvert_02/idconvert_out_1
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  msConvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      protk_in_1: dig_01/dig_out_1
+      protk_in_2: protk_02/protk_out_1
+    out: [protk_out_1, protk_out_2]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Percolator_in_1: protk_03/protk_out_1
+    out: [Percolator_out_1]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: idconvert_02/idconvert_out_1
-      StPeter_in_3: msConvert_04/msConvert_out_1
-    out: [StPeter_out_1]
+      Libra_in_1: Percolator_04/Percolator_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    outputSource: Libra_05/Libra_out_1

@@ -4,55 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_332
-doc: A workflow including the tool(s) idconvert, mzRecal, PeptideProphet, ProteinProphet, protXml2IdList, gProfiler.
+doc: A workflow including the tool(s) Jtraml, PeptideProphet, OpenMS, MassChroQ, OpenSWATH.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1628" # ABI
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3556" # MHTML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3155" # SBRML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+  Jtraml_01:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      Jtraml_in_1: input_1
+    out: [Jtraml_out_1]
+  PeptideProphet_02:
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      mzRecal_in_1: input_3
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PeptideProphet_in_1: input_2
+    out: [PeptideProphet_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: mzRecal_02/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: Jtraml_01/Jtraml_out_1
+      OpenMS_in_3: PeptideProphet_02/PeptideProphet_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  MassChroQ_04:
+    run: add-path-to-the-implementation/MassChroQ.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      MassChroQ_in_1: OpenMS_03/OpenMS_out_1
+    out: [MassChroQ_out_1]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
-  gProfiler_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/gProfiler/gProfiler.cwl
-    in:
-      gProfiler_in_1: protXml2IdList_05/protXml2IdList_out_1
-    out: [gProfiler_out_1]
+      OpenSWATH_in_1: MassChroQ_04/MassChroQ_out_1
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3781" # PubAnnotation format
-    outputSource: gProfiler_06/gProfiler_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenSWATH_05/OpenSWATH_out_1

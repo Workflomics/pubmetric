@@ -4,58 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_505
-doc: A workflow including the tool(s) XTandem, PeptideProphet, ProteinProphet, Comet, idconvert, StPeter.
+doc: A workflow including the tool(s) Jtraml, PChopper, MS-Fit, OpenMS, OpenSWATH.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_2:
     type: File
-    format: "http://edamontology.org/format_3781" # PubAnnotation format
+    format: "http://edamontology.org/format_3313" # BLC
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1641" # affymetrix-exp
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  Jtraml_01:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      XTandem_in_1: input_3
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Jtraml_in_1: input_3
+    out: [Jtraml_out_1]
+  PChopper_02:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PChopper_in_1: Jtraml_01/Jtraml_out_1
+    out: [PChopper_out_1]
+  MS-Fit_03:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  Comet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      MS-Fit_in_1: input_3
+    out: [MS-Fit_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      Comet_in_1: input_3
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: PChopper_02/PChopper_out_1
+      OpenMS_in_3: MS-Fit_03/MS-Fit_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      idconvert_in_1: Comet_04/Comet_out_2
-    out: [idconvert_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: idconvert_05/idconvert_out_1
-      StPeter_in_3: input_3
-    out: [StPeter_out_1]
+      OpenSWATH_in_1: OpenMS_04/OpenMS_out_2
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenSWATH_05/OpenSWATH_out_1

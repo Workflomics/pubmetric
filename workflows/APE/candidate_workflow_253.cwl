@@ -4,55 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_252
-doc: A workflow including the tool(s) msConvert, XTandem, PeptideProphet, ProteinProphet, protXml2IdList, gProfiler.
+doc: A workflow including the tool(s) imDEV, MSiReader, Graph Extract, OpenSWATH, Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3652" # dta
+    format: "http://edamontology.org/format_3682" # imzML metadata file
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3468" # xls
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  imDEV_01:
+    run: add-path-to-the-implementation/imDEV.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      imDEV_in_1: input_2
+    out: [imDEV_out_1, imDEV_out_2]
+  MSiReader_02:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: input_1
+    out: [MSiReader_out_1, MSiReader_out_2]
+  Graph Extract_03:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Graph Extract_in_1: imDEV_01/imDEV_out_1
+    out: [Graph Extract_out_1]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      OpenSWATH_in_1: input_3
+      OpenSWATH_in_2: Graph Extract_03/Graph Extract_out_1
+    out: [OpenSWATH_out_1]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
-  gProfiler_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/gProfiler/gProfiler.cwl
-    in:
-      gProfiler_in_1: protXml2IdList_05/protXml2IdList_out_1
-    out: [gProfiler_out_1]
+      Mascot Server_in_1: OpenSWATH_04/OpenSWATH_out_1
+      Mascot Server_in_2: MSiReader_02/MSiReader_out_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3781" # PubAnnotation format
-    outputSource: gProfiler_06/gProfiler_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

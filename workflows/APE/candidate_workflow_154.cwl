@@ -4,53 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_153
-doc: A workflow including the tool(s) Comet, PeptideProphet, ProteinProphet, mzRecal, StPeter.
+doc: A workflow including the tool(s) OBI-Warp, MS-Isotope, EncyclopeDIA, OpenMS, OpenSWATH.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3781" # PubAnnotation format
+    format: "http://edamontology.org/format_3652" # dta
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  OBI-Warp_01:
+    run: add-path-to-the-implementation/OBI-Warp.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OBI-Warp_in_1: input_3
+    out: [OBI-Warp_out_1]
+  MS-Isotope_02:
+    run: add-path-to-the-implementation/MS-Isotope.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MS-Isotope_in_1: OBI-Warp_01/OBI-Warp_out_1
+    out: [MS-Isotope_out_1]
+  EncyclopeDIA_03:
+    run: add-path-to-the-implementation/EncyclopeDIA.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      EncyclopeDIA_in_1: input_3
+      EncyclopeDIA_in_2: input_2
+    out: [EncyclopeDIA_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: MS-Isotope_02/MS-Isotope_out_1
+      OpenMS_in_3: EncyclopeDIA_03/EncyclopeDIA_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: Comet_01/Comet_out_1
-      StPeter_in_3: mzRecal_04/mzRecal_out_1
-    out: [StPeter_out_1]
+      OpenSWATH_in_1: OpenMS_04/OpenMS_out_2
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenSWATH_05/OpenSWATH_out_1

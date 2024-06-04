@@ -4,56 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_342
-doc: A workflow including the tool(s) msConvert, mzRecal, mzRecal, idconvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) CrosstalkDB, CrosstalkDB, PRIDE Toolsuite, PECAN (PEptide-Centric Analysis), Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3752" # CSV
   input_2:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  CrosstalkDB_01:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      CrosstalkDB_in_1: input_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      mzRecal_in_1: msConvert_01/msConvert_out_1
-      mzRecal_in_2: input_2
-    out: [mzRecal_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      CrosstalkDB_in_1: CrosstalkDB_01/CrosstalkDB_out_3
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  PRIDE Toolsuite_03:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      mzRecal_in_1: mzRecal_02/mzRecal_out_1
-      mzRecal_in_2: input_2
-    out: [mzRecal_out_1]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      PRIDE Toolsuite_in_1: CrosstalkDB_02/CrosstalkDB_out_4
+    out: [PRIDE Toolsuite_out_1]
+  PECAN (PEptide-Centric Analysis)_04:
+    run: add-path-to-the-implementation/PECAN (PEptide-Centric Analysis).cwl 
     in:
-      idconvert_in_1: input_2
-    out: [idconvert_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PECAN (PEptide-Centric Analysis)_in_1: input_3
+      PECAN (PEptide-Centric Analysis)_in_2: input_2
+    out: [PECAN (PEptide-Centric Analysis)_out_1, PECAN (PEptide-Centric Analysis)_out_2]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      PeptideProphet_in_1: idconvert_04/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      Mascot Server_in_1: PRIDE Toolsuite_03/PRIDE Toolsuite_out_1
+      Mascot Server_in_2: PECAN (PEptide-Centric Analysis)_04/PECAN (PEptide-Centric Analysis)_out_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

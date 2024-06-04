@@ -4,50 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_3
-doc: A workflow including the tool(s) Comet, PeptideProphet, ProteinProphet, protXml2IdList, gProfiler.
+doc: A workflow including the tool(s) PEAKS DB, OpenMS, PVIEW, CrosstalkDB, mspire_mspire-sequest.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_2311" # EMBL-HTML
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  PEAKS DB_01:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PEAKS DB_in_1: input_3
+      PEAKS DB_in_2: input_1
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_1
+      OpenMS_in_3: PEAKS DB_01/PEAKS DB_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PVIEW_03:
+    run: add-path-to-the-implementation/PVIEW.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      PVIEW_in_1: input_2
+      PVIEW_in_2: input_3
+      PVIEW_in_3: OpenMS_02/OpenMS_out_1
+    out: [PVIEW_out_1]
+  CrosstalkDB_04:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_03/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
-  gProfiler_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/gProfiler/gProfiler.cwl
+      CrosstalkDB_in_1: PVIEW_03/PVIEW_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  mspire_mspire-sequest_05:
+    run: add-path-to-the-implementation/mspire_mspire-sequest.cwl 
     in:
-      gProfiler_in_1: protXml2IdList_04/protXml2IdList_out_1
-    out: [gProfiler_out_1]
+      mspire_mspire-sequest_in_1: CrosstalkDB_04/CrosstalkDB_out_3
+    out: [mspire_mspire-sequest_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3784" # Open Annotation format
-    outputSource: gProfiler_05/gProfiler_out_1
+    format: "http://edamontology.org/format_3655" # pepXML
+    outputSource: mspire_mspire-sequest_05/mspire_mspire-sequest_out_1

@@ -4,58 +4,47 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1172
-doc: A workflow including the tool(s) Comet, msConvert, XTandem, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) InDigestion, protk, ProteinProphet, Percolator, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3578" # IDAT
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1631" # EXP
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3655" # pepXML
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      InDigestion_in_1: input_2
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  protk_02:
+    run: add-path-to-the-implementation/protk.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      protk_in_1: InDigestion_01/InDigestion_out_3
+      protk_in_2: input_3
+    out: [protk_out_1, protk_out_2]
+  ProteinProphet_03:
+    run: add-path-to-the-implementation/ProteinProphet.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ProteinProphet_in_1: protk_02/protk_out_1
+    out: [ProteinProphet_out_1]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Percolator_in_1: ProteinProphet_03/ProteinProphet_out_1
+    out: [Percolator_out_1]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: Comet_01/Comet_out_1
-      StPeter_in_3: msConvert_02/msConvert_out_1
-    out: [StPeter_out_1]
+      Libra_in_1: Percolator_04/Percolator_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    outputSource: Libra_05/Libra_out_1

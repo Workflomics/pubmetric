@@ -4,52 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_55
-doc: A workflow including the tool(s) idconvert, PeptideProphet, Comet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) MSD File Reader, Xtractor, Sirius, PECAN (PEptide-Centric Analysis), Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1336" # dhf
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  MSD File Reader_01:
+    run: add-path-to-the-implementation/MSD File Reader.cwl 
+    in: []
+    out: [MSD File Reader_out_1]
+  Xtractor_02:
+    run: add-path-to-the-implementation/Xtractor.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Xtractor_in_1: input_3
+      Xtractor_in_2: MSD File Reader_01/MSD File Reader_out_1
+      Xtractor_in_3: input_3
+    out: [Xtractor_out_1, Xtractor_out_2, Xtractor_out_3]
+  Sirius_03:
+    run: add-path-to-the-implementation/Sirius.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  Comet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      Sirius_in_1: Xtractor_02/Xtractor_out_1
+    out: [Sirius_out_1, Sirius_out_2]
+  PECAN (PEptide-Centric Analysis)_04:
+    run: add-path-to-the-implementation/PECAN (PEptide-Centric Analysis).cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PECAN (PEptide-Centric Analysis)_in_1: input_1
+      PECAN (PEptide-Centric Analysis)_in_2: input_2
+    out: [PECAN (PEptide-Centric Analysis)_out_1, PECAN (PEptide-Centric Analysis)_out_2]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: Comet_03/Comet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      Mascot Server_in_1: Sirius_03/Sirius_out_2
+      Mascot Server_in_2: PECAN (PEptide-Centric Analysis)_04/PECAN (PEptide-Centric Analysis)_out_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

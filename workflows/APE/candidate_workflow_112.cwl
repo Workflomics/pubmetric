@@ -4,50 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_111
-doc: A workflow including the tool(s) msConvert, XTandem, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) OpenSWATH, Mascot Server, XTandemPipeline, MaxQuant, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3246" # TraML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  OpenSWATH_01:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      OpenSWATH_in_1: input_1
+      OpenSWATH_in_2: input_3
+    out: [OpenSWATH_out_1]
+  Mascot Server_02:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      XTandem_in_1: msConvert_01/msConvert_out_1
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Mascot Server_in_1: OpenSWATH_01/OpenSWATH_out_1
+      Mascot Server_in_2: input_1
+    out: [Mascot Server_out_1]
+  XTandemPipeline_03:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      XTandemPipeline_in_1: Mascot Server_02/Mascot Server_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  MaxQuant_04:
+    run: add-path-to-the-implementation/MaxQuant.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      MaxQuant_in_1: XTandemPipeline_03/XTandemPipeline_out_1
+    out: [MaxQuant_out_1, MaxQuant_out_2]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      MSiReader_in_1: input_2
+      MSiReader_in_2: MaxQuant_04/MaxQuant_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
-    outputSource: protXml2IdList_05/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3620" # xlsx
+    outputSource: MSiReader_05/MSiReader_out_1

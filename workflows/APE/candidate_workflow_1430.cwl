@@ -4,59 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1427
-doc: A workflow including the tool(s) msConvert, PeptideProphet, XTandem, ProteinProphet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) OpenSWATH, msmsEDA, EncyclopeDIA, Multi-Q, LimmaRP.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3650" # netCDF
   input_2:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  OpenSWATH_01:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenSWATH_in_1: input_3
+    out: [OpenSWATH_out_1]
+  msmsEDA_02:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      PeptideProphet_in_1: input_2
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      msmsEDA_in_1: input_1
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
+  EncyclopeDIA_03:
+    run: add-path-to-the-implementation/EncyclopeDIA.cwl 
     in:
-      XTandem_in_1: msConvert_01/msConvert_out_1
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      EncyclopeDIA_in_1: OpenSWATH_01/OpenSWATH_out_1
+      EncyclopeDIA_in_2: input_2
+    out: [EncyclopeDIA_out_1]
+  Multi-Q_04:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Multi-Q_in_1: input_3
+      Multi-Q_in_2: EncyclopeDIA_03/EncyclopeDIA_out_1
+    out: [Multi-Q_out_1]
+  LimmaRP_05:
+    run: add-path-to-the-implementation/LimmaRP.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: msConvert_01/msConvert_out_1
-    out: [StPeter_out_1]
+      LimmaRP_in_1: msmsEDA_02/msmsEDA_out_2
+      LimmaRP_in_2: Multi-Q_04/Multi-Q_out_1
+    out: [LimmaRP_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: LimmaRP_05/LimmaRP_out_1

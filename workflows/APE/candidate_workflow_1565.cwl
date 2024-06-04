@@ -4,59 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1564
-doc: A workflow including the tool(s) Comet, PeptideProphet, msConvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) MS-Isotope, PeptideProphet, OpenMS, PRIDE Toolsuite, MS-Digest.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1957" # raw
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3770" # UniProtKB XML
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  MS-Isotope_01:
+    run: add-path-to-the-implementation/MS-Isotope.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
+      MS-Isotope_in_1: input_2
+    out: [MS-Isotope_out_1]
   PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      PeptideProphet_in_1: MS-Isotope_01/MS-Isotope_out_1
+    out: [PeptideProphet_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_1
+      OpenMS_in_3: PeptideProphet_02/PeptideProphet_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PRIDE Toolsuite_04:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PRIDE Toolsuite_in_1: OpenMS_03/OpenMS_out_1
+    out: [PRIDE Toolsuite_out_1]
+  MS-Digest_05:
+    run: add-path-to-the-implementation/MS-Digest.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_02/PeptideProphet_out_1
-      StPeter_in_3: msConvert_03/msConvert_out_1
-    out: [StPeter_out_1]
+      MS-Digest_in_1: input_2
+      MS-Digest_in_2: PRIDE Toolsuite_04/PRIDE Toolsuite_out_1
+    out: [MS-Digest_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3701" # Sequin format
+    outputSource: MS-Digest_05/MS-Digest_out_1

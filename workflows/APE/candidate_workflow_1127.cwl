@@ -4,58 +4,47 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1126
-doc: A workflow including the tool(s) msConvert, msConvert, PeptideProphet, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) Jtraml, Unipept CLI, mspire_mspire-sequest, Percolator, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1628" # ABI
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1964" # plain text format (unformatted)
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3313" # BLC
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  Jtraml_01:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      Jtraml_in_1: input_1
+    out: [Jtraml_out_1]
+  Unipept CLI_02:
+    run: add-path-to-the-implementation/Unipept CLI.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Unipept CLI_in_1: input_2
+      Unipept CLI_in_2: Jtraml_01/Jtraml_out_1
+    out: [Unipept CLI_out_1, Unipept CLI_out_2]
+  mspire_mspire-sequest_03:
+    run: add-path-to-the-implementation/mspire_mspire-sequest.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      mspire_mspire-sequest_in_1: Unipept CLI_02/Unipept CLI_out_2
+    out: [mspire_mspire-sequest_out_1]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Percolator_in_1: mspire_mspire-sequest_03/mspire_mspire-sequest_out_1
+    out: [Percolator_out_1]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1
-      StPeter_in_3: msConvert_02/msConvert_out_1
-    out: [StPeter_out_1]
+      Libra_in_1: Percolator_04/Percolator_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    outputSource: Libra_05/Libra_out_1

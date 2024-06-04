@@ -4,56 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_355
-doc: A workflow including the tool(s) msConvert, idconvert, mzRecal, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) esimsa2D, CrosstalkDB, MSiReader, ComPIL, IsobariQ.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1200" # smarts
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1631" # EXP
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3752" # CSV
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  esimsa2D_01:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      esimsa2D_in_1: input_2
+      esimsa2D_in_2: input_1
+      esimsa2D_in_3: input_1
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      CrosstalkDB_in_1: input_3
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      mzRecal_in_1: msConvert_01/msConvert_out_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MSiReader_in_1: esimsa2D_01/esimsa2D_out_2
+      MSiReader_in_2: CrosstalkDB_02/CrosstalkDB_out_3
+    out: [MSiReader_out_1, MSiReader_out_2]
+  ComPIL_04:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      mzRecal_in_1: mzRecal_03/mzRecal_out_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ComPIL_in_1: MSiReader_03/MSiReader_out_2
+    out: [ComPIL_out_1]
+  IsobariQ_05:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      PeptideProphet_in_1: idconvert_02/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      IsobariQ_in_1: ComPIL_04/ComPIL_out_1
+    out: [IsobariQ_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3311" # RNAML
+    outputSource: IsobariQ_05/IsobariQ_out_1

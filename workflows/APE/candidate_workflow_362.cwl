@@ -4,56 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_361
-doc: A workflow including the tool(s) msConvert, msConvert, XTandem, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) massXpert, MZmine, Graph Extract, ProFound, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3468" # xls
   input_2:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3248" # mzQuantML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  massXpert_01:
+    run: add-path-to-the-implementation/massXpert.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      massXpert_in_1: input_1
+      massXpert_in_2: input_2
+    out: [massXpert_out_1, massXpert_out_2]
+  MZmine_02:
+    run: add-path-to-the-implementation/MZmine.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      MZmine_in_1: input_3
+    out: [MZmine_out_1, MZmine_out_2, MZmine_out_3]
+  Graph Extract_03:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      XTandem_in_1: msConvert_01/msConvert_out_1
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      Graph Extract_in_1: MZmine_02/MZmine_out_3
+    out: [Graph Extract_out_1]
+  ProFound_04:
+    run: add-path-to-the-implementation/ProFound.cwl 
     in:
-      mzRecal_in_1: msConvert_02/msConvert_out_1
-      mzRecal_in_2: input_2
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ProFound_in_1: Graph Extract_03/Graph Extract_out_1
+    out: [ProFound_out_1]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      OpenMS_in_1: input_3
+      OpenMS_in_2: massXpert_01/massXpert_out_2
+      OpenMS_in_3: ProFound_04/ProFound_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3652" # dta
+    outputSource: OpenMS_05/OpenMS_out_1

@@ -4,57 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1167
-doc: A workflow including the tool(s) Comet, msConvert, msConvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) XTandemPipeline, OpenMS, ASAPRatio, OpenSWATH, msmsTests.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3758" # SEQUEST .out file
   input_2:
     type: File
-    format: "http://edamontology.org/format_3651" # MGF
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3845" # HSAML
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  XTandemPipeline_01:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      XTandemPipeline_in_1: input_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      OpenMS_in_1: input_2
+      OpenMS_in_2: input_3
+      OpenMS_in_3: XTandemPipeline_01/XTandemPipeline_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  ASAPRatio_03:
+    run: add-path-to-the-implementation/ASAPRatio.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ASAPRatio_in_1: OpenMS_02/OpenMS_out_1
+    out: [ASAPRatio_out_1, ASAPRatio_out_2]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: msConvert_03/msConvert_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenSWATH_in_1: ASAPRatio_03/ASAPRatio_out_2
+    out: [OpenSWATH_out_1]
+  msmsTests_05:
+    run: add-path-to-the-implementation/msmsTests.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_04/PeptideProphet_out_1
-      StPeter_in_3: msConvert_02/msConvert_out_1
-    out: [StPeter_out_1]
+      msmsTests_in_1: OpenSWATH_04/OpenSWATH_out_1
+    out: [msmsTests_out_1, msmsTests_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3592" # BMP
+    outputSource: msmsTests_05/msmsTests_out_1

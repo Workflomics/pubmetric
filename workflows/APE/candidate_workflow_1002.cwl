@@ -4,57 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1001
-doc: A workflow including the tool(s) idconvert, PeptideProphet, ProteinProphet, idconvert, mzRecal, StPeter.
+doc: A workflow including the tool(s) multiplierz, ComplexBrowser, Graph Extract, MS-Fit, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3710" # WIFF format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3752" # CSV
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  multiplierz_01:
+    run: add-path-to-the-implementation/multiplierz.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      multiplierz_in_1: input_1
+      multiplierz_in_2: input_2
+    out: [multiplierz_out_1]
+  ComplexBrowser_02:
+    run: add-path-to-the-implementation/ComplexBrowser.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      ComplexBrowser_in_1: multiplierz_01/multiplierz_out_1
+      ComplexBrowser_in_2: input_3
+    out: [ComplexBrowser_out_1, ComplexBrowser_out_2, ComplexBrowser_out_3]
+  Graph Extract_03:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      Graph Extract_in_1: ComplexBrowser_02/ComplexBrowser_out_3
+    out: [Graph Extract_out_1]
+  MS-Fit_04:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      idconvert_in_1: PeptideProphet_02/PeptideProphet_out_1
-    out: [idconvert_out_1]
-  mzRecal_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MS-Fit_in_1: Graph Extract_03/Graph Extract_out_1
+    out: [MS-Fit_out_1]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_04/idconvert_out_1
-    out: [mzRecal_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_02/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_05/mzRecal_out_1
-    out: [StPeter_out_1]
+      Libra_in_1: MS-Fit_04/MS-Fit_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    outputSource: Libra_05/Libra_out_1

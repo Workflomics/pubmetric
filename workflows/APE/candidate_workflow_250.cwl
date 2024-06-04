@@ -4,57 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_247
-doc: A workflow including the tool(s) Comet, mzRecal, Comet, idconvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) MaxQuant, MSiReader, ICPLQuant, IsobariQ, LimmaRP.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3682" # imzML metadata file
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3620" # xlsx
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3713" # Mascot .dat file
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  MaxQuant_01:
+    run: add-path-to-the-implementation/MaxQuant.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MaxQuant_in_1: input_2
+    out: [MaxQuant_out_1, MaxQuant_out_2]
+  MSiReader_02:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  Comet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      MSiReader_in_1: input_1
+      MSiReader_in_2: MaxQuant_01/MaxQuant_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
+  ICPLQuant_03:
+    run: add-path-to-the-implementation/ICPLQuant.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      ICPLQuant_in_1: input_1
+      ICPLQuant_in_2: MSiReader_02/MSiReader_out_2
+      ICPLQuant_in_3: input_3
+    out: [ICPLQuant_out_1]
+  IsobariQ_04:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      idconvert_in_1: Comet_03/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      IsobariQ_in_1: input_3
+    out: [IsobariQ_out_1]
+  LimmaRP_05:
+    run: add-path-to-the-implementation/LimmaRP.cwl 
     in:
-      PeptideProphet_in_1: idconvert_04/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_02/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      LimmaRP_in_1: ICPLQuant_03/ICPLQuant_out_1
+      LimmaRP_in_2: IsobariQ_04/IsobariQ_out_1
+    out: [LimmaRP_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: LimmaRP_05/LimmaRP_out_1

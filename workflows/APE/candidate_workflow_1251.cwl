@@ -4,58 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1250
-doc: A workflow including the tool(s) idconvert, Comet, PeptideProphet, mzRecal, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) XTandemPipeline, Mascot Server, dig, Graph Extract, MS-Digest.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1996" # pair
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3713" # Mascot .dat file
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3313" # BLC
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  XTandemPipeline_01:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      XTandemPipeline_in_1: input_2
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Mascot Server_02:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Mascot Server_in_1: input_1
+      Mascot Server_in_2: input_3
+    out: [Mascot Server_out_1]
+  dig_03:
+    run: add-path-to-the-implementation/dig.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      dig_in_1: XTandemPipeline_01/XTandemPipeline_out_2
+    out: [dig_out_1]
+  Graph Extract_04:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_02/Comet_out_2
-    out: [mzRecal_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Graph Extract_in_1: Mascot Server_02/Mascot Server_out_1
+    out: [Graph Extract_out_1]
+  MS-Digest_05:
+    run: add-path-to-the-implementation/MS-Digest.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: idconvert_01/idconvert_out_1
-      StPeter_in_3: mzRecal_04/mzRecal_out_1
-    out: [StPeter_out_1]
+      MS-Digest_in_1: dig_03/dig_out_1
+      MS-Digest_in_2: Graph Extract_04/Graph Extract_out_1
+    out: [MS-Digest_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3701" # Sequin format
+    outputSource: MS-Digest_05/MS-Digest_out_1

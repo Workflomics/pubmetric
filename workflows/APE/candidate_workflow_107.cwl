@@ -4,50 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_106
-doc: A workflow including the tool(s) Comet, msConvert, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) InDigestion, OpenSWATH, Mascot Server, protk, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3246" # TraML
   input_2:
     type: File
     format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1445" # Phylip tree distance format
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      InDigestion_in_1: input_3
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  OpenSWATH_02:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenSWATH_in_1: input_2
+      OpenSWATH_in_2: input_1
+    out: [OpenSWATH_out_1]
+  Mascot Server_03:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Mascot Server_in_1: OpenSWATH_02/OpenSWATH_out_1
+      Mascot Server_in_2: input_1
+    out: [Mascot Server_out_1]
+  protk_04:
+    run: add-path-to-the-implementation/protk.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      protk_in_1: InDigestion_01/InDigestion_out_3
+      protk_in_2: Mascot Server_03/Mascot Server_out_1
+    out: [protk_out_1, protk_out_2]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      MSiReader_in_1: input_2
+      MSiReader_in_2: protk_04/protk_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
-    outputSource: protXml2IdList_05/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3591" # TIFF
+    outputSource: MSiReader_05/MSiReader_out_1

@@ -4,59 +4,47 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1047
-doc: A workflow including the tool(s) XTandem, PeptideProphet, ProteinProphet, idconvert, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) CrosstalkDB, Graph Extract, PIA - Protein Inference Algorithms, Percolator, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3752" # CSV
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3313" # BLC
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  CrosstalkDB_01:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      XTandem_in_1: input_3
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      CrosstalkDB_in_1: input_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  Graph Extract_02:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Graph Extract_in_1: CrosstalkDB_01/CrosstalkDB_out_1
+    out: [Graph Extract_out_1]
+  PIA - Protein Inference Algorithms_03:
+    run: add-path-to-the-implementation/PIA - Protein Inference Algorithms.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      PIA - Protein Inference Algorithms_in_1: Graph Extract_02/Graph Extract_out_1
+    out: [PIA - Protein Inference Algorithms_out_1, PIA - Protein Inference Algorithms_out_2]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Percolator_in_1: PIA - Protein Inference Algorithms_03/PIA - Protein Inference Algorithms_out_1
+    out: [Percolator_out_1]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      PeptideProphet_in_1: idconvert_04/idconvert_out_1
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: input_3
-    out: [StPeter_out_1]
+      Quant_in_1: input_2
+      Quant_in_2: Percolator_04/Percolator_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

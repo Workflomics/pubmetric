@@ -4,59 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1415
-doc: A workflow including the tool(s) idconvert, Comet, PeptideProphet, ProteinProphet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) PRIDE Toolsuite, InDigestion, MR-MSPOLYGRAPH, Percolator, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3655" # pepXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  PRIDE Toolsuite_01:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PRIDE Toolsuite_in_1: input_3
+    out: [PRIDE Toolsuite_out_1]
+  InDigestion_02:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      InDigestion_in_1: PRIDE Toolsuite_01/PRIDE Toolsuite_out_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  MR-MSPOLYGRAPH_03:
+    run: add-path-to-the-implementation/MR-MSPOLYGRAPH.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MR-MSPOLYGRAPH_in_1: input_1
+      MR-MSPOLYGRAPH_in_2: InDigestion_02/InDigestion_out_3
+    out: [MR-MSPOLYGRAPH_out_1, MR-MSPOLYGRAPH_out_2]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Percolator_in_1: input_2
+    out: [Percolator_out_1]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      PeptideProphet_in_1: Comet_02/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      Quant_in_1: MR-MSPOLYGRAPH_03/MR-MSPOLYGRAPH_out_2
+      Quant_in_2: Percolator_04/Percolator_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

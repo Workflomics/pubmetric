@@ -4,51 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_164
-doc: A workflow including the tool(s) msConvert, XTandem, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) InDigestion, MR-MSPOLYGRAPH, make_random, PEAKS DB, PEAKS Q.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3827" # proBED
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_2310" # FASTA-HTML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      InDigestion_in_1: input_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  MR-MSPOLYGRAPH_02:
+    run: add-path-to-the-implementation/MR-MSPOLYGRAPH.cwl 
     in:
-      XTandem_in_1: msConvert_01/msConvert_out_1
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MR-MSPOLYGRAPH_in_1: input_2
+      MR-MSPOLYGRAPH_in_2: InDigestion_01/InDigestion_out_3
+    out: [MR-MSPOLYGRAPH_out_1, MR-MSPOLYGRAPH_out_2]
+  make_random_03:
+    run: add-path-to-the-implementation/make_random.cwl 
     in:
-      mzRecal_in_1: msConvert_01/msConvert_out_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      make_random_in_1: input_3
+    out: [make_random_out_1]
+  PEAKS DB_04:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PEAKS DB_in_1: MR-MSPOLYGRAPH_02/MR-MSPOLYGRAPH_out_2
+      PEAKS DB_in_2: make_random_03/make_random_out_1
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  PEAKS Q_05:
+    run: add-path-to-the-implementation/PEAKS Q.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      PEAKS Q_in_1: PEAKS DB_04/PEAKS DB_out_1
+    out: [PEAKS Q_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_2311" # EMBL-HTML
+    outputSource: PEAKS Q_05/PEAKS Q_out_1

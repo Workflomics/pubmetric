@@ -4,58 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1203
-doc: A workflow including the tool(s) Comet, msConvert, PeptideProphet, mzRecal, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) ProSight Lite, MZmine, Graph Extract, OpenSWATH, Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3654" # mzXML
+    format: "http://edamontology.org/format_1963" # UniProtKB format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3244" # mzML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3609" # qualillumina
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  ProSight Lite_01:
+    run: add-path-to-the-implementation/ProSight Lite.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      ProSight Lite_in_1: input_2
+      ProSight Lite_in_2: input_3
+      ProSight Lite_in_3: input_1
+    out: [ProSight Lite_out_1, ProSight Lite_out_2]
+  MZmine_02:
+    run: add-path-to-the-implementation/MZmine.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MZmine_in_1: input_2
+    out: [MZmine_out_1, MZmine_out_2, MZmine_out_3]
+  Graph Extract_03:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      Graph Extract_in_1: MZmine_02/MZmine_out_3
+    out: [Graph Extract_out_1]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      mzRecal_in_1: msConvert_02/msConvert_out_1
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenSWATH_in_1: ProSight Lite_01/ProSight Lite_out_1
+      OpenSWATH_in_2: Graph Extract_03/Graph Extract_out_1
+    out: [OpenSWATH_out_1]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_04/mzRecal_out_1
-    out: [StPeter_out_1]
+      Mascot Server_in_1: OpenSWATH_04/OpenSWATH_out_1
+      Mascot Server_in_2: input_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

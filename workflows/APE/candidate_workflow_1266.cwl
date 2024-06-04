@@ -4,58 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1265
-doc: A workflow including the tool(s) idconvert, mzRecal, PeptideProphet, mzRecal, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) PRIDE Toolsuite, esimsa, dig, PEAKS DB, PEAKS Q.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3244" # mzML
   input_2:
     type: File
     format: "http://edamontology.org/format_3244" # mzML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_2001" # EMBOSS simple format
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+  PRIDE Toolsuite_01:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      PRIDE Toolsuite_in_1: input_2
+    out: [PRIDE Toolsuite_out_1]
+  esimsa_02:
+    run: add-path-to-the-implementation/esimsa.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      esimsa_in_1: PRIDE Toolsuite_01/PRIDE Toolsuite_out_1
+      esimsa_in_2: input_3
+      esimsa_in_3: input_3
+    out: [esimsa_out_1, esimsa_out_2, esimsa_out_3]
+  dig_03:
+    run: add-path-to-the-implementation/dig.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: mzRecal_02/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      dig_in_1: esimsa_02/esimsa_out_3
+    out: [dig_out_1]
+  PEAKS DB_04:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PEAKS DB_in_1: input_1
+      PEAKS DB_in_2: dig_03/dig_out_1
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  PEAKS Q_05:
+    run: add-path-to-the-implementation/PEAKS Q.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: input_1
-      StPeter_in_3: mzRecal_04/mzRecal_out_1
-    out: [StPeter_out_1]
+      PEAKS Q_in_1: PEAKS DB_04/PEAKS DB_out_1
+    out: [PEAKS Q_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3556" # MHTML
+    outputSource: PEAKS Q_05/PEAKS Q_out_1

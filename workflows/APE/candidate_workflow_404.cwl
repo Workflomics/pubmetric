@@ -4,7 +4,7 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_403
-doc: A workflow including the tool(s) XTandem, msConvert, idconvert, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) PChopper, mres2x, EncyclopeDIA, OpenMS, OpenSWATH.
 
 inputs:
   input_1:
@@ -12,48 +12,41 @@ inputs:
     format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3711" # X!Tandem XML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3713" # Mascot .dat file
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  PChopper_01:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      PChopper_in_1: input_1
+    out: [PChopper_out_1]
+  mres2x_02:
+    run: add-path-to-the-implementation/mres2x.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      mres2x_in_1: input_3
+    out: [mres2x_out_1]
+  EncyclopeDIA_03:
+    run: add-path-to-the-implementation/EncyclopeDIA.cwl 
     in:
-      idconvert_in_1: XTandem_01/XTandem_out_1
-    out: [idconvert_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      EncyclopeDIA_in_1: input_2
+      EncyclopeDIA_in_2: input_1
+    out: [EncyclopeDIA_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      mzRecal_in_1: msConvert_02/msConvert_out_1
-      mzRecal_in_2: idconvert_03/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: mres2x_02/mres2x_out_1
+      OpenMS_in_2: PChopper_01/PChopper_out_1
+      OpenMS_in_3: EncyclopeDIA_03/EncyclopeDIA_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      OpenSWATH_in_1: OpenMS_04/OpenMS_out_2
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenSWATH_05/OpenSWATH_out_1

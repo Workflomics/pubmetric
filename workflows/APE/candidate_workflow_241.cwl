@@ -4,56 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_240
-doc: A workflow including the tool(s) Comet, idconvert, mzRecal, idconvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) Jtraml, massXpert, XTandem Parser, XTandemPipeline, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1628" # ABI
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3161" # MAGE-ML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3711" # X!Tandem XML
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  Jtraml_01:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      Jtraml_in_1: input_1
+    out: [Jtraml_out_1]
+  massXpert_02:
+    run: add-path-to-the-implementation/massXpert.cwl 
     in:
-      idconvert_in_1: Comet_01/Comet_out_1
-    out: [idconvert_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      massXpert_in_1: input_2
+      massXpert_in_2: Jtraml_01/Jtraml_out_1
+    out: [massXpert_out_1, massXpert_out_2]
+  XTandem Parser_03:
+    run: add-path-to-the-implementation/XTandem Parser.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      XTandem Parser_in_1: input_3
+    out: [XTandem Parser_out_1, XTandem Parser_out_2]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      idconvert_in_1: Comet_01/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      XTandemPipeline_in_1: input_3
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: idconvert_04/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      OpenMS_in_1: XTandem Parser_03/XTandem Parser_out_2
+      OpenMS_in_2: massXpert_02/massXpert_out_2
+      OpenMS_in_3: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3655" # pepXML
+    outputSource: OpenMS_05/OpenMS_out_1

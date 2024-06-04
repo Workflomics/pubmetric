@@ -4,60 +4,52 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1573
-doc: A workflow including the tool(s) mzRecal, XTandem, PeptideProphet, ProteinProphet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) InDigestion, MassMatrix, OpenMS, DeconMSn, PeptideShaker.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3257" # Notation3
   input_3:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      InDigestion_in_1: input_2
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  MassMatrix_02:
+    run: add-path-to-the-implementation/MassMatrix.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MassMatrix_in_1: input_1
+      MassMatrix_in_2: InDigestion_01/InDigestion_out_3
+    out: [MassMatrix_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: input_3
+      OpenMS_in_3: MassMatrix_02/MassMatrix_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  DeconMSn_04:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      DeconMSn_in_1: input_1
+      DeconMSn_in_2: input_1
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  PeptideShaker_05:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_01/mzRecal_out_1
-    out: [StPeter_out_1]
+      PeptideShaker_in_1: input_3
+      PeptideShaker_in_2: OpenMS_03/OpenMS_out_1
+      PeptideShaker_in_3: DeconMSn_04/DeconMSn_out_1
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3579" # JPG
+    outputSource: PeptideShaker_05/PeptideShaker_out_1

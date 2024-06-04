@@ -4,7 +4,7 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_174
-doc: A workflow including the tool(s) XTandem, mzRecal, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) PChopper, InDigestion, EncyclopeDIA, Multi-Q, DIA-Umpire.
 
 inputs:
   input_1:
@@ -12,44 +12,42 @@ inputs:
     format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  PChopper_01:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      PChopper_in_1: input_1
+    out: [PChopper_out_1]
+  InDigestion_02:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      InDigestion_in_1: PChopper_01/PChopper_out_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  EncyclopeDIA_03:
+    run: add-path-to-the-implementation/EncyclopeDIA.cwl 
     in:
-      mzRecal_in_1: mzRecal_02/mzRecal_out_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      EncyclopeDIA_in_1: input_3
+      EncyclopeDIA_in_2: InDigestion_02/InDigestion_out_3
+    out: [EncyclopeDIA_out_1]
+  Multi-Q_04:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Multi-Q_in_1: input_2
+      Multi-Q_in_2: EncyclopeDIA_03/EncyclopeDIA_out_1
+    out: [Multi-Q_out_1]
+  DIA-Umpire_05:
+    run: add-path-to-the-implementation/DIA-Umpire.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      DIA-Umpire_in_1: input_2
+      DIA-Umpire_in_2: Multi-Q_04/Multi-Q_out_1
+      DIA-Umpire_in_3: input_1
+    out: [DIA-Umpire_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
+    outputSource: DIA-Umpire_05/DIA-Umpire_out_1

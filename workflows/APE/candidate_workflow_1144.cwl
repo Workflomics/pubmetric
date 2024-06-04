@@ -4,58 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1143
-doc: A workflow including the tool(s) Comet, msConvert, PeptideProphet, ProteinProphet, mzRecal, StPeter.
+doc: A workflow including the tool(s) ComPIL, PEAKS Q, CrosstalkDB, Graph Extract, Xtractor.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3009" # 2bit
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3709" # GCT/Res format
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3827" # proBED
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  ComPIL_01:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      Comet_in_1: input_3
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      ComPIL_in_1: input_3
+    out: [ComPIL_out_1]
+  PEAKS Q_02:
+    run: add-path-to-the-implementation/PEAKS Q.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PEAKS Q_in_1: ComPIL_01/ComPIL_out_1
+    out: [PEAKS Q_out_1]
+  CrosstalkDB_03:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      CrosstalkDB_in_1: PEAKS Q_02/PEAKS Q_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  Graph Extract_04:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  mzRecal_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      Graph Extract_in_1: CrosstalkDB_03/CrosstalkDB_out_2
+    out: [Graph Extract_out_1]
+  Xtractor_05:
+    run: add-path-to-the-implementation/Xtractor.cwl 
     in:
-      mzRecal_in_1: input_3
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_05/mzRecal_out_1
-    out: [StPeter_out_1]
+      Xtractor_in_1: input_2
+      Xtractor_in_2: Graph Extract_04/Graph Extract_out_1
+      Xtractor_in_3: input_3
+    out: [Xtractor_out_1, Xtractor_out_2, Xtractor_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3882" # PSF
+    outputSource: Xtractor_05/Xtractor_out_1

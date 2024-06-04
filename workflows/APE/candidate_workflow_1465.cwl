@@ -4,59 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1464
-doc: A workflow including the tool(s) mzRecal, XTandem, PeptideProphet, Comet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) XTandemPipeline, Multi-Q, CrosstalkDB, MSiReader, Xtractor.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3758" # SEQUEST .out file
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1644" # CHP
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  XTandemPipeline_01:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      XTandemPipeline_in_1: input_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Multi-Q_02:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Multi-Q_in_1: input_3
+      Multi-Q_in_2: XTandemPipeline_01/XTandemPipeline_out_1
+    out: [Multi-Q_out_1]
+  CrosstalkDB_03:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  Comet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      CrosstalkDB_in_1: Multi-Q_02/Multi-Q_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  MSiReader_04:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: CrosstalkDB_03/CrosstalkDB_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
+  Xtractor_05:
+    run: add-path-to-the-implementation/Xtractor.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: Comet_04/Comet_out_1
-      StPeter_in_3: mzRecal_01/mzRecal_out_1
-    out: [StPeter_out_1]
+      Xtractor_in_1: input_2
+      Xtractor_in_2: input_2
+      Xtractor_in_3: MSiReader_04/MSiReader_out_2
+    out: [Xtractor_out_1, Xtractor_out_2, Xtractor_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_1350" # MEME Dirichlet prior
+    outputSource: Xtractor_05/Xtractor_out_1

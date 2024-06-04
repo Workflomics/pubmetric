@@ -4,58 +4,46 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1221
-doc: A workflow including the tool(s) PeptideProphet, idconvert, mzRecal, Comet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) MaxQuant, CrosstalkDB, PRIDE Toolsuite, Percolator, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3010" # .nib
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3620" # xlsx
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3313" # BLC
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  MaxQuant_01:
+    run: add-path-to-the-implementation/MaxQuant.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      MaxQuant_in_1: input_2
+    out: [MaxQuant_out_1, MaxQuant_out_2]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      CrosstalkDB_in_1: MaxQuant_01/MaxQuant_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  PRIDE Toolsuite_03:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      mzRecal_in_1: input_3
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  Comet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PRIDE Toolsuite_in_1: CrosstalkDB_02/CrosstalkDB_out_3
+    out: [PRIDE Toolsuite_out_1]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      Comet_in_1: input_3
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Percolator_in_1: PRIDE Toolsuite_03/PRIDE Toolsuite_out_1
+    out: [Percolator_out_1]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: Comet_04/Comet_out_1
-      StPeter_in_3: mzRecal_03/mzRecal_out_1
-    out: [StPeter_out_1]
+      Libra_in_1: Percolator_04/Percolator_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    outputSource: Libra_05/Libra_out_1

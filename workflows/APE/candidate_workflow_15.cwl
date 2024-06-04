@@ -4,7 +4,7 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_14
-doc: A workflow including the tool(s) idconvert, PeptideProphet, ProteinProphet, protXml2IdList, gProfiler.
+doc: A workflow including the tool(s) PEAKS DB, PEAKS Q, msmsEDA, CrosstalkDB, ComplexBrowser.
 
 inputs:
   input_1:
@@ -12,41 +12,40 @@ inputs:
     format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3711" # X!Tandem XML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3653" # pkl
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  PEAKS DB_01:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PEAKS DB_in_1: input_3
+      PEAKS DB_in_2: input_1
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  PEAKS Q_02:
+    run: add-path-to-the-implementation/PEAKS Q.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PEAKS Q_in_1: PEAKS DB_01/PEAKS DB_out_1
+    out: [PEAKS Q_out_1]
+  msmsEDA_03:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      msmsEDA_in_1: input_2
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
+  CrosstalkDB_04:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_03/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
-  gProfiler_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/gProfiler/gProfiler.cwl
+      CrosstalkDB_in_1: PEAKS Q_02/PEAKS Q_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  ComplexBrowser_05:
+    run: add-path-to-the-implementation/ComplexBrowser.cwl 
     in:
-      gProfiler_in_1: protXml2IdList_04/protXml2IdList_out_1
-    out: [gProfiler_out_1]
+      ComplexBrowser_in_1: msmsEDA_03/msmsEDA_out_3
+      ComplexBrowser_in_2: CrosstalkDB_04/CrosstalkDB_out_4
+    out: [ComplexBrowser_out_1, ComplexBrowser_out_2, ComplexBrowser_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3774" # BioJSON (Jalview)
-    outputSource: gProfiler_05/gProfiler_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: ComplexBrowser_05/ComplexBrowser_out_1

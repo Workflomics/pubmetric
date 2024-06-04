@@ -4,56 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1707
-doc: A workflow including the tool(s) idconvert, mzRecal, mzRecal, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) InfernoRDN, CrosstalkDB, Percolator, Multi-Q, ComplexBrowser.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3758" # SEQUEST .out file
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3157" # EBI Application Result XML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  InfernoRDN_01:
+    run: add-path-to-the-implementation/InfernoRDN.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      InfernoRDN_in_1: input_1
+    out: [InfernoRDN_out_1, InfernoRDN_out_2]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      CrosstalkDB_in_1: InfernoRDN_01/InfernoRDN_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  Percolator_03:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      mzRecal_in_1: mzRecal_02/mzRecal_out_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Percolator_in_1: input_2
+    out: [Percolator_out_1]
+  Multi-Q_04:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Multi-Q_in_1: input_3
+      Multi-Q_in_2: Percolator_03/Percolator_out_1
+    out: [Multi-Q_out_1]
+  ComplexBrowser_05:
+    run: add-path-to-the-implementation/ComplexBrowser.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
-    in:
-      protXml2IdList_in_1: ProteinProphet_05/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      ComplexBrowser_in_1: Multi-Q_04/Multi-Q_out_1
+      ComplexBrowser_in_2: CrosstalkDB_02/CrosstalkDB_out_4
+    out: [ComplexBrowser_out_1, ComplexBrowser_out_2, ComplexBrowser_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: protXml2IdList_06/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: ComplexBrowser_05/ComplexBrowser_out_1

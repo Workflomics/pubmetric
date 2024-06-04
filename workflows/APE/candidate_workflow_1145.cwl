@@ -4,57 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1144
-doc: A workflow including the tool(s) mzRecal, idconvert, PeptideProphet, ProteinProphet, idconvert, StPeter.
+doc: A workflow including the tool(s) PRIDE Toolsuite, massXpert, massXpert, MyriMatch, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3834" # mzData
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  PRIDE Toolsuite_01:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      PRIDE Toolsuite_in_1: input_1
+    out: [PRIDE Toolsuite_out_1]
+  massXpert_02:
+    run: add-path-to-the-implementation/massXpert.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      massXpert_in_1: input_1
+      massXpert_in_2: PRIDE Toolsuite_01/PRIDE Toolsuite_out_1
+    out: [massXpert_out_1, massXpert_out_2]
+  massXpert_03:
+    run: add-path-to-the-implementation/massXpert.cwl 
     in:
-      PeptideProphet_in_1: idconvert_02/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      massXpert_in_1: massXpert_02/massXpert_out_1
+      massXpert_in_2: massXpert_02/massXpert_out_2
+    out: [massXpert_out_1, massXpert_out_2]
+  MyriMatch_04:
+    run: add-path-to-the-implementation/MyriMatch.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  idconvert_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      MyriMatch_in_1: input_3
+      MyriMatch_in_2: input_2
+    out: [MyriMatch_out_1]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: idconvert_05/idconvert_out_1
-      StPeter_in_3: mzRecal_01/mzRecal_out_1
-    out: [StPeter_out_1]
+      OpenMS_in_1: input_3
+      OpenMS_in_2: massXpert_03/massXpert_out_2
+      OpenMS_in_3: MyriMatch_04/MyriMatch_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: OpenMS_05/OpenMS_out_1

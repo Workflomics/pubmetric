@@ -4,53 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_126
-doc: A workflow including the tool(s) idconvert, PeptideProphet, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) MSD File Reader, OpenSWATH, Mascot Server, esimsa2D, ICPLQuant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3888" # AMBER frcmod
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1996" # pair
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  MSD File Reader_01:
+    run: add-path-to-the-implementation/MSD File Reader.cwl 
+    in: []
+    out: [MSD File Reader_out_1]
+  OpenSWATH_02:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenSWATH_in_1: input_3
+      OpenSWATH_in_2: MSD File Reader_01/MSD File Reader_out_1
+    out: [OpenSWATH_out_1]
+  Mascot Server_03:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Mascot Server_in_1: input_3
+      Mascot Server_in_2: MSD File Reader_01/MSD File Reader_out_1
+    out: [Mascot Server_out_1]
+  esimsa2D_04:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      esimsa2D_in_1: input_1
+      esimsa2D_in_2: MSD File Reader_01/MSD File Reader_out_1
+      esimsa2D_in_3: MSD File Reader_01/MSD File Reader_out_1
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  ICPLQuant_05:
+    run: add-path-to-the-implementation/ICPLQuant.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_02/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      ICPLQuant_in_1: OpenSWATH_02/OpenSWATH_out_1
+      ICPLQuant_in_2: esimsa2D_04/esimsa2D_out_2
+      ICPLQuant_in_3: Mascot Server_03/Mascot Server_out_1
+    out: [ICPLQuant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: ICPLQuant_05/ICPLQuant_out_1

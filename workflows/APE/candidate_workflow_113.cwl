@@ -4,50 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_112
-doc: A workflow including the tool(s) msConvert, Comet, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) InfernoRDN, CrosstalkDB, PeptideProphet, Multi-Q, ComplexBrowser.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3654" # mzXML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3556" # MHTML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3752" # CSV
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  InfernoRDN_01:
+    run: add-path-to-the-implementation/InfernoRDN.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      InfernoRDN_in_1: input_3
+    out: [InfernoRDN_out_1, InfernoRDN_out_2]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      Comet_in_1: msConvert_01/msConvert_out_1
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
+      CrosstalkDB_in_1: InfernoRDN_01/InfernoRDN_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
   PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      PeptideProphet_in_1: Comet_02/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PeptideProphet_in_1: input_2
+    out: [PeptideProphet_out_1]
+  Multi-Q_04:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      Multi-Q_in_1: input_1
+      Multi-Q_in_2: PeptideProphet_03/PeptideProphet_out_1
+    out: [Multi-Q_out_1]
+  ComplexBrowser_05:
+    run: add-path-to-the-implementation/ComplexBrowser.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      ComplexBrowser_in_1: Multi-Q_04/Multi-Q_out_1
+      ComplexBrowser_in_2: CrosstalkDB_02/CrosstalkDB_out_4
+    out: [ComplexBrowser_out_1, ComplexBrowser_out_2, ComplexBrowser_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
-    outputSource: protXml2IdList_05/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: ComplexBrowser_05/ComplexBrowser_out_1

@@ -4,58 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_415
-doc: A workflow including the tool(s) PeptideProphet, idconvert, mzRecal, Comet, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) DeconMSn, msmsEDA, MSiReader, ComPIL, IsobariQ.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3578" # IDAT
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3712" # Thermo RAW
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  DeconMSn_01:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      DeconMSn_in_1: input_3
+      DeconMSn_in_2: input_3
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  msmsEDA_02:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      idconvert_in_1: PeptideProphet_01/PeptideProphet_out_1
-    out: [idconvert_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      msmsEDA_in_1: DeconMSn_01/DeconMSn_out_3
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  Comet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      MSiReader_in_1: input_2
+      MSiReader_in_2: msmsEDA_02/msmsEDA_out_3
+    out: [MSiReader_out_1, MSiReader_out_2]
+  ComPIL_04:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ComPIL_in_1: MSiReader_03/MSiReader_out_2
+    out: [ComPIL_out_1]
+  IsobariQ_05:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      PeptideProphet_in_1: Comet_04/Comet_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      IsobariQ_in_1: ComPIL_04/ComPIL_out_1
+    out: [IsobariQ_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3311" # RNAML
+    outputSource: IsobariQ_05/IsobariQ_out_1

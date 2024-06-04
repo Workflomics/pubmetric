@@ -4,57 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1166
-doc: A workflow including the tool(s) mzRecal, idconvert, idconvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) PEAKS DB, OpenMS, Pep3D, Graph Extract, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  PEAKS DB_01:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      PEAKS DB_in_1: input_1
+      PEAKS DB_in_2: input_3
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: input_3
+      OpenMS_in_3: PEAKS DB_01/PEAKS DB_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  Pep3D_03:
+    run: add-path-to-the-implementation/Pep3D.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Pep3D_in_1: input_1
+      Pep3D_in_2: OpenMS_02/OpenMS_out_1
+    out: [Pep3D_out_1, Pep3D_out_2]
+  Graph Extract_04:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      PeptideProphet_in_1: idconvert_03/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Graph Extract_in_1: Pep3D_03/Pep3D_out_1
+    out: [Graph Extract_out_1]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: idconvert_02/idconvert_out_1
-      StPeter_in_3: mzRecal_01/mzRecal_out_1
-    out: [StPeter_out_1]
+      MSiReader_in_1: input_2
+      MSiReader_in_2: Graph Extract_04/Graph Extract_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3592" # BMP
+    outputSource: MSiReader_05/MSiReader_out_1

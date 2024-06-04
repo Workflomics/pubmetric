@@ -4,50 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_20
-doc: A workflow including the tool(s) msConvert, Comet, idconvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) CrosstalkDB, CrosstalkDB, OpenSWATH, MyriMatch, Multi-Q.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3654" # mzXML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3710" # WIFF format
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3752" # CSV
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  CrosstalkDB_01:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      CrosstalkDB_in_1: input_3
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      CrosstalkDB_in_1: CrosstalkDB_01/CrosstalkDB_out_3
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  OpenSWATH_03:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      idconvert_in_1: Comet_02/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenSWATH_in_1: CrosstalkDB_02/CrosstalkDB_out_3
+    out: [OpenSWATH_out_1]
+  MyriMatch_04:
+    run: add-path-to-the-implementation/MyriMatch.cwl 
     in:
-      PeptideProphet_in_1: idconvert_03/idconvert_out_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MyriMatch_in_1: input_2
+      MyriMatch_in_2: input_1
+    out: [MyriMatch_out_1]
+  Multi-Q_05:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      Multi-Q_in_1: OpenSWATH_03/OpenSWATH_out_1
+      Multi-Q_in_2: MyriMatch_04/MyriMatch_out_1
+    out: [Multi-Q_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3157" # EBI Application Result XML
+    outputSource: Multi-Q_05/Multi-Q_out_1

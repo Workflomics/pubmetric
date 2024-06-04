@@ -4,7 +4,7 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1725
-doc: A workflow including the tool(s) msConvert, PeptideProphet, msConvert, idconvert, ProteinProphet, mzRecal, StPeter.
+doc: A workflow including the tool(s) MSD File Reader, CPM, OpenSWATH, Mascot Server, PeptideShaker.
 
 inputs:
   input_1:
@@ -12,54 +12,42 @@ inputs:
     format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3651" # MGF
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  MSD File Reader_01:
+    run: add-path-to-the-implementation/MSD File Reader.cwl 
+    in: []
+    out: [MSD File Reader_out_1]
+  CPM_02:
+    run: add-path-to-the-implementation/CPM.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      CPM_in_1: MSD File Reader_01/MSD File Reader_out_1
+      CPM_in_2: MSD File Reader_01/MSD File Reader_out_1
+    out: [CPM_out_1, CPM_out_2]
+  OpenSWATH_03:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: input_2
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      OpenSWATH_in_1: input_2
+      OpenSWATH_in_2: CPM_02/CPM_out_1
+    out: [OpenSWATH_out_1]
+  Mascot Server_04:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      Mascot Server_in_1: OpenSWATH_03/OpenSWATH_out_1
+      Mascot Server_in_2: input_3
+    out: [Mascot Server_out_1]
+  PeptideShaker_05:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      idconvert_in_1: input_2
-    out: [idconvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  mzRecal_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
-    in:
-      mzRecal_in_1: msConvert_03/msConvert_out_1
-      mzRecal_in_2: idconvert_04/idconvert_out_1
-    out: [mzRecal_out_1]
-  StPeter_07:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: input_2
-      StPeter_in_3: mzRecal_06/mzRecal_out_1
-    out: [StPeter_out_1]
+      PeptideShaker_in_1: input_1
+      PeptideShaker_in_2: Mascot Server_04/Mascot Server_out_1
+      PeptideShaker_in_3: input_3
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_07/StPeter_out_1
+    format: "http://edamontology.org/format_1432" # Phylip character frequencies format
+    outputSource: PeptideShaker_05/PeptideShaker_out_1

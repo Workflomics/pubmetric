@@ -4,52 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_143
-doc: A workflow including the tool(s) mzRecal, idconvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) XTandemPipeline, Multi-Q, CrosstalkDB, CrosstalkDB, DIA-Umpire.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3713" # Mascot .dat file
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  XTandemPipeline_01:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      XTandemPipeline_in_1: input_3
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Multi-Q_02:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Multi-Q_in_1: input_2
+      Multi-Q_in_2: XTandemPipeline_01/XTandemPipeline_out_1
+    out: [Multi-Q_out_1]
+  CrosstalkDB_03:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      PeptideProphet_in_1: idconvert_02/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      CrosstalkDB_in_1: Multi-Q_02/Multi-Q_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  CrosstalkDB_04:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      CrosstalkDB_in_1: CrosstalkDB_03/CrosstalkDB_out_3
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  DIA-Umpire_05:
+    run: add-path-to-the-implementation/DIA-Umpire.cwl 
     in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: idconvert_02/idconvert_out_1
-      StPeter_in_3: mzRecal_01/mzRecal_out_1
-    out: [StPeter_out_1]
+      DIA-Umpire_in_1: input_2
+      DIA-Umpire_in_2: CrosstalkDB_04/CrosstalkDB_out_3
+      DIA-Umpire_in_3: input_1
+    out: [DIA-Umpire_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
+    outputSource: DIA-Umpire_05/DIA-Umpire_out_1

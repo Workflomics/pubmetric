@@ -4,59 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1560
-doc: A workflow including the tool(s) XTandem, PeptideProphet, mzRecal, mzRecal, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) esimsa, msmsEDA, Graph Extract, MS-Fit, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3652" # dta
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1999" # scores format
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3877" # XYZ
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  esimsa_01:
+    run: add-path-to-the-implementation/esimsa.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      esimsa_in_1: input_3
+      esimsa_in_2: input_2
+      esimsa_in_3: input_2
+    out: [esimsa_out_1, esimsa_out_2, esimsa_out_3]
+  msmsEDA_02:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      msmsEDA_in_1: esimsa_01/esimsa_out_1
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
+  Graph Extract_03:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      Graph Extract_in_1: msmsEDA_02/msmsEDA_out_3
+    out: [Graph Extract_out_1]
+  MS-Fit_04:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      mzRecal_in_1: mzRecal_03/mzRecal_out_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MS-Fit_in_1: Graph Extract_03/Graph Extract_out_1
+    out: [MS-Fit_out_1]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_02/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_04/mzRecal_out_1
-    out: [StPeter_out_1]
+      Quant_in_1: input_1
+      Quant_in_2: MS-Fit_04/MS-Fit_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

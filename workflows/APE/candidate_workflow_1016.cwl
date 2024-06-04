@@ -4,58 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1015
-doc: A workflow including the tool(s) msConvert, PeptideProphet, ProteinProphet, msConvert, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) InDigestion, MyriMatch, OpenMS, MSiReader, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3248" # mzQuantML
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3882" # PSF
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      InDigestion_in_1: input_2
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  MyriMatch_02:
+    run: add-path-to-the-implementation/MyriMatch.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MyriMatch_in_1: input_3
+      MyriMatch_in_2: InDigestion_01/InDigestion_out_3
+    out: [MyriMatch_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  msConvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_1
+      OpenMS_in_3: MyriMatch_02/MyriMatch_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  MSiReader_04:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: OpenMS_03/OpenMS_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: msConvert_04/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: msConvert_01/msConvert_out_1
-    out: [StPeter_out_1]
+      MSiReader_in_1: input_3
+      MSiReader_in_2: MSiReader_04/MSiReader_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3604" # SVG
+    outputSource: MSiReader_05/MSiReader_out_1

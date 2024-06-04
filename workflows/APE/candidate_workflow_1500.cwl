@@ -4,58 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1477
-doc: A workflow including the tool(s) XTandem, Comet, msConvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) make_random, PeptideProphet, OpenMS, RelEx, PECA.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3654" # mzXML
+    format: "http://edamontology.org/format_1954" # Pearson format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_2311" # EMBL-HTML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3311" # RNAML
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  make_random_01:
+    run: add-path-to-the-implementation/make_random.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      make_random_in_1: input_1
+    out: [make_random_out_1]
+  PeptideProphet_02:
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      PeptideProphet_in_1: input_2
+    out: [PeptideProphet_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: make_random_01/make_random_out_1
+      OpenMS_in_3: PeptideProphet_02/PeptideProphet_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  RelEx_04:
+    run: add-path-to-the-implementation/RelEx.cwl 
     in:
-      PeptideProphet_in_1: Comet_02/Comet_out_1
-      PeptideProphet_in_2: msConvert_03/msConvert_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      RelEx_in_1: OpenMS_03/OpenMS_out_1
+    out: [RelEx_out_1]
+  PECA_05:
+    run: add-path-to-the-implementation/PECA.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: XTandem_01/XTandem_out_1
-      StPeter_in_3: msConvert_03/msConvert_out_1
-    out: [StPeter_out_1]
+      PECA_in_1: RelEx_04/RelEx_out_1
+    out: [PECA_out_1, PECA_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3626" # MAT
+    outputSource: PECA_05/PECA_out_1

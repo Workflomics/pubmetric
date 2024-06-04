@@ -4,57 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_475
-doc: A workflow including the tool(s) mzRecal, Comet, idconvert, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) Jtraml, DECIPHER, MS-Fit, OpenMS, OpenSWATH.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3652" # dta
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1930" # FASTQ
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3257" # Notation3
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  Jtraml_01:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      Jtraml_in_1: input_3
+    out: [Jtraml_out_1]
+  DECIPHER_02:
+    run: add-path-to-the-implementation/DECIPHER.cwl 
     in:
-      Comet_in_1: mzRecal_01/mzRecal_out_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      DECIPHER_in_1: Jtraml_01/Jtraml_out_1
+      DECIPHER_in_2: input_2
+    out: [DECIPHER_out_1, DECIPHER_out_2]
+  MS-Fit_03:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      idconvert_in_1: Comet_02/Comet_out_2
-    out: [idconvert_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MS-Fit_in_1: input_3
+    out: [MS-Fit_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: DECIPHER_02/DECIPHER_out_1
+      OpenMS_in_3: MS-Fit_03/MS-Fit_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: idconvert_03/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      OpenSWATH_in_1: OpenMS_04/OpenMS_out_2
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenSWATH_05/OpenSWATH_out_1

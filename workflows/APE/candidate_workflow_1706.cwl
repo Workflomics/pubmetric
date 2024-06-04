@@ -4,56 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1705
-doc: A workflow including the tool(s) idconvert, XTandem, mzRecal, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) msmsEDA, MSiReader, ComPIL, isobar, pepXML2Excel.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3913" # Loom
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3651" # MGF
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3682" # imzML metadata file
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+  msmsEDA_01:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      msmsEDA_in_1: input_2
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
+  MSiReader_02:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: msmsEDA_01/msmsEDA_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
+  ComPIL_03:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ComPIL_in_1: MSiReader_02/MSiReader_out_2
+    out: [ComPIL_out_1]
+  isobar_04:
+    run: add-path-to-the-implementation/isobar.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      isobar_in_1: input_2
+      isobar_in_2: ComPIL_03/ComPIL_out_1
+    out: [isobar_out_1]
+  pepXML2Excel_05:
+    run: add-path-to-the-implementation/pepXML2Excel.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
-    in:
-      protXml2IdList_in_1: ProteinProphet_05/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      pepXML2Excel_in_1: isobar_04/isobar_out_1
+    out: [pepXML2Excel_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: protXml2IdList_06/protXml2IdList_out_1
+    format: "http://edamontology.org/format_1928" # Staden experiment format
+    outputSource: pepXML2Excel_05/pepXML2Excel_out_1

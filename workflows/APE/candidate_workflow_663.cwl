@@ -4,7 +4,7 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_662
-doc: A workflow including the tool(s) Comet, mzRecal, PeptideProphet, mzRecal, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) libmgf, PeptideShaker, GenePattern, Percolator, OpenMS.
 
 inputs:
   input_1:
@@ -12,51 +12,42 @@ inputs:
     format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3247" # mzIdentML
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  libmgf_01:
+    run: add-path-to-the-implementation/libmgf.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      libmgf_in_1: input_2
+    out: [libmgf_out_1]
+  PeptideShaker_02:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PeptideShaker_in_1: input_1
+      PeptideShaker_in_2: input_3
+      PeptideShaker_in_3: libmgf_01/libmgf_out_1
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
+  GenePattern_03:
+    run: add-path-to-the-implementation/GenePattern.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: mzRecal_02/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      GenePattern_in_1: PeptideShaker_02/PeptideShaker_out_4
+    out: [GenePattern_out_1]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Percolator_in_1: input_3
+    out: [Percolator_out_1]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: Comet_01/Comet_out_1
-      StPeter_in_3: mzRecal_04/mzRecal_out_1
-    out: [StPeter_out_1]
+      OpenMS_in_1: input_2
+      OpenMS_in_2: GenePattern_03/GenePattern_out_1
+      OpenMS_in_3: Percolator_04/Percolator_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3683" # qcML
+    outputSource: OpenMS_05/OpenMS_out_1

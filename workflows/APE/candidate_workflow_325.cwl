@@ -4,58 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_324
-doc: A workflow including the tool(s) Comet, mzRecal, Comet, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) XTandemPipeline, OpenMS, ASAPRatio, OpenSWATH, ExMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3758" # SEQUEST .out file
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  XTandemPipeline_01:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      XTandemPipeline_in_1: input_3
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  Comet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      OpenMS_in_1: input_2
+      OpenMS_in_2: input_1
+      OpenMS_in_3: XTandemPipeline_01/XTandemPipeline_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  ASAPRatio_03:
+    run: add-path-to-the-implementation/ASAPRatio.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      ASAPRatio_in_1: OpenMS_02/OpenMS_out_1
+    out: [ASAPRatio_out_1, ASAPRatio_out_2]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      mzRecal_in_1: mzRecal_02/mzRecal_out_1
-      mzRecal_in_2: Comet_03/Comet_out_2
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenSWATH_in_1: ASAPRatio_03/ASAPRatio_out_2
+    out: [OpenSWATH_out_1]
+  ExMS_05:
+    run: add-path-to-the-implementation/ExMS.cwl 
     in:
-      PeptideProphet_in_1: Comet_03/Comet_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      ExMS_in_1: XTandemPipeline_01/XTandemPipeline_out_1
+      ExMS_in_2: OpenSWATH_04/OpenSWATH_out_1
+    out: [ExMS_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: ExMS_05/ExMS_out_1

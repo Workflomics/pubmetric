@@ -4,52 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_7
-doc: A workflow including the tool(s) idconvert, Comet, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) PRIDE Toolsuite, OpenSWATH, esimsa, MS-Fit, Multi-Q.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3702" # MSF
   input_2:
     type: File
     format: "http://edamontology.org/format_3244" # mzML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1644" # CHP
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  PRIDE Toolsuite_01:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PRIDE Toolsuite_in_1: input_2
+    out: [PRIDE Toolsuite_out_1]
+  OpenSWATH_02:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenSWATH_in_1: input_1
+    out: [OpenSWATH_out_1]
+  esimsa_03:
+    run: add-path-to-the-implementation/esimsa.cwl 
     in:
-      PeptideProphet_in_1: Comet_02/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      esimsa_in_1: input_3
+      esimsa_in_2: PRIDE Toolsuite_01/PRIDE Toolsuite_out_1
+      esimsa_in_3: PRIDE Toolsuite_01/PRIDE Toolsuite_out_1
+    out: [esimsa_out_1, esimsa_out_2, esimsa_out_3]
+  MS-Fit_04:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      MS-Fit_in_1: esimsa_03/esimsa_out_1
+    out: [MS-Fit_out_1]
+  Multi-Q_05:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: idconvert_01/idconvert_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      Multi-Q_in_1: OpenSWATH_02/OpenSWATH_out_1
+      Multi-Q_in_2: MS-Fit_04/MS-Fit_out_1
+    out: [Multi-Q_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3752" # CSV
+    outputSource: Multi-Q_05/Multi-Q_out_1

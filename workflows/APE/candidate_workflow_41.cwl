@@ -4,52 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_40
-doc: A workflow including the tool(s) Comet, PeptideProphet, idconvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) dig, CrosstalkDB, Peppy, OpenMS, ComplexBrowser.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3781" # PubAnnotation format
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3651" # MGF
   input_3:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  dig_01:
+    run: add-path-to-the-implementation/dig.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      dig_in_1: input_1
+    out: [dig_out_1]
+  CrosstalkDB_02:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      CrosstalkDB_in_1: dig_01/dig_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  Peppy_03:
+    run: add-path-to-the-implementation/Peppy.cwl 
     in:
-      idconvert_in_1: Comet_01/Comet_out_2
-    out: [idconvert_out_1]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Peppy_in_1: input_2
+      Peppy_in_2: input_1
+      Peppy_in_3: input_3
+    out: [Peppy_out_1, Peppy_out_2]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      OpenMS_in_1: input_2
+      OpenMS_in_2: input_1
+      OpenMS_in_3: Peppy_03/Peppy_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  ComplexBrowser_05:
+    run: add-path-to-the-implementation/ComplexBrowser.cwl 
     in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: idconvert_03/idconvert_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      ComplexBrowser_in_1: OpenMS_04/OpenMS_out_2
+      ComplexBrowser_in_2: CrosstalkDB_02/CrosstalkDB_out_4
+    out: [ComplexBrowser_out_1, ComplexBrowser_out_2, ComplexBrowser_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: ComplexBrowser_05/ComplexBrowser_out_1
