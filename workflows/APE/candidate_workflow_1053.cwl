@@ -4,58 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1052
-doc: A workflow including the tool(s) PeptideProphet, Comet, mzRecal, idconvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) PECAN (PEptide-Centric Analysis), Mascot Server, XTandem Parser, msmsEDA, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3682" # imzML metadata file
   input_2:
     type: File
     format: "http://edamontology.org/format_3244" # mzML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  PECAN (PEptide-Centric Analysis)_01:
+    run: add-path-to-the-implementation/PECAN (PEptide-Centric Analysis).cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PECAN (PEptide-Centric Analysis)_in_1: input_2
+      PECAN (PEptide-Centric Analysis)_in_2: input_3
+    out: [PECAN (PEptide-Centric Analysis)_out_1, PECAN (PEptide-Centric Analysis)_out_2]
+  Mascot Server_02:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      Mascot Server_in_1: input_1
+      Mascot Server_in_2: PECAN (PEptide-Centric Analysis)_01/PECAN (PEptide-Centric Analysis)_out_2
+    out: [Mascot Server_out_1]
+  XTandem Parser_03:
+    run: add-path-to-the-implementation/XTandem Parser.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_02/Comet_out_2
-    out: [mzRecal_out_1]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      XTandem Parser_in_1: Mascot Server_02/Mascot Server_out_1
+    out: [XTandem Parser_out_1, XTandem Parser_out_2]
+  msmsEDA_04:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      idconvert_in_1: Comet_02/Comet_out_2
-    out: [idconvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      msmsEDA_in_1: XTandem Parser_03/XTandem Parser_out_2
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: idconvert_04/idconvert_out_1
-      StPeter_in_3: mzRecal_03/mzRecal_out_1
-    out: [StPeter_out_1]
+      MSiReader_in_1: input_1
+      MSiReader_in_2: msmsEDA_04/msmsEDA_out_3
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3620" # xlsx
+    outputSource: MSiReader_05/MSiReader_out_1

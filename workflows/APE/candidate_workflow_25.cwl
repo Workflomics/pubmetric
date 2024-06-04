@@ -4,50 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_24
-doc: A workflow including the tool(s) msConvert, msConvert, XTandem, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) Unipept CLI, Unipept CLI, PRIDE Toolsuite, XTandemPipeline, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1972" # NCBI format
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3653" # pkl
+    format: "http://edamontology.org/format_1964" # plain text format (unformatted)
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  Unipept CLI_01:
+    run: add-path-to-the-implementation/Unipept CLI.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      Unipept CLI_in_1: input_3
+      Unipept CLI_in_2: input_1
+    out: [Unipept CLI_out_1, Unipept CLI_out_2]
+  Unipept CLI_02:
+    run: add-path-to-the-implementation/Unipept CLI.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      Unipept CLI_in_1: input_3
+      Unipept CLI_in_2: Unipept CLI_01/Unipept CLI_out_2
+    out: [Unipept CLI_out_1, Unipept CLI_out_2]
+  PRIDE Toolsuite_03:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      XTandem_in_1: msConvert_01/msConvert_out_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PRIDE Toolsuite_in_1: Unipept CLI_02/Unipept CLI_out_1
+    out: [PRIDE Toolsuite_out_1]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      XTandemPipeline_in_1: PRIDE Toolsuite_03/PRIDE Toolsuite_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      Quant_in_1: input_2
+      Quant_in_2: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

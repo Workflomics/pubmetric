@@ -4,58 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1232
-doc: A workflow including the tool(s) idconvert, XTandem, mzRecal, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) InDigestion, EncyclopeDIA, Multi-Q, OpenChrom, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1734" # PubMed citation
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      InDigestion_in_1: input_3
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  EncyclopeDIA_02:
+    run: add-path-to-the-implementation/EncyclopeDIA.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      EncyclopeDIA_in_1: input_1
+      EncyclopeDIA_in_2: InDigestion_01/InDigestion_out_3
+    out: [EncyclopeDIA_out_1]
+  Multi-Q_03:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Multi-Q_in_1: input_2
+      Multi-Q_in_2: EncyclopeDIA_02/EncyclopeDIA_out_1
+    out: [Multi-Q_out_1]
+  OpenChrom_04:
+    run: add-path-to-the-implementation/OpenChrom.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenChrom_in_1: input_2
+    out: [OpenChrom_out_1, OpenChrom_out_2]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: input_1
-      StPeter_in_3: mzRecal_03/mzRecal_out_1
-    out: [StPeter_out_1]
+      MSiReader_in_1: OpenChrom_04/OpenChrom_out_1
+      MSiReader_in_2: Multi-Q_03/Multi-Q_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3592" # BMP
+    outputSource: MSiReader_05/MSiReader_out_1

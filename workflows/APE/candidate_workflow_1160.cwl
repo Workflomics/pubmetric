@@ -4,58 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1157
-doc: A workflow including the tool(s) Comet, msConvert, PeptideProphet, ProteinProphet, Comet, StPeter.
+doc: A workflow including the tool(s) OpenSWATH, Mascot Server, ICPLQuant, CrosstalkDB, ComplexBrowser.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3752" # CSV
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  OpenSWATH_01:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      OpenSWATH_in_1: input_1
+      OpenSWATH_in_2: input_3
+    out: [OpenSWATH_out_1]
+  Mascot Server_02:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Mascot Server_in_1: OpenSWATH_01/OpenSWATH_out_1
+      Mascot Server_in_2: input_1
+    out: [Mascot Server_out_1]
+  ICPLQuant_03:
+    run: add-path-to-the-implementation/ICPLQuant.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      ICPLQuant_in_1: OpenSWATH_01/OpenSWATH_out_1
+      ICPLQuant_in_2: input_3
+      ICPLQuant_in_3: Mascot Server_02/Mascot Server_out_1
+    out: [ICPLQuant_out_1]
+  CrosstalkDB_04:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  Comet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      CrosstalkDB_in_1: input_2
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  ComplexBrowser_05:
+    run: add-path-to-the-implementation/ComplexBrowser.cwl 
     in:
-      Comet_in_1: msConvert_02/msConvert_out_1
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: Comet_05/Comet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      ComplexBrowser_in_1: ICPLQuant_03/ICPLQuant_out_1
+      ComplexBrowser_in_2: CrosstalkDB_04/CrosstalkDB_out_1
+    out: [ComplexBrowser_out_1, ComplexBrowser_out_2, ComplexBrowser_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: ComplexBrowser_05/ComplexBrowser_out_1

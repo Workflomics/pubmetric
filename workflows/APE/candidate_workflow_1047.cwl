@@ -4,57 +4,53 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1046
-doc: A workflow including the tool(s) Comet, PeptideProphet, msConvert, idconvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) OpenSWATH, Mascot Server, esimsa2D, msaccess, nontarget.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3244" # mzML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3752" # CSV
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  OpenSWATH_01:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenSWATH_in_1: input_2
+      OpenSWATH_in_2: input_1
+    out: [OpenSWATH_out_1]
+  Mascot Server_02:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      Mascot Server_in_1: OpenSWATH_01/OpenSWATH_out_1
+      Mascot Server_in_2: input_1
+    out: [Mascot Server_out_1]
+  esimsa2D_03:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      esimsa2D_in_1: input_3
+      esimsa2D_in_2: input_1
+      esimsa2D_in_3: input_1
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  msaccess_04:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      idconvert_in_1: Comet_01/Comet_out_2
-    out: [idconvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      msaccess_in_1: input_2
+      msaccess_in_2: Mascot Server_02/Mascot Server_out_1
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  nontarget_05:
+    run: add-path-to-the-implementation/nontarget.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: idconvert_04/idconvert_out_1
-      StPeter_in_3: msConvert_03/msConvert_out_1
-    out: [StPeter_out_1]
+      nontarget_in_1: input_1
+      nontarget_in_2: esimsa2D_03/esimsa2D_out_2
+      nontarget_in_3: msaccess_04/msaccess_out_1
+    out: [nontarget_out_1, nontarget_out_2, nontarget_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3823" # FASTG
+    outputSource: nontarget_05/nontarget_out_1

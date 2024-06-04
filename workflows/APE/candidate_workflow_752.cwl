@@ -4,59 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_751
-doc: A workflow including the tool(s) PeptideProphet, ProteinProphet, idconvert, PeptideProphet, mzRecal, StPeter.
+doc: A workflow including the tool(s) InDigestion, MR-MSPOLYGRAPH, TopPIC, XTandemPipeline, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1198" # mf
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      InDigestion_in_1: input_3
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  MR-MSPOLYGRAPH_02:
+    run: add-path-to-the-implementation/MR-MSPOLYGRAPH.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      MR-MSPOLYGRAPH_in_1: input_1
+      MR-MSPOLYGRAPH_in_2: InDigestion_01/InDigestion_out_3
+    out: [MR-MSPOLYGRAPH_out_1, MR-MSPOLYGRAPH_out_2]
+  TopPIC_03:
+    run: add-path-to-the-implementation/TopPIC.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      TopPIC_in_1: MR-MSPOLYGRAPH_02/MR-MSPOLYGRAPH_out_2
+      TopPIC_in_2: input_2
+    out: [TopPIC_out_1, TopPIC_out_2]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  mzRecal_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      XTandemPipeline_in_1: TopPIC_03/TopPIC_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_03/idconvert_out_1
-    out: [mzRecal_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_02/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_04/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_05/mzRecal_out_1
-    out: [StPeter_out_1]
+      Libra_in_1: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    outputSource: Libra_05/Libra_out_1

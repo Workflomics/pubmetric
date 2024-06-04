@@ -4,59 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1347
-doc: A workflow including the tool(s) idconvert, PeptideProphet, PeptideProphet, ProteinProphet, mzRecal, StPeter.
+doc: A workflow including the tool(s) CCdigest, PeptideProphet, OpenMS, RelEx, PPIExp.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1957" # raw
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3651" # MGF
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3311" # RNAML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  CCdigest_01:
+    run: add-path-to-the-implementation/CCdigest.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
+      CCdigest_in_1: input_1
+    out: [CCdigest_out_1]
   PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PeptideProphet_in_1: CCdigest_01/CCdigest_out_1
+    out: [PeptideProphet_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_2
+      OpenMS_in_3: PeptideProphet_02/PeptideProphet_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  RelEx_04:
+    run: add-path-to-the-implementation/RelEx.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  mzRecal_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      RelEx_in_1: OpenMS_03/OpenMS_out_1
+    out: [RelEx_out_1]
+  PPIExp_05:
+    run: add-path-to-the-implementation/PPIExp.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_05/mzRecal_out_1
-    out: [StPeter_out_1]
+      PPIExp_in_1: RelEx_04/RelEx_out_1
+    out: [PPIExp_out_1, PPIExp_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3781" # PubAnnotation format
+    outputSource: PPIExp_05/PPIExp_out_1

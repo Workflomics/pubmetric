@@ -4,59 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_230
-doc: A workflow including the tool(s) PeptideProphet, Comet, ProteinProphet, mzRecal, Comet, StPeter.
+doc: A workflow including the tool(s) CrosstalkDB, nontarget, MSiReader, ComPIL, PEAKS Q.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1392" # DIALIGN format
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3752" # CSV
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3609" # qualillumina
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  CrosstalkDB_01:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      CrosstalkDB_in_1: input_2
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  nontarget_02:
+    run: add-path-to-the-implementation/nontarget.cwl 
     in:
-      Comet_in_1: input_3
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      nontarget_in_1: input_1
+      nontarget_in_2: input_1
+      nontarget_in_3: input_3
+    out: [nontarget_out_1, nontarget_out_2, nontarget_out_3]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MSiReader_in_1: nontarget_02/nontarget_out_2
+      MSiReader_in_2: CrosstalkDB_01/CrosstalkDB_out_3
+    out: [MSiReader_out_1, MSiReader_out_2]
+  ComPIL_04:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      mzRecal_in_1: input_3
-      mzRecal_in_2: Comet_02/Comet_out_2
-    out: [mzRecal_out_1]
-  Comet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      ComPIL_in_1: MSiReader_03/MSiReader_out_2
+    out: [ComPIL_out_1]
+  PEAKS Q_05:
+    run: add-path-to-the-implementation/PEAKS Q.cwl 
     in:
-      Comet_in_1: mzRecal_04/mzRecal_out_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: Comet_05/Comet_out_1
-      StPeter_in_3: input_3
-    out: [StPeter_out_1]
+      PEAKS Q_in_1: ComPIL_04/ComPIL_out_1
+    out: [PEAKS Q_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_2532" # GenBank-HTML
+    outputSource: PEAKS Q_05/PEAKS Q_out_1

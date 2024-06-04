@@ -4,58 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1025
-doc: A workflow including the tool(s) XTandem, mzRecal, PeptideProphet, idconvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) XTandemPipeline, PEAKS DB, PRIDE Toolsuite, PeptideProphet, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3758" # SEQUEST .out file
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  XTandemPipeline_01:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      XTandemPipeline_in_1: input_2
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  PEAKS DB_02:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PEAKS DB_in_1: input_1
+      PEAKS DB_in_2: input_3
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  PRIDE Toolsuite_03:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      PRIDE Toolsuite_in_1: XTandemPipeline_01/XTandemPipeline_out_1
+    out: [PRIDE Toolsuite_out_1]
+  PeptideProphet_04:
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PeptideProphet_in_1: PEAKS DB_02/PEAKS DB_out_1
+    out: [PeptideProphet_out_1]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: idconvert_04/idconvert_out_1
-      StPeter_in_3: mzRecal_02/mzRecal_out_1
-    out: [StPeter_out_1]
+      OpenMS_in_1: input_1
+      OpenMS_in_2: PRIDE Toolsuite_03/PRIDE Toolsuite_out_1
+      OpenMS_in_3: PeptideProphet_04/PeptideProphet_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: OpenMS_05/OpenMS_out_1

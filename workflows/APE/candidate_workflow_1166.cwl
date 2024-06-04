@@ -4,57 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1165
-doc: A workflow including the tool(s) XTandem, msConvert, msConvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) ComPIL, IsobariQ, Graph Extract, InDigestion, GlycoMod.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3653" # pkl
+    format: "http://edamontology.org/format_1392" # DIALIGN format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1627" # Primer3 primer
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1504" # aaindex
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  ComPIL_01:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      ComPIL_in_1: input_2
+    out: [ComPIL_out_1]
+  IsobariQ_02:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      IsobariQ_in_1: ComPIL_01/ComPIL_out_1
+    out: [IsobariQ_out_1]
+  Graph Extract_03:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Graph Extract_in_1: IsobariQ_02/IsobariQ_out_1
+    out: [Graph Extract_out_1]
+  InDigestion_04:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: msConvert_03/msConvert_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      InDigestion_in_1: Graph Extract_03/Graph Extract_out_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  GlycoMod_05:
+    run: add-path-to-the-implementation/GlycoMod.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: XTandem_01/XTandem_out_1
-      StPeter_in_3: msConvert_02/msConvert_out_1
-    out: [StPeter_out_1]
+      GlycoMod_in_1: input_1
+      GlycoMod_in_2: InDigestion_04/InDigestion_out_3
+      GlycoMod_in_3: input_3
+    out: [GlycoMod_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3728" # LocARNA PP
+    outputSource: GlycoMod_05/GlycoMod_out_1

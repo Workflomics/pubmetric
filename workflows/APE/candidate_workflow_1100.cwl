@@ -4,57 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1077
-doc: A workflow including the tool(s) msConvert, msConvert, PeptideProphet, XTandem, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) ProSight PTM, Xtractor, adjustPKL, OpenSWATH, Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3713" # Mascot .dat file
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1391" # HMMER-aln
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  ProSight PTM_01:
+    run: add-path-to-the-implementation/ProSight PTM.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      ProSight PTM_in_1: input_2
+    out: [ProSight PTM_out_1]
+  Xtractor_02:
+    run: add-path-to-the-implementation/Xtractor.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Xtractor_in_1: input_3
+      Xtractor_in_2: input_2
+      Xtractor_in_3: input_3
+    out: [Xtractor_out_1, Xtractor_out_2, Xtractor_out_3]
+  adjustPKL_03:
+    run: add-path-to-the-implementation/adjustPKL.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  XTandem_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      adjustPKL_in_1: ProSight PTM_01/ProSight PTM_out_1
+      adjustPKL_in_2: ProSight PTM_01/ProSight PTM_out_1
+    out: [adjustPKL_out_1, adjustPKL_out_2]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      XTandem_in_1: msConvert_01/msConvert_out_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenSWATH_in_1: input_1
+      OpenSWATH_in_2: Xtractor_02/Xtractor_out_3
+    out: [OpenSWATH_out_1]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: XTandem_04/XTandem_out_1
-      StPeter_in_3: msConvert_02/msConvert_out_1
-    out: [StPeter_out_1]
+      Mascot Server_in_1: OpenSWATH_04/OpenSWATH_out_1
+      Mascot Server_in_2: adjustPKL_03/adjustPKL_out_1
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

@@ -4,52 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_57
-doc: A workflow including the tool(s) PeptideProphet, Comet, ProteinProphet, idconvert, StPeter.
+doc: A workflow including the tool(s) CrosstalkDB, PRIDE Toolsuite, Percolator, OpenMS, PeptideShaker.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3752" # CSV
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3651" # MGF
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  CrosstalkDB_01:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      PeptideProphet_in_1: input_3
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      CrosstalkDB_in_1: input_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  PRIDE Toolsuite_02:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PRIDE Toolsuite_in_1: CrosstalkDB_01/CrosstalkDB_out_4
+    out: [PRIDE Toolsuite_out_1]
+  Percolator_03:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      Percolator_in_1: PRIDE Toolsuite_02/PRIDE Toolsuite_out_1
+    out: [Percolator_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      idconvert_in_1: Comet_02/Comet_out_2
-    out: [idconvert_out_1]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      OpenMS_in_1: input_2
+      OpenMS_in_2: input_3
+      OpenMS_in_3: Percolator_03/Percolator_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PeptideShaker_05:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: idconvert_04/idconvert_out_1
-      StPeter_in_3: input_1
-    out: [StPeter_out_1]
+      PeptideShaker_in_1: input_3
+      PeptideShaker_in_2: OpenMS_04/OpenMS_out_1
+      PeptideShaker_in_3: input_2
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3579" # JPG
+    outputSource: PeptideShaker_05/PeptideShaker_out_1

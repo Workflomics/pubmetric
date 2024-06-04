@@ -4,50 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_105
-doc: A workflow including the tool(s) Comet, idconvert, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) OpenChrom, CPM, MS-Fit, Multi-Q, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3913" # Loom
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3580" # rcc
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  OpenChrom_01:
+    run: add-path-to-the-implementation/OpenChrom.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      OpenChrom_in_1: input_3
+    out: [OpenChrom_out_1, OpenChrom_out_2]
+  CPM_02:
+    run: add-path-to-the-implementation/CPM.cwl 
     in:
-      idconvert_in_1: Comet_01/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      CPM_in_1: input_2
+      CPM_in_2: input_2
+    out: [CPM_out_1, CPM_out_2]
+  MS-Fit_03:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      PeptideProphet_in_1: idconvert_02/idconvert_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MS-Fit_in_1: CPM_02/CPM_out_2
+    out: [MS-Fit_out_1]
+  Multi-Q_04:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      Multi-Q_in_1: input_3
+      Multi-Q_in_2: MS-Fit_03/MS-Fit_out_1
+    out: [Multi-Q_out_1]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      MSiReader_in_1: OpenChrom_01/OpenChrom_out_1
+      MSiReader_in_2: Multi-Q_04/Multi-Q_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
-    outputSource: protXml2IdList_05/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3592" # BMP
+    outputSource: MSiReader_05/MSiReader_out_1

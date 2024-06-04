@@ -4,55 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1662
-doc: A workflow including the tool(s) msConvert, Comet, msConvert, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) mzStar, PeptideProphet, OpenMS, MassHunter File Reader, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3710" # WIFF format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3556" # MHTML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3311" # RNAML
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  mzStar_01:
+    run: add-path-to-the-implementation/mzStar.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      mzStar_in_1: input_1
+    out: [mzStar_out_1]
+  PeptideProphet_02:
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      Comet_in_1: msConvert_01/msConvert_out_1
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      PeptideProphet_in_1: input_2
+    out: [PeptideProphet_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: mzStar_01/mzStar_out_1
+      OpenMS_in_3: PeptideProphet_02/PeptideProphet_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  MassHunter File Reader_04:
+    run: add-path-to-the-implementation/MassHunter File Reader.cwl 
     in:
-      PeptideProphet_in_1: Comet_02/Comet_out_1
-      PeptideProphet_in_2: msConvert_03/msConvert_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MassHunter File Reader_in_1: input_1
+    out: [MassHunter File Reader_out_1]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
-    in:
-      protXml2IdList_in_1: ProteinProphet_05/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      MSiReader_in_1: MassHunter File Reader_04/MassHunter File Reader_out_1
+      MSiReader_in_2: OpenMS_03/OpenMS_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: protXml2IdList_06/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3620" # xlsx
+    outputSource: MSiReader_05/MSiReader_out_1

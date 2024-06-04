@@ -4,59 +4,52 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1240
-doc: A workflow including the tool(s) PeptideProphet, Comet, mzRecal, ProteinProphet, Comet, StPeter.
+doc: A workflow including the tool(s) TopPIC, DeconMSn, Percolator, OpenMS, PeptideShaker.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3913" # Loom
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  TopPIC_01:
+    run: add-path-to-the-implementation/TopPIC.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      TopPIC_in_1: input_3
+      TopPIC_in_2: input_2
+    out: [TopPIC_out_1, TopPIC_out_2]
+  DeconMSn_02:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      DeconMSn_in_1: input_3
+      DeconMSn_in_2: input_3
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  Percolator_03:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_02/Comet_out_2
-    out: [mzRecal_out_1]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Percolator_in_1: TopPIC_01/TopPIC_out_1
+    out: [Percolator_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  Comet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_2
+      OpenMS_in_3: Percolator_03/Percolator_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PeptideShaker_05:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: Comet_05/Comet_out_1
-      StPeter_in_3: mzRecal_03/mzRecal_out_1
-    out: [StPeter_out_1]
+      PeptideShaker_in_1: input_2
+      PeptideShaker_in_2: OpenMS_04/OpenMS_out_1
+      PeptideShaker_in_3: DeconMSn_02/DeconMSn_out_3
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_1432" # Phylip character frequencies format
+    outputSource: PeptideShaker_05/PeptideShaker_out_1

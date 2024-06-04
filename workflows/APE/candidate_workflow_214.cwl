@@ -4,53 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_213
-doc: A workflow including the tool(s) XTandem, PeptideProphet, mzRecal, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) ASAPRatio, OpenSWATH, DeconMSn, Percolator, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3712" # Thermo RAW
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3655" # pepXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3155" # SBRML
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  ASAPRatio_01:
+    run: add-path-to-the-implementation/ASAPRatio.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ASAPRatio_in_1: input_2
+    out: [ASAPRatio_out_1, ASAPRatio_out_2]
+  OpenSWATH_02:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      OpenSWATH_in_1: ASAPRatio_01/ASAPRatio_out_2
+    out: [OpenSWATH_out_1]
+  DeconMSn_03:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      DeconMSn_in_1: input_1
+      DeconMSn_in_2: OpenSWATH_02/OpenSWATH_out_1
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      Percolator_in_1: input_3
+    out: [Percolator_out_1]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: XTandem_01/XTandem_out_1
-      StPeter_in_3: mzRecal_03/mzRecal_out_1
-    out: [StPeter_out_1]
+      Quant_in_1: DeconMSn_03/DeconMSn_out_3
+      Quant_in_2: Percolator_04/Percolator_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

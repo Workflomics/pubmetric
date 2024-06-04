@@ -4,57 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_772
-doc: A workflow including the tool(s) XTandem, msConvert, PeptideProphet, msConvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) nontarget, DeconMSn, OpenChrom, MS-Fit, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3652" # dta
+    format: "http://edamontology.org/format_1356" # prosite-pattern
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1932" # FASTQ-sanger
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  nontarget_01:
+    run: add-path-to-the-implementation/nontarget.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      nontarget_in_1: input_1
+      nontarget_in_2: input_1
+      nontarget_in_3: input_3
+    out: [nontarget_out_1, nontarget_out_2, nontarget_out_3]
+  DeconMSn_02:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      DeconMSn_in_1: input_2
+      DeconMSn_in_2: input_2
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  OpenChrom_03:
+    run: add-path-to-the-implementation/OpenChrom.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  msConvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      OpenChrom_in_1: nontarget_01/nontarget_out_1
+    out: [OpenChrom_out_1, OpenChrom_out_2]
+  MS-Fit_04:
+    run: add-path-to-the-implementation/MS-Fit.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MS-Fit_in_1: OpenChrom_03/OpenChrom_out_1
+    out: [MS-Fit_out_1]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: XTandem_01/XTandem_out_1
-      StPeter_in_3: msConvert_04/msConvert_out_1
-    out: [StPeter_out_1]
+      Quant_in_1: DeconMSn_02/DeconMSn_out_3
+      Quant_in_2: MS-Fit_04/MS-Fit_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

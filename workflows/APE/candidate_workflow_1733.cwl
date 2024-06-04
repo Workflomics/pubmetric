@@ -4,62 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1732
-doc: A workflow including the tool(s) msConvert, PeptideProphet, ProteinProphet, idconvert, msConvert, mzRecal, StPeter.
+doc: A workflow including the tool(s) PChopper, InDigestion, MS-GF+, OpenMS, PeptideShaker.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3653" # pkl
 steps:
-  msConvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+  PChopper_01:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PChopper_in_1: input_2
+    out: [PChopper_out_1]
+  InDigestion_02:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      PeptideProphet_in_1: input_2
-      PeptideProphet_in_2: msConvert_01/msConvert_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      InDigestion_in_1: input_2
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  MS-GF+_03:
+    run: add-path-to-the-implementation/MS-GF+.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      MS-GF+_in_1: input_3
+      MS-GF+_in_2: InDigestion_02/InDigestion_out_3
+    out: [MS-GF+_out_1, MS-GF+_out_2]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      idconvert_in_1: input_2
-    out: [idconvert_out_1]
-  msConvert_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: PChopper_01/PChopper_out_1
+      OpenMS_in_3: MS-GF+_03/MS-GF+_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PeptideShaker_05:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  mzRecal_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
-    in:
-      mzRecal_in_1: msConvert_05/msConvert_out_1
-      mzRecal_in_2: idconvert_04/idconvert_out_1
-    out: [mzRecal_out_1]
-  StPeter_07:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: input_2
-      StPeter_in_3: mzRecal_06/mzRecal_out_1
-    out: [StPeter_out_1]
+      PeptideShaker_in_1: PChopper_01/PChopper_out_1
+      PeptideShaker_in_2: OpenMS_04/OpenMS_out_1
+      PeptideShaker_in_3: input_1
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_07/StPeter_out_1
+    format: "http://edamontology.org/format_1948" # nbrf/pir
+    outputSource: PeptideShaker_05/PeptideShaker_out_1

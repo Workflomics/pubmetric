@@ -4,58 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1150
-doc: A workflow including the tool(s) XTandem, msConvert, PeptideProphet, ProteinProphet, XTandem, StPeter.
+doc: A workflow including the tool(s) MassWiz, PEAKS Q, InDigestion, CrosstalkDB, DIA-Umpire.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3687" # ISA-TAB
   input_2:
     type: File
-    format: "http://edamontology.org/format_3711" # X!Tandem XML
+    format: "http://edamontology.org/format_3913" # Loom
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3651" # MGF
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  MassWiz_01:
+    run: add-path-to-the-implementation/MassWiz.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      MassWiz_in_1: input_3
+    out: [MassWiz_out_1]
+  PEAKS Q_02:
+    run: add-path-to-the-implementation/PEAKS Q.cwl 
     in:
-      msConvert_in_1: input_1
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PEAKS Q_in_1: MassWiz_01/MassWiz_out_1
+    out: [PEAKS Q_out_1]
+  InDigestion_03:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      InDigestion_in_1: input_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  CrosstalkDB_04:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  XTandem_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      CrosstalkDB_in_1: PEAKS Q_02/PEAKS Q_out_1
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  DIA-Umpire_05:
+    run: add-path-to-the-implementation/DIA-Umpire.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: XTandem_05/XTandem_out_1
-      StPeter_in_3: msConvert_02/msConvert_out_1
-    out: [StPeter_out_1]
+      DIA-Umpire_in_1: input_3
+      DIA-Umpire_in_2: CrosstalkDB_04/CrosstalkDB_out_3
+      DIA-Umpire_in_3: InDigestion_03/InDigestion_out_3
+    out: [DIA-Umpire_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
+    outputSource: DIA-Umpire_05/DIA-Umpire_out_1

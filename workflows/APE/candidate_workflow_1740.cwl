@@ -4,62 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1737
-doc: A workflow including the tool(s) mzRecal, XTandem, idconvert, mzRecal, idconvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) dig, PeptideProphet, OpenMS, RelEx, PaDuA.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_2311" # EMBL-HTML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3311" # RNAML
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  dig_01:
+    run: add-path-to-the-implementation/dig.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: input_3
-    out: [mzRecal_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      dig_in_1: input_1
+    out: [dig_out_1]
+  PeptideProphet_02:
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      XTandem_in_1: mzRecal_01/mzRecal_out_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      PeptideProphet_in_1: input_2
+    out: [PeptideProphet_out_1]
+  OpenMS_03:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      idconvert_in_1: XTandem_02/XTandem_out_1
-    out: [idconvert_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_1
+      OpenMS_in_3: PeptideProphet_02/PeptideProphet_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  RelEx_04:
+    run: add-path-to-the-implementation/RelEx.cwl 
     in:
-      mzRecal_in_1: input_1
-      mzRecal_in_2: idconvert_03/idconvert_out_1
-    out: [mzRecal_out_1]
-  idconvert_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      RelEx_in_1: OpenMS_03/OpenMS_out_1
+    out: [RelEx_out_1]
+  PaDuA_05:
+    run: add-path-to-the-implementation/PaDuA.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
-    in:
-      PeptideProphet_in_1: idconvert_05/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_07:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_06/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      PaDuA_in_1: dig_01/dig_out_1
+      PaDuA_in_2: RelEx_04/RelEx_out_1
+    out: [PaDuA_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: ProteinProphet_07/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: PaDuA_05/PaDuA_out_1

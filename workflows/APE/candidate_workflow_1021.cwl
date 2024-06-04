@@ -4,58 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1020
-doc: A workflow including the tool(s) Comet, PeptideProphet, ProteinProphet, msConvert, mzRecal, StPeter.
+doc: A workflow including the tool(s) PIA - Protein Inference Algorithms, MR-MSPOLYGRAPH, MR-MSPOLYGRAPH, Percolator, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3702" # MSF
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  PIA - Protein Inference Algorithms_01:
+    run: add-path-to-the-implementation/PIA - Protein Inference Algorithms.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PIA - Protein Inference Algorithms_in_1: input_1
+    out: [PIA - Protein Inference Algorithms_out_1, PIA - Protein Inference Algorithms_out_2]
+  MR-MSPOLYGRAPH_02:
+    run: add-path-to-the-implementation/MR-MSPOLYGRAPH.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MR-MSPOLYGRAPH_in_1: input_2
+      MR-MSPOLYGRAPH_in_2: input_3
+    out: [MR-MSPOLYGRAPH_out_1, MR-MSPOLYGRAPH_out_2]
+  MR-MSPOLYGRAPH_03:
+    run: add-path-to-the-implementation/MR-MSPOLYGRAPH.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  msConvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      MR-MSPOLYGRAPH_in_1: MR-MSPOLYGRAPH_02/MR-MSPOLYGRAPH_out_2
+      MR-MSPOLYGRAPH_in_2: input_3
+    out: [MR-MSPOLYGRAPH_out_1, MR-MSPOLYGRAPH_out_2]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  mzRecal_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      Percolator_in_1: PIA - Protein Inference Algorithms_01/PIA - Protein Inference Algorithms_out_1
+    out: [Percolator_out_1]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      mzRecal_in_1: msConvert_04/msConvert_out_1
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: Comet_01/Comet_out_1
-      StPeter_in_3: mzRecal_05/mzRecal_out_1
-    out: [StPeter_out_1]
+      Quant_in_1: MR-MSPOLYGRAPH_03/MR-MSPOLYGRAPH_out_2
+      Quant_in_2: Percolator_04/Percolator_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

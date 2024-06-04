@@ -4,52 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_11
-doc: A workflow including the tool(s) Comet, mzRecal, Comet, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) DeconMSn, msaccess, DeconMSn, Percolator, Quant.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3651" # MGF
+    format: "http://edamontology.org/format_3913" # Loom
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3247" # mzIdentML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3712" # Thermo RAW
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  DeconMSn_01:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      DeconMSn_in_1: input_3
+      DeconMSn_in_2: input_3
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  msaccess_02:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  Comet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      msaccess_in_1: DeconMSn_01/DeconMSn_out_3
+      msaccess_in_2: input_2
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  DeconMSn_03:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      DeconMSn_in_1: input_3
+      DeconMSn_in_2: input_3
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      PeptideProphet_in_1: Comet_03/Comet_out_1
-      PeptideProphet_in_2: mzRecal_02/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Percolator_in_1: msaccess_02/msaccess_out_2
+    out: [Percolator_out_1]
+  Quant_05:
+    run: add-path-to-the-implementation/Quant.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      Quant_in_1: DeconMSn_03/DeconMSn_out_3
+      Quant_in_2: Percolator_04/Percolator_out_1
+    out: [Quant_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3468" # xls
+    outputSource: Quant_05/Quant_out_1

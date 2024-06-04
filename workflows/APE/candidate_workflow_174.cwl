@@ -4,51 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_173
-doc: A workflow including the tool(s) Comet, msConvert, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) CPM, CPM, PeptideProphet, OpenMS, MSiReader.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3556" # MHTML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3651" # MGF
+    format: "http://edamontology.org/format_3775" # GSuite
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3652" # dta
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  CPM_01:
+    run: add-path-to-the-implementation/CPM.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      CPM_in_1: input_2
+      CPM_in_2: input_2
+    out: [CPM_out_1, CPM_out_2]
+  CPM_02:
+    run: add-path-to-the-implementation/CPM.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      CPM_in_1: CPM_01/CPM_out_1
+      CPM_in_2: CPM_01/CPM_out_1
+    out: [CPM_out_1, CPM_out_2]
+  PeptideProphet_03:
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      mzRecal_in_1: msConvert_02/msConvert_out_1
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PeptideProphet_in_1: input_1
+    out: [PeptideProphet_out_1]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: mzRecal_03/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenMS_in_1: CPM_02/CPM_out_2
+      OpenMS_in_2: input_3
+      OpenMS_in_3: PeptideProphet_03/PeptideProphet_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  MSiReader_05:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      MSiReader_in_1: CPM_01/CPM_out_1
+      MSiReader_in_2: OpenMS_04/OpenMS_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3592" # BMP
+    outputSource: MSiReader_05/MSiReader_out_1

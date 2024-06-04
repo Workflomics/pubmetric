@@ -4,52 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_10
-doc: A workflow including the tool(s) Comet, mzRecal, XTandem, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) PRIDE Toolsuite, XTandemPipeline, XTandem Parser, OpenSWATH, Mascot Server.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3246" # TraML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3652" # dta
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  PRIDE Toolsuite_01:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      PRIDE Toolsuite_in_1: input_1
+    out: [PRIDE Toolsuite_out_1]
+  XTandemPipeline_02:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      XTandemPipeline_in_1: PRIDE Toolsuite_01/PRIDE Toolsuite_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  XTandem Parser_03:
+    run: add-path-to-the-implementation/XTandem Parser.cwl 
     in:
-      XTandem_in_1: input_3
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      XTandem Parser_in_1: XTandemPipeline_02/XTandemPipeline_out_1
+    out: [XTandem Parser_out_1, XTandem Parser_out_2]
+  OpenSWATH_04:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: mzRecal_02/mzRecal_out_1
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenSWATH_in_1: input_3
+      OpenSWATH_in_2: input_2
+    out: [OpenSWATH_out_1]
+  Mascot Server_05:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      Mascot Server_in_1: OpenSWATH_04/OpenSWATH_out_1
+      Mascot Server_in_2: XTandem Parser_03/XTandem Parser_out_2
+    out: [Mascot Server_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: Mascot Server_05/Mascot Server_out_1

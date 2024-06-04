@@ -4,56 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_363
-doc: A workflow including the tool(s) idconvert, msConvert, Comet, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) OpenSWATH, Mascot Server, Jtraml, msaccess, esimsa.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1628" # ABI
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+  OpenSWATH_01:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      OpenSWATH_in_1: input_2
+      OpenSWATH_in_2: input_3
+    out: [OpenSWATH_out_1]
+  Mascot Server_02:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  Comet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      Mascot Server_in_1: input_1
+      Mascot Server_in_2: input_2
+    out: [Mascot Server_out_1]
+  Jtraml_03:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      Comet_in_1: msConvert_02/msConvert_out_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      Jtraml_in_1: input_1
+    out: [Jtraml_out_1]
+  msaccess_04:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      mzRecal_in_1: msConvert_02/msConvert_out_1
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      msaccess_in_1: input_2
+      msaccess_in_2: Mascot Server_02/Mascot Server_out_1
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  esimsa_05:
+    run: add-path-to-the-implementation/esimsa.cwl 
     in:
-      PeptideProphet_in_1: Comet_03/Comet_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      esimsa_in_1: Jtraml_03/Jtraml_out_1
+      esimsa_in_2: OpenSWATH_01/OpenSWATH_out_1
+      esimsa_in_3: msaccess_04/msaccess_out_1
+    out: [esimsa_out_1, esimsa_out_2, esimsa_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3956" # N-Quads
+    outputSource: esimsa_05/esimsa_out_1

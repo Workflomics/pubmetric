@@ -4,58 +4,48 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1041
-doc: A workflow including the tool(s) XTandem, PeptideProphet, ProteinProphet, msConvert, Comet, StPeter.
+doc: A workflow including the tool(s) InDigestion, EncyclopeDIA, IsobariQ, PRIDE Toolsuite, MS-GF+.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3608" # qualsolexa
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3247" # mzIdentML
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      InDigestion_in_1: input_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  EncyclopeDIA_02:
+    run: add-path-to-the-implementation/EncyclopeDIA.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      EncyclopeDIA_in_1: input_2
+      EncyclopeDIA_in_2: InDigestion_01/InDigestion_out_3
+    out: [EncyclopeDIA_out_1]
+  IsobariQ_03:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  msConvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      IsobariQ_in_1: EncyclopeDIA_02/EncyclopeDIA_out_1
+    out: [IsobariQ_out_1]
+  PRIDE Toolsuite_04:
+    run: add-path-to-the-implementation/PRIDE Toolsuite.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  Comet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PRIDE Toolsuite_in_1: IsobariQ_03/IsobariQ_out_1
+    out: [PRIDE Toolsuite_out_1]
+  MS-GF+_05:
+    run: add-path-to-the-implementation/MS-GF+.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: Comet_05/Comet_out_1
-      StPeter_in_3: msConvert_04/msConvert_out_1
-    out: [StPeter_out_1]
+      MS-GF+_in_1: input_3
+      MS-GF+_in_2: PRIDE Toolsuite_04/PRIDE Toolsuite_out_1
+    out: [MS-GF+_out_1, MS-GF+_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
+    outputSource: MS-GF+_05/MS-GF+_out_1

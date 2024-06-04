@@ -4,51 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_12
-doc: A workflow including the tool(s) idconvert, mzRecal, XTandem, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) OpenSWATH, Mascot Server, msaccess, Xtractor, msmsEDA.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3654" # mzXML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1927" # EMBL format
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3246" # TraML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+  OpenSWATH_01:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      OpenSWATH_in_1: input_1
+      OpenSWATH_in_2: input_3
+    out: [OpenSWATH_out_1]
+  Mascot Server_02:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      Mascot Server_in_1: OpenSWATH_01/OpenSWATH_out_1
+      Mascot Server_in_2: input_3
+    out: [Mascot Server_out_1]
+  msaccess_03:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      XTandem_in_1: mzRecal_02/mzRecal_out_1
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      msaccess_in_1: input_1
+      msaccess_in_2: Mascot Server_02/Mascot Server_out_1
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  Xtractor_04:
+    run: add-path-to-the-implementation/Xtractor.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Xtractor_in_1: input_2
+      Xtractor_in_2: input_2
+      Xtractor_in_3: msaccess_03/msaccess_out_1
+    out: [Xtractor_out_1, Xtractor_out_2, Xtractor_out_3]
+  msmsEDA_05:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      msmsEDA_in_1: Xtractor_04/Xtractor_out_2
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3604" # SVG
+    outputSource: msmsEDA_05/msmsEDA_out_1

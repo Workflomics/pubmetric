@@ -4,52 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_115
-doc: A workflow including the tool(s) XTandem, msConvert, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) PECA, GenePattern, msgfdb2pepxml, XTandemPipeline, Multi-Q.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3653" # pkl
+    format: "http://edamontology.org/format_1638" # cel
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  PECA_01:
+    run: add-path-to-the-implementation/PECA.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      PECA_in_1: input_1
+    out: [PECA_out_1, PECA_out_2]
+  GenePattern_02:
+    run: add-path-to-the-implementation/GenePattern.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      GenePattern_in_1: PECA_01/PECA_out_1
+    out: [GenePattern_out_1]
+  msgfdb2pepxml_03:
+    run: add-path-to-the-implementation/msgfdb2pepxml.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      msgfdb2pepxml_in_1: input_2
+      msgfdb2pepxml_in_2: GenePattern_02/GenePattern_out_1
+      msgfdb2pepxml_in_3: input_3
+    out: [msgfdb2pepxml_out_1]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      XTandemPipeline_in_1: msgfdb2pepxml_03/msgfdb2pepxml_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Multi-Q_05:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1
-      StPeter_in_3: msConvert_02/msConvert_out_1
-    out: [StPeter_out_1]
+      Multi-Q_in_1: input_2
+      Multi-Q_in_2: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [Multi-Q_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3311" # RNAML
+    outputSource: Multi-Q_05/Multi-Q_out_1

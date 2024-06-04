@@ -4,7 +4,7 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_5
-doc: A workflow including the tool(s) Comet, msConvert, idconvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) msConvert, MassAI, X Hunter, XTandemPipeline, Libra.
 
 inputs:
   input_1:
@@ -12,42 +12,40 @@ inputs:
     format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3651" # MGF
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3913" # Loom
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  msConvert_01:
+    run: add-path-to-the-implementation/msConvert.cwl 
     in:
-      Comet_in_1: input_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
-    in:
-      msConvert_in_1: input_3
+      msConvert_in_1: input_1
     out: [msConvert_out_1]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  MassAI_02:
+    run: add-path-to-the-implementation/MassAI.cwl 
     in:
-      idconvert_in_1: Comet_01/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MassAI_in_1: input_1
+    out: [MassAI_out_1, MassAI_out_2]
+  X Hunter_03:
+    run: add-path-to-the-implementation/X Hunter.cwl 
     in:
-      PeptideProphet_in_1: idconvert_03/idconvert_out_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      X Hunter_in_1: msConvert_01/msConvert_out_1
+      X Hunter_in_2: MassAI_02/MassAI_out_2
+      X Hunter_in_3: input_2
+    out: [X Hunter_out_1]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      XTandemPipeline_in_1: X Hunter_03/X Hunter_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
+    in:
+      Libra_in_1: XTandemPipeline_04/XTandemPipeline_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3655" # pepXML
+    outputSource: Libra_05/Libra_out_1

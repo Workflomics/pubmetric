@@ -4,57 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1003
-doc: A workflow including the tool(s) idconvert, Comet, PeptideProphet, idconvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) MSD File Reader, esimsa, Jtraml, ProFound, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_2549" # OBO
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3829" # GPR
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1392" # DIALIGN format
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  MSD File Reader_01:
+    run: add-path-to-the-implementation/MSD File Reader.cwl 
+    in: []
+    out: [MSD File Reader_out_1]
+  esimsa_02:
+    run: add-path-to-the-implementation/esimsa.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      esimsa_in_1: input_3
+      esimsa_in_2: MSD File Reader_01/MSD File Reader_out_1
+      esimsa_in_3: input_2
+    out: [esimsa_out_1, esimsa_out_2, esimsa_out_3]
+  Jtraml_03:
+    run: add-path-to-the-implementation/Jtraml.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Jtraml_in_1: esimsa_02/esimsa_out_1
+    out: [Jtraml_out_1]
+  ProFound_04:
+    run: add-path-to-the-implementation/ProFound.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      ProFound_in_1: input_1
+    out: [ProFound_out_1]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      idconvert_in_1: Comet_02/Comet_out_2
-    out: [idconvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: idconvert_04/idconvert_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      OpenMS_in_1: input_1
+      OpenMS_in_2: Jtraml_03/Jtraml_out_1
+      OpenMS_in_3: ProFound_04/ProFound_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3652" # dta
+    outputSource: OpenMS_05/OpenMS_out_1

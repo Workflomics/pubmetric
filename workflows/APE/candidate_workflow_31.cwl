@@ -4,51 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_30
-doc: A workflow including the tool(s) mzRecal, Comet, idconvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) PGA, PeptideShaker, PChopper, PEAKS DB, PEAKS Q.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3586" # bed12
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3247" # mzIdentML
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  PGA_01:
+    run: add-path-to-the-implementation/PGA.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PGA_in_1: input_2
+    out: [PGA_out_1]
+  PeptideShaker_02:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      PeptideShaker_in_1: PGA_01/PGA_out_1
+      PeptideShaker_in_2: input_3
+      PeptideShaker_in_3: input_1
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
+  PChopper_03:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      idconvert_in_1: Comet_02/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PChopper_in_1: PeptideShaker_02/PeptideShaker_out_2
+    out: [PChopper_out_1]
+  PEAKS DB_04:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      PeptideProphet_in_1: idconvert_03/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_01/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      PEAKS DB_in_1: input_1
+      PEAKS DB_in_2: PChopper_03/PChopper_out_1
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  PEAKS Q_05:
+    run: add-path-to-the-implementation/PEAKS Q.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      PEAKS Q_in_1: PEAKS DB_04/PEAKS DB_out_1
+    out: [PEAKS Q_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_05/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3556" # MHTML
+    outputSource: PEAKS Q_05/PEAKS Q_out_1

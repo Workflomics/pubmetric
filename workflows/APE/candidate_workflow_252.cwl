@@ -4,7 +4,7 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_251
-doc: A workflow including the tool(s) Comet, mzRecal, XTandem, PeptideProphet, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) PChopper, MeroX, MS-GF+, OpenMS, PeptideShaker.
 
 inputs:
   input_1:
@@ -15,48 +15,41 @@ inputs:
     format: "http://edamontology.org/format_3653" # pkl
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3651" # MGF
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  PChopper_01:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      Comet_in_1: input_3
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      PChopper_in_1: input_1
+    out: [PChopper_out_1]
+  MeroX_02:
+    run: add-path-to-the-implementation/MeroX.cwl 
     in:
-      mzRecal_in_1: input_3
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      MeroX_in_1: input_3
+      MeroX_in_2: PChopper_01/PChopper_out_1
+    out: [MeroX_out_1]
+  MS-GF+_03:
+    run: add-path-to-the-implementation/MS-GF+.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      MS-GF+_in_1: input_2
+      MS-GF+_in_2: MeroX_02/MeroX_out_1
+    out: [MS-GF+_out_1, MS-GF+_out_2]
+  OpenMS_04:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      OpenMS_in_1: input_3
+      OpenMS_in_2: input_1
+      OpenMS_in_3: MS-GF+_03/MS-GF+_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PeptideShaker_05:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_04/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_02/mzRecal_out_1
-    out: [StPeter_out_1]
+      PeptideShaker_in_1: input_1
+      PeptideShaker_in_2: OpenMS_04/OpenMS_out_1
+      PeptideShaker_in_3: input_3
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
+    outputSource: PeptideShaker_05/PeptideShaker_out_1

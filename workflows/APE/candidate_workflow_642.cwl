@@ -4,59 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_641
-doc: A workflow including the tool(s) Comet, XTandem, PeptideProphet, mzRecal, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) Graph Extract, nontarget, lutefisk, MyriMatch, Libra.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3710" # WIFF format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3551" # nrrd
   input_3:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_1963" # UniProtKB format
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  Graph Extract_01:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      Graph Extract_in_1: input_2
+    out: [Graph Extract_out_1]
+  nontarget_02:
+    run: add-path-to-the-implementation/nontarget.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      nontarget_in_1: input_2
+      nontarget_in_2: input_2
+      nontarget_in_3: input_3
+    out: [nontarget_out_1, nontarget_out_2, nontarget_out_3]
+  lutefisk_03:
+    run: add-path-to-the-implementation/lutefisk.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      lutefisk_in_1: nontarget_02/nontarget_out_3
+      lutefisk_in_2: Graph Extract_01/Graph Extract_out_1
+    out: [lutefisk_out_1]
+  MyriMatch_04:
+    run: add-path-to-the-implementation/MyriMatch.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_01/Comet_out_2
-    out: [mzRecal_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MyriMatch_in_1: input_1
+      MyriMatch_in_2: lutefisk_03/lutefisk_out_1
+    out: [MyriMatch_out_1]
+  Libra_05:
+    run: add-path-to-the-implementation/Libra.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1
-      StPeter_in_3: mzRecal_04/mzRecal_out_1
-    out: [StPeter_out_1]
+      Libra_in_1: MyriMatch_04/MyriMatch_out_1
+    out: [Libra_out_1]
 outputs:
   output_1:
     type: File
     format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    outputSource: Libra_05/Libra_out_1

@@ -4,12 +4,12 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1637
-doc: A workflow including the tool(s) PeptideProphet, Comet, idconvert, ProteinProphet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) MSD File Reader, InDigestion, PECAN (PEptide-Centric Analysis), Mascot Server, PeptideShaker.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
     format: "http://edamontology.org/format_3244" # mzML
@@ -17,46 +17,36 @@ inputs:
     type: File
     format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  MSD File Reader_01:
+    run: add-path-to-the-implementation/MSD File Reader.cwl 
+    in: []
+    out: [MSD File Reader_out_1]
+  InDigestion_02:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      InDigestion_in_1: MSD File Reader_01/MSD File Reader_out_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  PECAN (PEptide-Centric Analysis)_03:
+    run: add-path-to-the-implementation/PECAN (PEptide-Centric Analysis).cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      PECAN (PEptide-Centric Analysis)_in_1: input_2
+      PECAN (PEptide-Centric Analysis)_in_2: InDigestion_02/InDigestion_out_3
+    out: [PECAN (PEptide-Centric Analysis)_out_1, PECAN (PEptide-Centric Analysis)_out_2]
+  Mascot Server_04:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      idconvert_in_1: Comet_02/Comet_out_2
-    out: [idconvert_out_1]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Mascot Server_in_1: input_1
+      Mascot Server_in_2: PECAN (PEptide-Centric Analysis)_03/PECAN (PEptide-Centric Analysis)_out_2
+    out: [Mascot Server_out_1]
+  PeptideShaker_05:
+    run: add-path-to-the-implementation/PeptideShaker.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
-    in:
-      PeptideProphet_in_1: idconvert_03/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      PeptideShaker_in_1: input_3
+      PeptideShaker_in_2: Mascot Server_04/Mascot Server_out_1
+      PeptideShaker_in_3: input_1
+    out: [PeptideShaker_out_1, PeptideShaker_out_2, PeptideShaker_out_3, PeptideShaker_out_4]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_1950" # pdbatom
+    outputSource: PeptideShaker_05/PeptideShaker_out_1

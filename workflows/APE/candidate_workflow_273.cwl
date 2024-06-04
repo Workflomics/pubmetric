@@ -4,58 +4,53 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_272
-doc: A workflow including the tool(s) mzRecal, Comet, mzRecal, XTandem, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) DeconMSn, DeconMSn, MeroX, Peppy, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3712" # Thermo RAW
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3313" # BLC
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  DeconMSn_01:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  Comet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      DeconMSn_in_1: input_1
+      DeconMSn_in_2: input_1
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  DeconMSn_02:
+    run: add-path-to-the-implementation/DeconMSn.cwl 
     in:
-      Comet_in_1: mzRecal_01/mzRecal_out_1
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  mzRecal_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      DeconMSn_in_1: input_1
+      DeconMSn_in_2: input_1
+    out: [DeconMSn_out_1, DeconMSn_out_2, DeconMSn_out_3]
+  MeroX_03:
+    run: add-path-to-the-implementation/MeroX.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: Comet_02/Comet_out_2
-    out: [mzRecal_out_1]
-  XTandem_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      MeroX_in_1: DeconMSn_02/DeconMSn_out_3
+      MeroX_in_2: input_2
+    out: [MeroX_out_1]
+  Peppy_04:
+    run: add-path-to-the-implementation/Peppy.cwl 
     in:
-      XTandem_in_1: mzRecal_03/mzRecal_out_1
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Peppy_in_1: DeconMSn_01/DeconMSn_out_3
+      Peppy_in_2: MeroX_03/MeroX_out_1
+      Peppy_in_3: input_2
+    out: [Peppy_out_1, Peppy_out_2]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: XTandem_04/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      OpenMS_in_1: DeconMSn_01/DeconMSn_out_1
+      OpenMS_in_2: input_2
+      OpenMS_in_3: Peppy_04/Peppy_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3651" # MGF
+    outputSource: OpenMS_05/OpenMS_out_1

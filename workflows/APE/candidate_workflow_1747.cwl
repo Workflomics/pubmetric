@@ -4,63 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1746
-doc: A workflow including the tool(s) PeptideProphet, idconvert, ProteinProphet, mzRecal, Comet, idconvert, StPeter.
+doc: A workflow including the tool(s) InDigestion, XTandem, msaccess, PEAKS DB, OpenMS.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3651" # MGF
   input_2:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3816" # Mol2
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  InDigestion_01:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      PeptideProphet_in_1: input_2
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  idconvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      InDigestion_in_1: input_2
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  XTandem_02:
+    run: add-path-to-the-implementation/XTandem.cwl 
     in:
-      idconvert_in_1: input_2
-    out: [idconvert_out_1]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      XTandem_in_1: input_1
+      XTandem_in_2: InDigestion_01/InDigestion_out_3
+    out: [XTandem_out_1]
+  msaccess_03:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      msaccess_in_1: input_1
+      msaccess_in_2: XTandem_02/XTandem_out_1
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  PEAKS DB_04:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      mzRecal_in_1: input_3
-      mzRecal_in_2: idconvert_02/idconvert_out_1
-    out: [mzRecal_out_1]
-  Comet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PEAKS DB_in_1: input_1
+      PEAKS DB_in_2: input_3
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  OpenMS_05:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      Comet_in_1: mzRecal_04/mzRecal_out_1
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
-    in:
-      idconvert_in_1: Comet_05/Comet_out_2
-    out: [idconvert_out_1]
-  StPeter_07:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: idconvert_06/idconvert_out_1
-      StPeter_in_3: input_3
-    out: [StPeter_out_1]
+      OpenMS_in_1: msaccess_03/msaccess_out_1
+      OpenMS_in_2: input_3
+      OpenMS_in_3: PEAKS DB_04/PEAKS DB_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_07/StPeter_out_1
+    format: "http://edamontology.org/format_3654" # mzXML
+    outputSource: OpenMS_05/OpenMS_out_1

@@ -4,56 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_427
-doc: A workflow including the tool(s) idconvert, XTandem, idconvert, mzRecal, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) PeptideProphet, OpenMS, PChopper, msmsEDA, ComplexBrowser.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3655" # pepXML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3655" # pepXML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  PeptideProphet_01:
+    run: add-path-to-the-implementation/PeptideProphet.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      PeptideProphet_in_1: input_3
+    out: [PeptideProphet_out_1]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  idconvert_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+      OpenMS_in_1: input_1
+      OpenMS_in_2: input_2
+      OpenMS_in_3: PeptideProphet_01/PeptideProphet_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  PChopper_03:
+    run: add-path-to-the-implementation/PChopper.cwl 
     in:
-      idconvert_in_1: XTandem_02/XTandem_out_1
-    out: [idconvert_out_1]
-  mzRecal_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      PChopper_in_1: OpenMS_02/OpenMS_out_2
+    out: [PChopper_out_1]
+  msmsEDA_04:
+    run: add-path-to-the-implementation/msmsEDA.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: idconvert_03/idconvert_out_1
-    out: [mzRecal_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      msmsEDA_in_1: input_1
+    out: [msmsEDA_out_1, msmsEDA_out_2, msmsEDA_out_3]
+  ComplexBrowser_05:
+    run: add-path-to-the-implementation/ComplexBrowser.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: mzRecal_04/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      ComplexBrowser_in_1: msmsEDA_04/msmsEDA_out_2
+      ComplexBrowser_in_2: PChopper_03/PChopper_out_1
+    out: [ComplexBrowser_out_1, ComplexBrowser_out_2, ComplexBrowser_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3508" # PDF
+    outputSource: ComplexBrowser_05/ComplexBrowser_out_1

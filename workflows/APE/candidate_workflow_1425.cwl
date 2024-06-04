@@ -4,59 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1424
-doc: A workflow including the tool(s) idconvert, PeptideProphet, ProteinProphet, Comet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) ComPIL, IsobariQ, MSiReader, esimsa2D, esimsa.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3916" # MTX
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3313" # BLC
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1644" # CHP
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  ComPIL_01:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      ComPIL_in_1: input_3
+    out: [ComPIL_out_1]
+  IsobariQ_02:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      IsobariQ_in_1: ComPIL_01/ComPIL_out_1
+    out: [IsobariQ_out_1]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  Comet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: IsobariQ_02/IsobariQ_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
+  esimsa2D_04:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      Comet_in_1: input_2
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      esimsa2D_in_1: input_1
+      esimsa2D_in_2: input_3
+      esimsa2D_in_3: MSiReader_03/MSiReader_out_2
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
+  esimsa_05:
+    run: add-path-to-the-implementation/esimsa.cwl 
     in:
-      PeptideProphet_in_1: Comet_04/Comet_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_03/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      esimsa_in_1: input_1
+      esimsa_in_2: esimsa2D_04/esimsa2D_out_1
+      esimsa_in_3: input_3
+    out: [esimsa_out_1, esimsa_out_2, esimsa_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_1455" # hssp
+    outputSource: esimsa_05/esimsa_out_1

@@ -4,52 +4,47 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_53
-doc: A workflow including the tool(s) idconvert, PeptideProphet, XTandem, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) CrosstalkDB, OpenSWATH, InDigestion, EncyclopeDIA, IsobariQ.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_1392" # DIALIGN format
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3752" # CSV
   input_3:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3330" # PO
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  CrosstalkDB_01:
+    run: add-path-to-the-implementation/CrosstalkDB.cwl 
     in:
-      idconvert_in_1: input_3
-    out: [idconvert_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      CrosstalkDB_in_1: input_2
+    out: [CrosstalkDB_out_1, CrosstalkDB_out_2, CrosstalkDB_out_3, CrosstalkDB_out_4]
+  OpenSWATH_02:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      OpenSWATH_in_1: CrosstalkDB_01/CrosstalkDB_out_3
+    out: [OpenSWATH_out_1]
+  InDigestion_03:
+    run: add-path-to-the-implementation/InDigestion.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      InDigestion_in_1: input_1
+    out: [InDigestion_out_1, InDigestion_out_2, InDigestion_out_3]
+  EncyclopeDIA_04:
+    run: add-path-to-the-implementation/EncyclopeDIA.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      EncyclopeDIA_in_1: OpenSWATH_02/OpenSWATH_out_1
+      EncyclopeDIA_in_2: InDigestion_03/InDigestion_out_3
+    out: [EncyclopeDIA_out_1]
+  IsobariQ_05:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: XTandem_03/XTandem_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      IsobariQ_in_1: EncyclopeDIA_04/EncyclopeDIA_out_1
+    out: [IsobariQ_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3157" # EBI Application Result XML
+    outputSource: IsobariQ_05/IsobariQ_out_1

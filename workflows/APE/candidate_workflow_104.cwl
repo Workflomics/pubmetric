@@ -4,50 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_103
-doc: A workflow including the tool(s) XTandem, msConvert, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) ComPIL, IsobariQ, MSiReader, esimsa, nontarget.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3653" # pkl
+    format: "http://edamontology.org/format_1392" # DIALIGN format
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3913" # Loom
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_2306" # GTF
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  ComPIL_01:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  msConvert_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      ComPIL_in_1: input_3
+    out: [ComPIL_out_1]
+  IsobariQ_02:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      IsobariQ_in_1: ComPIL_01/ComPIL_out_1
+    out: [IsobariQ_out_1]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: msConvert_02/msConvert_out_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      MSiReader_in_1: input_3
+      MSiReader_in_2: IsobariQ_02/IsobariQ_out_1
+    out: [MSiReader_out_1, MSiReader_out_2]
+  esimsa_04:
+    run: add-path-to-the-implementation/esimsa.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
+      esimsa_in_1: input_1
+      esimsa_in_2: input_3
+      esimsa_in_3: MSiReader_03/MSiReader_out_2
+    out: [esimsa_out_1, esimsa_out_2, esimsa_out_3]
+  nontarget_05:
+    run: add-path-to-the-implementation/nontarget.cwl 
     in:
-      protXml2IdList_in_1: ProteinProphet_04/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      nontarget_in_1: input_3
+      nontarget_in_2: esimsa_04/esimsa_out_1
+      nontarget_in_3: input_3
+    out: [nontarget_out_1, nontarget_out_2, nontarget_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
-    outputSource: protXml2IdList_05/protXml2IdList_out_1
+    format: "http://edamontology.org/format_1350" # MEME Dirichlet prior
+    outputSource: nontarget_05/nontarget_out_1

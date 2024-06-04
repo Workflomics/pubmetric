@@ -4,56 +4,49 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_255
-doc: A workflow including the tool(s) idconvert, mzRecal, Comet, idconvert, PeptideProphet, ProteinProphet.
+doc: A workflow including the tool(s) MassAI, msaccess, ComPIL, IsobariQ, DIA-Umpire.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3578" # IDAT
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3655" # pepXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3651" # MGF
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_mzIdentML.cwl
+  MassAI_01:
+    run: add-path-to-the-implementation/MassAI.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      MassAI_in_1: input_3
+    out: [MassAI_out_1, MassAI_out_2]
+  msaccess_02:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      mzRecal_in_1: input_3
-      mzRecal_in_2: idconvert_01/idconvert_out_1
-    out: [mzRecal_out_1]
-  Comet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      msaccess_in_1: input_3
+      msaccess_in_2: input_2
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  ComPIL_03:
+    run: add-path-to-the-implementation/ComPIL.cwl 
     in:
-      Comet_in_1: mzRecal_02/mzRecal_out_1
-      Comet_in_2: input_2
-    out: [Comet_out_1, Comet_out_2]
-  idconvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+      ComPIL_in_1: msaccess_02/msaccess_out_1
+    out: [ComPIL_out_1]
+  IsobariQ_04:
+    run: add-path-to-the-implementation/IsobariQ.cwl 
     in:
-      idconvert_in_1: Comet_03/Comet_out_2
-    out: [idconvert_out_1]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      IsobariQ_in_1: ComPIL_03/ComPIL_out_1
+    out: [IsobariQ_out_1]
+  DIA-Umpire_05:
+    run: add-path-to-the-implementation/DIA-Umpire.cwl 
     in:
-      PeptideProphet_in_1: idconvert_04/idconvert_out_1
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
-    in:
-      ProteinProphet_in_1: PeptideProphet_05/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
+      DIA-Umpire_in_1: input_3
+      DIA-Umpire_in_2: IsobariQ_04/IsobariQ_out_1
+      DIA-Umpire_in_3: MassAI_01/MassAI_out_2
+    out: [DIA-Umpire_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: ProteinProphet_06/ProteinProphet_out_1
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
+    outputSource: DIA-Umpire_05/DIA-Umpire_out_1

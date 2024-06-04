@@ -4,59 +4,52 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1036
-doc: A workflow including the tool(s) XTandem, PeptideProphet, PeptideProphet, msConvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) PEAKS DB, OpenMS, TopPIC, XTandemPipeline, msgfdb2pepxml.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
   input_2:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3652" # dta
   input_3:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3654" # mzXML
 steps:
-  XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+  PEAKS DB_01:
+    run: add-path-to-the-implementation/PEAKS DB.cwl 
     in:
-      XTandem_in_1: input_1
-      XTandem_in_2: input_2
-    out: [XTandem_out_1]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PEAKS DB_in_1: input_3
+      PEAKS DB_in_2: input_1
+    out: [PEAKS DB_out_1, PEAKS DB_out_2]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenMS_in_1: input_2
+      OpenMS_in_2: input_1
+      OpenMS_in_3: PEAKS DB_01/PEAKS DB_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  TopPIC_03:
+    run: add-path-to-the-implementation/TopPIC.cwl 
     in:
-      PeptideProphet_in_1: XTandem_01/XTandem_out_1
-      PeptideProphet_in_2: input_1
-      PeptideProphet_in_3: input_2
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  msConvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      TopPIC_in_1: input_2
+      TopPIC_in_2: input_1
+    out: [TopPIC_out_1, TopPIC_out_2]
+  XTandemPipeline_04:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      msConvert_in_1: input_3
-    out: [msConvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      XTandemPipeline_in_1: OpenMS_02/OpenMS_out_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  msgfdb2pepxml_05:
+    run: add-path-to-the-implementation/msgfdb2pepxml.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_2
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_02/PeptideProphet_out_1
-      StPeter_in_3: msConvert_04/msConvert_out_1
-    out: [StPeter_out_1]
+      msgfdb2pepxml_in_1: input_3
+      msgfdb2pepxml_in_2: TopPIC_03/TopPIC_out_1
+      msgfdb2pepxml_in_3: XTandemPipeline_04/XTandemPipeline_out_2
+    out: [msgfdb2pepxml_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3655" # pepXML
+    outputSource: msgfdb2pepxml_05/msgfdb2pepxml_out_1

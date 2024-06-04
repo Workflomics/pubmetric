@@ -4,57 +4,51 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1712
-doc: A workflow including the tool(s) mzRecal, mzRecal, Comet, PeptideProphet, ProteinProphet, protXml2IdList.
+doc: A workflow including the tool(s) OpenChrom, PECAN (PEptide-Centric Analysis), Mascot Server, msaccess, esimsa2D.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_3162" # MAGE-TAB
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3016" # VCF
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  mzRecal_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+  OpenChrom_01:
+    run: add-path-to-the-implementation/OpenChrom.cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  mzRecal_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/mzRecal/mzRecal.cwl
+      OpenChrom_in_1: input_3
+    out: [OpenChrom_out_1, OpenChrom_out_2]
+  PECAN (PEptide-Centric Analysis)_02:
+    run: add-path-to-the-implementation/PECAN (PEptide-Centric Analysis).cwl 
     in:
-      mzRecal_in_1: input_2
-      mzRecal_in_2: input_1
-    out: [mzRecal_out_1]
-  Comet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+      PECAN (PEptide-Centric Analysis)_in_1: input_3
+      PECAN (PEptide-Centric Analysis)_in_2: input_1
+    out: [PECAN (PEptide-Centric Analysis)_out_1, PECAN (PEptide-Centric Analysis)_out_2]
+  Mascot Server_03:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      Comet_in_1: mzRecal_01/mzRecal_out_1
-      Comet_in_2: input_3
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      Mascot Server_in_1: OpenChrom_01/OpenChrom_out_1
+      Mascot Server_in_2: PECAN (PEptide-Centric Analysis)_02/PECAN (PEptide-Centric Analysis)_out_2
+    out: [Mascot Server_out_1]
+  msaccess_04:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      PeptideProphet_in_1: Comet_03/Comet_out_1
-      PeptideProphet_in_2: mzRecal_02/mzRecal_out_1
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      msaccess_in_1: input_3
+      msaccess_in_2: Mascot Server_03/Mascot Server_out_1
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  esimsa2D_05:
+    run: add-path-to-the-implementation/esimsa2D.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_04/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  protXml2IdList_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/protXml2IdList/protXml2IdList.cwl
-    in:
-      protXml2IdList_in_1: ProteinProphet_05/ProteinProphet_out_1
-    out: [protXml2IdList_out_1]
+      esimsa2D_in_1: input_2
+      esimsa2D_in_2: OpenChrom_01/OpenChrom_out_1
+      esimsa2D_in_3: msaccess_04/msaccess_out_1
+    out: [esimsa2D_out_1, esimsa2D_out_2, esimsa2D_out_3]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3162" # MAGE-TAB
-    outputSource: protXml2IdList_06/protXml2IdList_out_1
+    format: "http://edamontology.org/format_3242" # PSI MI TAB (MITAB)
+    outputSource: esimsa2D_05/esimsa2D_out_1

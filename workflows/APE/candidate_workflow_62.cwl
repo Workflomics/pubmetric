@@ -4,54 +4,47 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_61
-doc: A workflow including the tool(s) PeptideProphet, ProteinProphet, XTandem, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) XTandem Parser, MSGraph, PIA - Protein Inference Algorithms, Percolator, Multi-Q.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3655" # pepXML
+    format: "http://edamontology.org/format_3711" # X!Tandem XML
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_3654" # mzXML
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3330" # PO
 steps:
-  PeptideProphet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+  XTandem Parser_01:
+    run: add-path-to-the-implementation/XTandem Parser.cwl 
     in:
-      PeptideProphet_in_1: input_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      XTandem Parser_in_1: input_1
+    out: [XTandem Parser_out_1, XTandem Parser_out_2]
+  MSGraph_02:
+    run: add-path-to-the-implementation/MSGraph.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_01/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      MSGraph_in_1: XTandem Parser_01/XTandem Parser_out_2
+    out: [MSGraph_out_1, MSGraph_out_2]
+  PIA - Protein Inference Algorithms_03:
+    run: add-path-to-the-implementation/PIA - Protein Inference Algorithms.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      PIA - Protein Inference Algorithms_in_1: MSGraph_02/MSGraph_out_1
+    out: [PIA - Protein Inference Algorithms_out_1, PIA - Protein Inference Algorithms_out_2]
+  Percolator_04:
+    run: add-path-to-the-implementation/Percolator.cwl 
     in:
-      PeptideProphet_in_1: XTandem_03/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+      Percolator_in_1: PIA - Protein Inference Algorithms_03/PIA - Protein Inference Algorithms_out_1
+    out: [Percolator_out_1]
+  Multi-Q_05:
+    run: add-path-to-the-implementation/Multi-Q.cwl 
     in:
-      StPeter_in_1: ProteinProphet_02/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_04/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      Multi-Q_in_1: input_2
+      Multi-Q_in_2: Percolator_04/Percolator_out_1
+    out: [Multi-Q_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_05/StPeter_out_1
+    format: "http://edamontology.org/format_3157" # EBI Application Result XML
+    outputSource: Multi-Q_05/Multi-Q_out_1

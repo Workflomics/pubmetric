@@ -4,58 +4,50 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1042
-doc: A workflow including the tool(s) Comet, PeptideProphet, XTandem, msConvert, ProteinProphet, StPeter.
+doc: A workflow including the tool(s) XTandemPipeline, OpenMS, MSiReader, Graph Extract, PIQMIe.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3758" # SEQUEST .out file
   input_2:
     type: File
-    format: "http://edamontology.org/format_3712" # Thermo RAW
+    format: "http://edamontology.org/format_3682" # imzML metadata file
   input_3:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1929" # FASTA
 steps:
-  Comet_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/Comet/Comet.cwl
+  XTandemPipeline_01:
+    run: add-path-to-the-implementation/XTandemPipeline.cwl 
     in:
-      Comet_in_1: input_3
-      Comet_in_2: input_1
-    out: [Comet_out_1, Comet_out_2]
-  PeptideProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      XTandemPipeline_in_1: input_1
+    out: [XTandemPipeline_out_1, XTandemPipeline_out_2]
+  OpenMS_02:
+    run: add-path-to-the-implementation/OpenMS.cwl 
     in:
-      PeptideProphet_in_1: Comet_01/Comet_out_1
-      PeptideProphet_in_2: input_3
-      PeptideProphet_in_3: input_1
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      OpenMS_in_1: input_2
+      OpenMS_in_2: input_3
+      OpenMS_in_3: XTandemPipeline_01/XTandemPipeline_out_1
+    out: [OpenMS_out_1, OpenMS_out_2]
+  MSiReader_03:
+    run: add-path-to-the-implementation/MSiReader.cwl 
     in:
-      XTandem_in_1: input_3
-      XTandem_in_2: input_1
-    out: [XTandem_out_1]
-  msConvert_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/msConvert/msConvert.cwl
+      MSiReader_in_1: input_2
+      MSiReader_in_2: OpenMS_02/OpenMS_out_2
+    out: [MSiReader_out_1, MSiReader_out_2]
+  Graph Extract_04:
+    run: add-path-to-the-implementation/Graph Extract.cwl 
     in:
-      msConvert_in_1: input_2
-    out: [msConvert_out_1]
-  ProteinProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Graph Extract_in_1: MSiReader_03/MSiReader_out_1
+    out: [Graph Extract_out_1]
+  PIQMIe_05:
+    run: add-path-to-the-implementation/PIQMIe.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_02/PeptideProphet_out_1
-      ProteinProphet_in_2: input_1
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_05/ProteinProphet_out_1
-      StPeter_in_2: XTandem_03/XTandem_out_1
-      StPeter_in_3: msConvert_04/msConvert_out_1
-    out: [StPeter_out_1]
+      PIQMIe_in_1: input_3
+      PIQMIe_in_2: Graph Extract_04/Graph Extract_out_1
+    out: [PIQMIe_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
+    outputSource: PIQMIe_05/PIQMIe_out_1

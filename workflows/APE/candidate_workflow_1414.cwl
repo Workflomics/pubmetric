@@ -4,59 +4,52 @@ cwlVersion: v1.2
 class: Workflow
 
 label: WorkflowNo_1413
-doc: A workflow including the tool(s) idconvert, XTandem, PeptideProphet, ProteinProphet, PeptideProphet, StPeter.
+doc: A workflow including the tool(s) ProSight Lite, OpenSWATH, Mascot Server, msaccess, OpenSWATH.
 
 inputs:
   input_1:
     type: File
-    format: "http://edamontology.org/format_3247" # mzIdentML
+    format: "http://edamontology.org/format_1209" # consensus
   input_2:
     type: File
-    format: "http://edamontology.org/format_3244" # mzML
+    format: "http://edamontology.org/format_1963" # UniProtKB format
   input_3:
     type: File
-    format: "http://edamontology.org/format_1929" # FASTA
+    format: "http://edamontology.org/format_3244" # mzML
 steps:
-  idconvert_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/idconvert/idconvert_to_pepXML.cwl
+  ProSight Lite_01:
+    run: add-path-to-the-implementation/ProSight Lite.cwl 
     in:
-      idconvert_in_1: input_1
-    out: [idconvert_out_1]
-  XTandem_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+      ProSight Lite_in_1: input_3
+      ProSight Lite_in_2: input_1
+      ProSight Lite_in_3: input_2
+    out: [ProSight Lite_out_1, ProSight Lite_out_2]
+  OpenSWATH_02:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      XTandem_in_1: input_2
-      XTandem_in_2: input_3
-    out: [XTandem_out_1]
-  PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      OpenSWATH_in_1: input_3
+      OpenSWATH_in_2: ProSight Lite_01/ProSight Lite_out_1
+    out: [OpenSWATH_out_1]
+  Mascot Server_03:
+    run: add-path-to-the-implementation/Mascot Server.cwl 
     in:
-      PeptideProphet_in_1: XTandem_02/XTandem_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  ProteinProphet_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+      Mascot Server_in_1: OpenSWATH_02/OpenSWATH_out_1
+      Mascot Server_in_2: input_3
+    out: [Mascot Server_out_1]
+  msaccess_04:
+    run: add-path-to-the-implementation/msaccess.cwl 
     in:
-      ProteinProphet_in_1: PeptideProphet_03/PeptideProphet_out_1
-      ProteinProphet_in_2: input_3
-    out: [ProteinProphet_out_1, ProteinProphet_out_2]
-  PeptideProphet_05:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+      msaccess_in_1: input_3
+      msaccess_in_2: Mascot Server_03/Mascot Server_out_1
+    out: [msaccess_out_1, msaccess_out_2, msaccess_out_3]
+  OpenSWATH_05:
+    run: add-path-to-the-implementation/OpenSWATH.cwl 
     in:
-      PeptideProphet_in_1: idconvert_01/idconvert_out_1
-      PeptideProphet_in_2: input_2
-      PeptideProphet_in_3: input_3
-    out: [PeptideProphet_out_1, PeptideProphet_out_2]
-  StPeter_06:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
-    in:
-      StPeter_in_1: ProteinProphet_04/ProteinProphet_out_1
-      StPeter_in_2: PeptideProphet_05/PeptideProphet_out_1
-      StPeter_in_3: input_2
-    out: [StPeter_out_1]
+      OpenSWATH_in_1: OpenSWATH_02/OpenSWATH_out_1
+      OpenSWATH_in_2: msaccess_04/msaccess_out_1
+    out: [OpenSWATH_out_1]
 outputs:
   output_1:
     type: File
-    format: "http://edamontology.org/format_3747" # protXML
-    outputSource: StPeter_06/StPeter_out_1
+    format: "http://edamontology.org/format_3622" # Gemini SQLite format
+    outputSource: OpenSWATH_05/OpenSWATH_out_1
