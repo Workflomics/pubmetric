@@ -84,3 +84,70 @@ def radnomise_workflows(included_tools, num_pairs = 3):
 
 
 
+
+def load_undoc_tool(cwl_file):
+    with open(cwl_file, "r") as f:
+        cwl_string = f.read()
+    steps_string = cwl_string.split("steps:\n")[1].split("outputs")[0]
+    steps_list = steps_string.split('\n')
+    steps_list  = [row for row in steps_list if not row.startswith('    ')]
+    edge_list = []
+
+    for i in range(len(steps_list)):
+        if i+1 > len(steps_list)-1:
+            continue
+        
+        if steps_list[i+1] != "":
+            step_string = cwl_string.split(steps_list[i])[1].split(steps_list[i+1])[0]
+        else:
+            step_string = cwl_string.split(steps_list[i])[1].split("outputs:")[0]
+        step_in_out = step_string.split("in:\n")[1].split("out:")
+
+        step_in = step_in_out[0].split('\n')
+        step_in = [s.split(':')[1].strip() for s in step_in if ':' in s]
+
+        step_out = step_in_out[1].replace('[', '').replace(']', '').replace('\n', '').split(',')
+        step_out = [s.strip() for s in step_out]
+        
+        for si in step_in:
+            if "/" in si:
+                si = si.split('/')[1]
+            edge = (si, steps_list[i].split('_')[0])
+            edge_list.append(edge)
+        for so in step_out:
+            
+            edge = (steps_list[i].split('_')[0], so)
+            edge_list.append(edge)
+    
+    return edge_list
+
+def extract_tool_connections(edges):
+    pairwise_connections = set()
+    for source, target in edges:
+        if "_out_" in target:
+            for next_source, next_target in edges:
+                if next_source == target:
+                    pairwise_connections.add((source.lstrip(), next_target.lstrip()))
+    return pairwise_connections
+
+
+def parse_undocumented_workflows(cwl_file, cvsfile, undocumented=True):
+    
+    edges = load_undoc_tool(cwl_file)
+    
+    tool_edges = extract_tool_connections(edges)
+
+    csv_filename = cvsfile 
+    f = pd.read_csv(csv_filename)
+
+    new_edges = []
+    for edge in tool_edges:
+        source_pmid = f.loc[f['name'] == edge[0], 'pmid'].values[0] if len(f.loc[f['name'] == edge[0], 'pmid']) > 0 else None
+        target_pmid = f.loc[f['name'] == edge[1], 'pmid'].values[0] if len(f.loc[f['name'] == edge[1], 'pmid']) > 0 else None
+        if source_pmid is not None and target_pmid is not None:
+            new_edges.append((str(source_pmid), str(target_pmid)))
+
+    workflow_tools = np.unique([element for tuple in new_edges for element in tuple])
+
+    return new_edges, list(workflow_tools)
+

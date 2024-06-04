@@ -71,8 +71,12 @@ def sum_metric(G, workflow, included_tools): # cocitation metric
 
 
 def igraph_weighted_shortest_path(G, source, target):
-    results = G.get_shortest_paths(source, to=target, weights=G.es["weight"], output="epath")
-    if len(results[0]) > 0:
+    try: 
+        results = G.get_shortest_paths(source, to=target, weights=G.es["weight"], output="epath")
+    except: # in case they are both in the graph but disconnected
+        results = None 
+
+    if results and len(results[0]) > 0:
         distance = 0
         for e in results[0]:
             distance += G.es[e]["weight"]
