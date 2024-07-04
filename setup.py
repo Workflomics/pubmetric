@@ -23,11 +23,13 @@ setup(
         'ruamel.yaml',
         'cwl_utils'
     ],
-    tests_require=[
-        'pytest',
-        'pytest-datadir',
-        'pytest-asyncio'
-    ],
+    extras_require={
+        'test': [
+            'pytest',
+            'pytest-datadir',
+            'pytest-asyncio'
+        ]
+    },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: Apache Software License',
