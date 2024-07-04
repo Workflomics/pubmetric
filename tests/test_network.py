@@ -1,8 +1,9 @@
-import pytest
-from wfqc import network as nw
 import igraph
 import numpy as np
 import pickle
+
+from wfqc import network as nw
+
 
 # def test_create_citation_network():
 #     G, included_tools = nw.create_citation_network(loadData=False, testSize=10) # TODO: if no data then make data or ask if make data?

@@ -24,7 +24,9 @@ setup(
         'cwl_utils'
     ],
     tests_require=[
-        'pytest'
+        'pytest',
+        'pytest-datadir',
+        'pytest-asyncio'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
