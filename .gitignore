@@ -306,3 +306,7 @@ tags
 
 #VS Code
 .vscode/
+
+# Output files
+
+out_*
