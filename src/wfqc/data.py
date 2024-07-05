@@ -273,9 +273,8 @@ def get_tool_metadata(outpath, topicID="topic_0121", filename = None, update = F
     all_tools = pmid_tools + doi_tools
     metadata_file["tools"] = all_tools
 
-    json_data = json.dumps(metadata_file) # convert to json str
     with open(filename, 'w') as f:
-            json.dump(json_data, f)
+            json.dump(metadata_file, f)
 
     # If there were any pages, pmid not empty, check how many tools were retrieved and how many tools had pmids
 

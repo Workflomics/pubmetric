@@ -110,9 +110,9 @@ def test_prod_metric():
 
 def test_logprod_metric():
     test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
-    expected_scores = [2, 3]    # obs see the problem here where this metrics prefers single edged nw with good connection (msConvert to Comet for ex will always be best then)
+    expected_scores = [(math.log(3+1)*math.log(2+1)*math.log(1+1)/3), math.log(3+1)]    # obs see the problem here where this metrics prefers single edged nw with good connection (msConvert to Comet for ex will always be best then)
     for i, workflow in enumerate(test_workflows):
-        assert logprod_metric(test_coG, workflow) == expected_scores[i]
+        assert logprod_metric(test_coG, workflow) == round(expected_scores[i], 3)
 
 def test_complete_tree():
     assert complete_tree(test_coG, [('TA', 'TB'), ('TA', 'TC'), ('TA', 'TD')], normalise=True) == 2.75

@@ -141,17 +141,21 @@ def logprod_metric(graph, workflow, normalise = True):
     
     for edge in workflow:
         try:
+            print(get_graph_edge_weight(graph, edge) + 1)
+            print( math.log(get_graph_edge_weight(graph, edge) + 1)) 
             weights.append( math.log(get_graph_edge_weight(graph, edge) + 1)) # adding 1 to avoid - inf
         except:
             continue # if the edge does not exist 
 
     calculated_weights = [w for w in weights if w] 
+    print(calculated_weights)
     if calculated_weights:
         if normalise:
             prod_weights = np.prod(calculated_weights)/len(weights)
+            print(prod_weights)
         else:
             prod_weights  = np.prod(calculated_weights)
-        return int(prod_weights)
+        return float(round(prod_weights, 3))
     else: 
         return 0 # empty workflow has score 0 
     

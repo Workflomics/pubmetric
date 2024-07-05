@@ -13,9 +13,8 @@ Open cytoscape, open your code editor and press any key to play (it has to be ct
 
 ## Dependencies
 
-To use this code, ensure you have the following dependencies installed:
-
-Python packages listed in the `requirements.txt` file. You can install them using the following command: pip install -r requirements.txt 
+Python packages listed in the `setup.py` file. You can install them using the following command: `pip install .`
+For the development, you can include the test dependencies by running `pip install .[test]`
 
 
 Cytoscape software, which can be downloaded from [https://cytoscape.org/](https://cytoscape.org/). Please make sure Cytoscape is open and running when executing the code.
