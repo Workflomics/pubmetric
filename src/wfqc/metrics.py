@@ -179,32 +179,6 @@ def complete_tree(G, workflow,  normalise = True):
     else:
         return total_weight
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # ###
 # def sum_metric_citation(graph, workflow): # cocitation metric 
 
