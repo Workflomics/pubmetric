@@ -1,6 +1,7 @@
-from wfqc import data
 import pytest
-import os 
+import os
+
+from wfqc import data 
 
 @pytest.mark.asyncio
 async def test_get_tool_metadata(shared_datadir):
@@ -22,11 +23,6 @@ def test_get_pmid(shared_datadir):
 def test_get_pmid_from_doi():
     print('')
 
-
-
-# get_tool_metadata
-def test_get_tool_metadata():
-    print('')
 
 def test_old_get_tool_metadata():
     print('')
