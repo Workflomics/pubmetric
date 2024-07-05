@@ -107,14 +107,15 @@ def degree_norm_sum_metric(graph, workflow, normalise = True):
         weights.append(normalised_edge_weight)
 
     calculated_weights = [w for w in weights if w] 
-    if calculated_weights:
-        if normalise:
-            norm_score = sum(calculated_weights)/len(weights) # avg cocitations
-        else: 
-            norm_score = sum(calculated_weights)
-        return float(norm_score)
+    if not calculated_weights:
+        return 0.0 # empty workflow has score 0 
+        
+    if normalise:
+        norm_score = sum(calculated_weights)/len(weights) # avg cocitations
     else: 
-        return 0 # empty workflow has score 0 
+        norm_score = sum(calculated_weights)
+        
+    return float(norm_score)        
 
 
 
