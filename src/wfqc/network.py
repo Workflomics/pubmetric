@@ -24,37 +24,34 @@ import wfqc.data
 
 
 
-async def download_data(outpath, testSize, randomSeed, topicID):
+async def download_data(outpath, testSize, topicID):
     # Retrieve the data 
-    tool_metadata = wfqc.data.get_tool_metadata(outpath=outpath, topicID=topicID)
+    tool_metadata = wfqc.data.get_tool_metadata(outpath=outpath, topicID=topicID, testSize= testSize) #TODO: gettollmetadata needs testsize
     pmids = [tool['pmid'] for tool in tool_metadata['tools']] # its a json now
 
     # Randomly picks out a subset of the pmids
     if testSize != '': 
-        print(f"Creating test-cocitation network of size {testSize}. Random seed is {randomSeed}.")
-        np.random.seed(randomSeed)
-        pmids = np.random.choice(pmids, testSize)
-
-    included_tools = []  
+        print(f"Creating test-cocitation network of size {testSize}.")
+ 
     edges = []
     citation_json ={
         "tools" : []
     }
 
-    # Get citations for each tool, and generate edges between them. 
-    for pmid in tqdm(pmids, desc="Processing PMIDs"): 
-        pmid = str(pmid) # EuropePMC requires str            
+    # Get citations for each tool, and generate edges between them. TODO: this should be separate function
+    for tool in tqdm(tool_metadata['tools'], desc="Downloading citations from PMIDs"): 
+        pmid = str(tool['pmid']) # EuropePMC requires str            
 
         async with aiohttp.ClientSession() as session: 
             citations = await wfqc.data.europepmc_request(session, pmid) # CHECK!!
             for citation in citations:
-               
                 edges.append((citation, pmid)) # citations pointing to tools
-                if pmid not in included_tools:
-                    included_tools.append(pmid) 
 
-            citation_json['tools'].append({ 
+            # TODO: check why this is not generated correctly
+            citation_json['tools'].append({ # should I be recreating basically the same file, or should I jsut add the citation data to the og one?
                 'pmid': pmid,
+                'name': tool['name'],
+                'pubDate': tool['pubDate'],
                 'nrCitations': len(citations),
                 'citations': citations
             })
@@ -64,7 +61,9 @@ async def download_data(outpath, testSize, randomSeed, topicID):
     with open(filepath, 'w') as f:
         json.dump(citation_json, f) # can I do that to make it a dict? # should I make it a json file with more info- like nr citaitons etc? 
     
-    return edges, included_tools
+    # want to keep the metadata here too?    
+
+    return edges, citation_json
 
 
 
@@ -102,9 +101,11 @@ def cocitation_graph(G, vertices, inverted_weights = False): # generate cocitati
 
 
 
-def create_graph(edges, included_tools, includeCitationNodes = False):
+def create_graph(edges, tool_dictionary, includeCitationNodes = False):
     # Finding unique edges by converting list to a set (because tuples are hashable) and back to list.
     unq_edges = list(set(edges)) 
+
+    included_tools = [tool['pmid'] for tool in tool_dictionary['tools']] # do I need this?
     
     print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
 
@@ -201,12 +202,12 @@ def create_citation_network(topicID="topic_0121", testSize='', randomSeed=42, lo
             os.mkdir(outpath)
 
         # Downloading data
-        edges, included_tools = asyncio.run(download_data(outpath,testSize,randomSeed, topicID))
+        edges, tool_dictionary = asyncio.run(download_data(outpath,testSize, topicID))
 
         # Creating the graph using igraph
         print("Creating citation graph using igraph.")
 
-        G, included_tools, node_degree_dict =  create_graph(edges, included_tools)
+        G, included_tools, node_degree_dict =  create_graph(edges, tool_dictionary)
 
       
         # Saving edges, graph and tools included in the graph 
