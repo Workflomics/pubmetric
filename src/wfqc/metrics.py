@@ -3,7 +3,7 @@ import numpy as np
 
 
 
-def get_node_ids(graph: igraph.Graph, key= "name"):
+def get_node_ids(graph: igraph.Graph, key:str= "name") -> dict:
     # connect names to igraph ids
     if key == 'name':
         return {v['name']:v.index for v in graph.vs}
