@@ -33,6 +33,19 @@ def get_graph_edge_weight(graph, edge):
 import math
 
 
+def invert_edge_weights(G):
+    inverted_G = G.copy()
+
+    for edge in inverted_G.es:
+        current_weight = edge["weight"]
+        inverted_weight = 1.0 / current_weight 
+        edge["weight"] = inverted_weight 
+
+    return inverted_G  
+
+inv_G = invert_edge_weights(G)
+
+
 def sum_metric(graph, workflow, normalise = True):
 
     weights = []
