@@ -1,5 +1,3 @@
-import pytest
-from wfqc import network as nw
 import igraph
 import numpy as np
 import json

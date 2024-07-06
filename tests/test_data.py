@@ -1,4 +1,3 @@
-from wfqc import data
 import pytest
 import os 
 import asyncio
