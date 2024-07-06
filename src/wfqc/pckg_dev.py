@@ -1,10 +1,12 @@
 
 
 import pandas as pd
-import json
 import numpy as np
 import json 
 import random
+
+import copy
+import ast
 from sklearn.model_selection import train_test_split
 
 
@@ -62,40 +64,6 @@ def stratified_split_usecases(usecases, test_size=0.2, randomseed=42):
     return train_set, test_set
 
 
-# def parse_xml_single_sheet(file_paths, metadata_filename):
-    
-#     usecases = {"usecase1": [],
-#                 "usecase2": [],
-#                 "usecase3": [],
-#                 "usecase4": []
-#                 }
-
-#     for i, usecase in enumerate(usecases): # is my logic ciorrect? each use case is actually in right place? 
-#         df = pd.read_excel(file_paths[i], sheet_name=0)
-        
-#         for index, row in df.iterrows():
-#             workflow_steps = row[3].split(' -> ')
-#             workflow_tuples = [(workflow_steps[j], workflow_steps[j+1]) for j in range(len(workflow_steps) - 1)]
-            
-#             pmid_worflow_tuples = convert_workflow_to_pmid_tuples([workflow_tuples], metadata_filename)[0] # expects and outputs list
-            
-            
-#             usecase_data = {
-#                 'ratingAvg': float(row[0]),
-#                 'expert1': float(row[1]),
-#                 'expert2': float(row[2]),
-#                 'workflow': workflow_tuples,
-#                 'pmid_workflow': pmid_worflow_tuples,
-#                 'usecase': usecase
-#             }
-#             usecases[usecase].append(usecase_data)
-
-#     json_data = json.dumps(usecases, indent=4)
-#     with open('usecases_rated.json', 'w') as json_file:
-#         json_file.write(json_data)
-
-#     return usecases
-
 
 
 def parse_xml(file_paths, metadata_filename):
@@ -137,84 +105,9 @@ def parse_xml(file_paths, metadata_filename):
 
     return usecases
 
-# def parse_xml_splitbycase(file_paths, metadata_filename):
-    
-#     usecases = {"usecase1": [],
-#                 "usecase2": [],
-#                 "usecase3": [],
-#                 "usecase4": []
-#                 }
-
-#     for i, usecase in enumerate(usecases):
-#         # Load the entire Excel file
-#         xls = pd.ExcelFile(file_paths[i])
-        
-#         # Iterate over each sheet in the Excel file
-#         for sheet_name in xls.sheet_names:
-#             df = pd.read_excel(file_paths[i], sheet_name=sheet_name)
-#             id_ = 1
-#             for index, row in df.iterrows():
-#                 workflow_steps = row[3].split(' -> ')
-#                 workflow_tuples = [(workflow_steps[j], workflow_steps[j+1]) for j in range(len(workflow_steps) - 1)]
-                
-#                 pmid_workflow_tuples = convert_workflow_to_pmid_tuples([workflow_tuples], metadata_filename)[0] # expects and outputs list
-                
-#                 usecase_data = {
-#                     'ratingAvg': float(row[0]),
-#                     'expert1': float(row[1]),
-#                     'expert2': float(row[2]),
-#                     'workflow': workflow_tuples,
-#                     'pmid_workflow': pmid_workflow_tuples,
-#                     'usecase': usecase,
-#                     'scenario': sheet_name,
-#                     'id': id_ # creating a unique id to make deleting duplicates
-#                 }
-#                 usecases[usecase].append(usecase_data)
-
-#     json_data = json.dumps(usecases, indent=4)
-#     with open('usecases_rated.json', 'w') as json_file:
-#         json_file.write(json_data)
-
-#     return usecases
-
-
-# def parse_xml_str_workflow(file_paths):
-#     # List of Excel file paths
-#     file_paths = ['metriccomp/usecase1.xlsx', 'metriccomp/usecase2.xlsx', 'metriccomp/usecase3.xlsx', 'metriccomp/usecase4.xlsx']
-
-#     usecases = []
-    
-#     for i, file_path in enumerate(file_paths, start=1):
-#         df = pd.read_excel(file_path, sheet_name=0)
-#         for index, row in df.iterrows():
-#             usecase_data = {
-#                 'ratingAvg': float(row[0]),
-#                 'expert1': float(row[1]),
-#                 'expert2': float(row[2]),
-#                 'workflow': str(row[3]),
-#                 'usecase': i
-#             }
-#             usecases.append(usecase_data)
-
-#     data = {"usecases": usecases}
-
-#     # print(data)
-#     # Convert to JSON string
-#     json_data = json.dumps(data, indent=4)
 
 
 
-#     # Optionally, save to a file
-#     with open('ratingsOfusecases.json', 'w') as json_file:
-#         json_file.write(json_data)
-
-#     return data
-
-
-
-
-import pandas as pd
-import json
 
 def parse_xml_unseparated_usecases(file_paths):
     # List of Excel file paths
@@ -298,8 +191,6 @@ def convert_workflow_to_pmid_tuples(workflows, metadata_filename):
 
 ###
 
-import copy
-import ast
 
 def avg_rating(repeated_workflows, workflow_json, metadata_filename =''):
     repeated_workflow_ratings = {

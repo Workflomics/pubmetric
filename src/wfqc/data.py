@@ -8,7 +8,7 @@ from tqdm import tqdm
 from datetime import datetime, timedelta
 import glob
 import json
-
+import numpy as np
 import asyncio              # -"-
 import aiohttp              # Used for aggregating requests into single session
 import nest_asyncio         # For jupyter asyncio compatibility 
@@ -73,7 +73,7 @@ async def get_pmid_from_doi(doi_tools, doi_library_filename = 'doi_pmid_library.
             
             try:
                 doi_pmid = str(result.get('esearchresult').get('idlist')[0])
-                if doi_pmid and doi_pmid != 'null' and doi_pmid != "38866554": 
+                if doi_pmid and doi_pmid != 'null' and doi_pmid not in doi_library.items()[1]: # this is no dumb need tolook into this more
                     tool["pmid"] = doi_pmid
                     doi_library[doi] = doi_pmid  # Update the library
                     library_updates = True
@@ -82,7 +82,7 @@ async def get_pmid_from_doi(doi_tools, doi_library_filename = 'doi_pmid_library.
         
     if library_updates:
         print(f"Writing new doi, pmid pairs to file {doi_library_filename}")
-        with open(doi_library_filename, 'a') as f: #TODO a ok?
+        with open(doi_library_filename, 'w') as f: #TODO a ok? # appending new dict not good, wan tto extend contents
             json.dump(doi_library, f) # but this will still be wierd. change in furture
     
     updated_doi_tools = [tool for tool in doi_tools if tool.get('pmid')]
@@ -116,9 +116,6 @@ async def get_pmids(topicID, testSize = None):
     print("Downloading tool metadata from bio.tools")
     async with aiohttp.ClientSession() as session: 
         while page:
-            if testSize: # not the most optimal for testing, but better than noting? 
-                if page >= testSize:
-                    break # for debug 
             # send request for tools on the page, await further requests and return resonse in json format
             biotools_url = f'https://bio.tools/api/t?topicID=%22{topicID}%22&format=json&page={page}'
             biotool_data = await aggregate_requests(session, biotools_url)
@@ -136,7 +133,7 @@ async def get_pmids(topicID, testSize = None):
                     name = tool.get('name') 
                     publications = tool.get('publication') # does this cause a problem if there is no publication? 
                     topic = tool.get('topic')
-               
+                    
                     if isinstance(publications, list): #TODO: I want them all!
                         nr_publications = len(publications)
                         try:
@@ -152,6 +149,13 @@ async def get_pmids(topicID, testSize = None):
 
                     all_publications = [pub.get('pmid') for pub in publications]
 
+                    if primary_publication.get('metadata'):
+                        age = primary_publication['metadata'].get('date') 
+                        if age:
+                            age = int(age.split('-')[0])
+                    else: 
+                        age = None
+
                     if primary_publication.get('pmid'):
                         pmid_tools.append({
                             'name': name,
@@ -159,6 +163,7 @@ async def get_pmids(topicID, testSize = None):
                             'topic': topic[0]['term'],
                             'nrPublications':  nr_publications,
                             'allPublications': all_publications,
+                            'pubDate': age,
                             'pmid': str(primary_publication['pmid'])
 
                         })
@@ -169,8 +174,12 @@ async def get_pmids(topicID, testSize = None):
                             'doi': primary_publication.get('doi'),
                             'topic': topic[0]['term'],
                             'nrPublications':  nr_publications,
-                            'allPublications': all_publications
+                            'allPublications': all_publications,
+                            'pubDate': age
                         })
+
+                if len(pmid_tools) + len(doi_tools) >= testSize:
+                    break
 
                 page = biotool_data.get('next')
                 if page: # else page will be None and loop will stop 
@@ -182,9 +191,9 @@ async def get_pmids(topicID, testSize = None):
     # Record the total nr of tools
     total_nr_tools = int(biotool_data['count']) if biotool_data and 'count' in biotool_data else 0
 
-    return pmid_tools, doi_tools, total_nr_tools
+    return pmid_tools, doi_tools, total_nr_tools 
 
-def check_datafile(filename, topicID, update = False):
+def check_datafile(filename, topicID, update = False, testSize = None):
 
     """
     Checks if the metadata json file needs to be updatesd or not
@@ -200,9 +209,16 @@ def check_datafile(filename, topicID, update = False):
         Determines wether or not to force the creation of a new data file
     """
 
+
     if not filename: # if no given filename 
+        if testSize:
+            prefix = f'tool_metadata_test{testSize}_{topicID}'
+        else: 
+            prefix = f'tool_metadata_{topicID}'
+
         date_format = "%Y%m%d"
-        pattern = f'tool_metadata_{topicID}*'
+
+        pattern = f'{prefix}*' #TODO. this means every size of a testfile needs to be regenerated 
         matching_files = glob.glob(pattern)
 
         if matching_files:
@@ -217,7 +233,8 @@ def check_datafile(filename, topicID, update = False):
                 return (filename, True) # True, as in load the file 
         else:
             print("No existing bio.tools file. Downloading data.") 
-        filename = f'tool_metadata_{topicID}_{datetime.now().strftime(date_format)}.json' 
+
+        filename = f'{prefix}_{datetime.now().strftime(date_format)}.json' 
 
     else:
         print("Proceeding with custom file, please note that the contents may be dated.")
@@ -225,7 +242,37 @@ def check_datafile(filename, topicID, update = False):
     return (filename, False) # False, as in create the file 
 
 
-def get_tool_metadata(outpath, topicID="topic_0121", filename = None, update = False ): 
+# TODO: improve with asyncio 
+async def get_publication_dates(tool_metadata): 
+    tools_without_pubdate = 0
+    print(tool_metadata[:5])
+    async with aiohttp.ClientSession() as session: 
+        for tool in tqdm(tool_metadata, desc= 'Downloading publication dates'):
+
+            if tool['pubDate'] and tool['pubDate']!='null': # only fetch info for the ones that did not already have it 
+                continue
+
+            tools_without_pubdate += 1
+            pmid = tool['pmid']
+            url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={pmid}&retmode=json"
+
+            data = await aggregate_requests(session, url)
+            
+            if 'result' in data and pmid in data['result']:
+                try:
+                    pub_date = data['result'][pmid]['pubdate']
+
+                    tool['pubDate'] = int(str(pub_date).split()[0]) # only include year
+                except:
+                    tool['pubDate'] = None
+            else:
+                tool['pubDate'] = None
+    print(f"Nr of tools in bio.tools without a publication date: {tools_without_pubdate}")
+    return tool_metadata # TODO: do I have to return it or can I just update it using the function, i think i can just update it? 
+
+
+
+def get_tool_metadata(outpath, topicID="topic_0121", filename = None, update = False, testSize = None ): 
                                                         # TODO: should add parameter for optional forced retrieval - even if csv file, still recreate it 
                                                         # TODO: Currently no timing - add tracker
     """
@@ -246,21 +293,28 @@ def get_tool_metadata(outpath, topicID="topic_0121", filename = None, update = F
         determines wether or not to force the retrieval  of a new datafile
     """
 
+    np.random.seed(42) #TODO: should it be configurable?
 
     # File name checking and creation 
-    filename, load = check_datafile(filename, topicID, update)
+    filename, load = check_datafile(filename, topicID, update, testSize)
 
     if load:
         with open(filename, "r") as f:
             metadata_file = json.load(f)
-        return metadata_file
+        if testSize:
+            test_tools = np.random.choice(metadata_file['tools'], size = testSize) 
+            metadata_file['tools'] = test_tools
+            return metadata_file
+        else:
+            return metadata_file
     
     # Creating json file 
 
     metadata_file = {"creationDate": str(datetime.now())}
 
     # Download bio.tools metadata
-    pmid_tools, doi_tools, tot_nr_tools = asyncio.run(get_pmids(topicID))
+
+    pmid_tools, doi_tools, tot_nr_tools = asyncio.run(get_pmids(topicID, testSize))
 
     metadata_file['totalNrTools'] = tot_nr_tools  
     metadata_file['biotoolsWOpmid'] = len(doi_tools)
@@ -271,14 +325,17 @@ def get_tool_metadata(outpath, topicID="topic_0121", filename = None, update = F
     metadata_file["nrpmidfromdoi"] = len(doi_tools)
 
     all_tools = pmid_tools + doi_tools
-    metadata_file["tools"] = all_tools
+
+    all_tools_with_age = asyncio.run(get_publication_dates(all_tools))
+
+    metadata_file["tools"] = all_tools_with_age
 
     with open(filename, 'w') as f:
             json.dump(metadata_file, f)
 
     # If there were any pages, pmid not empty, check how many tools were retrieved and how many tools had pmids
 
-    print(f'Found {len(all_tools)} out of a total of {tot_nr_tools} tools with PMIDS.')
+    print(f'Found {len(all_tools_with_age)} out of a total of {tot_nr_tools} tools with PMIDS.')
 
     return metadata_file
 
