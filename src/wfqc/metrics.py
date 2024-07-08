@@ -1,5 +1,6 @@
 import igraph
 import numpy as np
+import math
 
 
 
@@ -30,7 +31,6 @@ def get_graph_edge_weight(graph, edge):
     return weight
 
 
-import math
 
 
 def invert_edge_weights(G):
@@ -42,8 +42,6 @@ def invert_edge_weights(G):
         edge["weight"] = inverted_weight 
 
     return inverted_G  
-
-inv_G = invert_edge_weights(G)
 
 
 def sum_metric(graph, workflow, normalise = True):

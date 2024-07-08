@@ -78,11 +78,6 @@ def test_get_graph_edge_weight():
         weight = get_graph_edge_weight(test_coG, edge)
         assert weight == expected_weight
  
-def test_simple_sum_metric():
-    test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
-    expected_scores = [6, 3] # obviously here the longer networks will be better, this is dumb
-    for i, workflow in enumerate(test_workflows):
-        assert simple_sum_metric(test_coG, workflow) == expected_scores[i]
 
 def test_sum_metric():
     test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
