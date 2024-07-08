@@ -74,8 +74,7 @@ def test_testsize_citation_network(shared_datadir):
     assert len(G.vs['name']) > 0 
 
 def test_load_citation_network(shared_datadir):
-    inpath = os.path.join(shared_datadir, "out")
-    G = nw.create_citation_network(loadData=True, inpath = inpath) 
+    G = nw.create_citation_network(loadData=True, inpath = shared_datadir) 
     assert len(G.vs['name']) > 0 
 
 
