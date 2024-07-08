@@ -24,9 +24,9 @@ import wfqc.data
 
 
 
-async def download_data(outpath, testSize, topicID):
+async def download_data(outpath, testSize, topicID, filepath = None):
     # Retrieve the data 
-    tool_metadata = wfqc.data.get_tool_metadata(outpath=outpath, topicID=topicID, testSize= testSize) #TODO: gettollmetadata needs testsize
+    tool_metadata = wfqc.data.get_tool_metadata(outpath=outpath, topicID=topicID, testSize= testSize, filename=filepath) #TODO: gettollmetadata needs testsize
     pmids = [tool['pmid'] for tool in tool_metadata['tools']] # its a json now
 
     # Randomly picks out a subset of the pmids
@@ -149,7 +149,7 @@ def create_graph(edges, tool_dictionary, includeCitationNodes = False):
 
 
 
-def create_citation_network(topicID="topic_0121", testSize='', randomSeed=42, loadData=True, filePath='', outpath = None, inpath = '', saveFiles=True): # TODO: I just threw  code into this function- improve
+def create_citation_network(topicID="topic_0121", testSize='', randomSeed=42, loadData=True, filepath=None, outpath = None, inpath = '', saveFiles=True): # TODO: I just threw  code into this function- improve
     
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph
@@ -202,7 +202,7 @@ def create_citation_network(topicID="topic_0121", testSize='', randomSeed=42, lo
             os.mkdir(outpath)
 
         # Downloading data
-        edges, tool_dictionary = asyncio.run(download_data(outpath,testSize, topicID))
+        edges, tool_dictionary = asyncio.run(download_data(outpath,testSize, topicID, filepath = filepath))
 
         # Creating the graph using igraph
         print("Creating citation graph using igraph.")

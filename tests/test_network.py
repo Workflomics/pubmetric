@@ -47,6 +47,18 @@ edges = [
 
 nodes_in_final_network = ['TA', 'TB', 'TC', 'TD', 'TE', 'TF', 'CJ', 'CK', 'CL', 'CO', 'CQ' ]
 tools_in_final_network = ['TA', 'TB', 'TC', 'TD', 'TE', 'TF']
+tools_in_final_network = ['TA', 'TB', 'TC', 'TD', 'TE', 'TF']
+tool_metadata = {
+    "tools": [
+        {'name': 'TA', 'pmid': 'TA'},
+        {'name': 'TB', 'pmid': 'TB'},
+        {'name': 'TC', 'pmid': 'TC'},
+        {'name': 'TD', 'pmid': 'TD'},
+        {'name': 'TE', 'pmid': 'TE'},
+        {'name': 'TF', 'pmid': 'TF'}
+    ]
+}
+
 
 
 Graph = igraph.Graph.TupleList(edges, directed=True)
@@ -56,8 +68,9 @@ Graph = igraph.Graph.TupleList(edges, directed=True)
 
 # TODO: test on  fake data also or instead
 
-def test_testsize_citation_network(): 
-    G = nw.create_citation_network(loadData=False, testSize=10) 
+def test_testsize_citation_network(shared_datadir): 
+    filename = os.path.join(shared_datadir, "tool_metadata_test20_topic_0121_20250705.json")
+    G = nw.create_citation_network(loadData=False, testSize=20, filepath=filename) 
     assert len(G.vs['name']) > 0 
 
 def test_load_citation_network(shared_datadir):
@@ -72,12 +85,12 @@ def test_cocitation_graph():
     assert sorted(tools_in_final_network) == sorted(G.vs['name'])
 
 def test_create_graph():
-    G, included_tools, node_degree_dict = nw.create_graph(edges, tools, includeCitationNodes=True)
+    G, included_tools, node_degree_dict = nw.create_graph(edges, tool_metadata, includeCitationNodes=True)
     print(np.sort(nodes_in_final_network), np.sort(G.vs['name']))
     assert sorted(nodes_in_final_network) == sorted(G.vs['name'])
 
+# need to add download data but bio.tools is down so I cant test 
 
-# need to merge with metrics to test download data
 # def test_download_data():
 
 

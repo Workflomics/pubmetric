@@ -70,10 +70,14 @@ async def get_pmid_from_doi(doi_tools, doi_library_filename = 'doi_pmid_library.
 
             url = f"http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=PubMed&retmode=json&term={doi}"
             result = await aggregate_requests(session, url)
-            
             try:
-                doi_pmid = str(result.get('esearchresult').get('idlist')[0])
-                if doi_pmid and doi_pmid != 'null' and doi_pmid not in doi_library.items()[1]: # this is no dumb need tolook into this more
+                doi_pmid = str(result.get('esearchresult').get('idlist')[0])   
+                print(doi_pmid)             
+                # if doi_library:
+                #     if doi_library.items()[1]:# this is no dumb need tolook into this more # solve why it gets stuck here! 
+                #         continue
+                print(doi_pmid)
+                if doi_pmid and doi_pmid != 'null': 
                     tool["pmid"] = doi_pmid
                     doi_library[doi] = doi_pmid  # Update the library
                     library_updates = True
@@ -86,7 +90,8 @@ async def get_pmid_from_doi(doi_tools, doi_library_filename = 'doi_pmid_library.
             json.dump(doi_library, f) # but this will still be wierd. change in furture
     
     updated_doi_tools = [tool for tool in doi_tools if tool.get('pmid')]
-
+    print(updated_doi_tools)
+    print(doi_tools)
     print(f"Found {len(updated_doi_tools)} more tools with pmid using their doi's")
 
     return updated_doi_tools
@@ -221,6 +226,7 @@ def check_datafile(filename, topicID, update = False, testSize = None):
         pattern = f'{prefix}*' #TODO. this means every size of a testfile needs to be regenerated 
         matching_files = glob.glob(pattern)
 
+
         if matching_files:
             matching_files.sort(key=os.path.getmtime)
             filename = matching_files[-1]          
@@ -235,17 +241,16 @@ def check_datafile(filename, topicID, update = False, testSize = None):
             print("No existing bio.tools file. Downloading data.") 
 
         filename = f'{prefix}_{datetime.now().strftime(date_format)}.json' 
-
     else:
         print("Proceeding with custom file, please note that the contents may be dated.")
-
+        return (filename, True)
+    
     return (filename, False) # False, as in create the file 
 
 
 # TODO: improve with asyncio 
 async def get_publication_dates(tool_metadata): 
     tools_without_pubdate = 0
-    print(tool_metadata[:5])
     async with aiohttp.ClientSession() as session: 
         for tool in tqdm(tool_metadata, desc= 'Downloading publication dates'):
 
