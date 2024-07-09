@@ -4,10 +4,17 @@ import pandas as pd
 import numpy as np
 import json 
 import random
-
 import copy
 import ast
 from sklearn.model_selection import train_test_split
+import sys
+import os
+import aiohttp
+from tqdm import tqdm       
+
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
+import wfqc.data 
 
 
 def stratified_split(data, test_size=0.2, random_state=42):
@@ -186,12 +193,6 @@ def convert_workflow_to_pmid_tuples(workflows, metadata_filename):
 
     return pmid_workflows
 
-
-
-
-###
-
-
 def avg_rating(repeated_workflows, workflow_json, metadata_filename =''):
     repeated_workflow_ratings = {
         workflow: [ next(item['ratingAvg'] for item in workflow_json if item['id'] == id_) for id_ in ids]
@@ -237,3 +238,12 @@ def unique_workflows(workflow_json, metadata_filename):
     return avg_rating(repeated_workflows, workflow_json, metadata_filename)
 
 
+
+async def get_citations(filename):
+    pmids = wfqc.data.get_pmids_from_file(filename)
+    async with aiohttp.ClientSession() as session:
+        citation_list = []
+        for article_id in tqdm(pmids, desc='Downloading citations from EuropePMC'):
+            citation_ids = await wfqc.data.europepmc_request(session, article_id)
+            citation_list.append(citation_ids)
+        return citation_list
