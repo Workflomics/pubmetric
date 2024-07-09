@@ -1,8 +1,7 @@
 import igraph
 import numpy as np
 import math
-
-
+import statistics
 
 def get_node_ids(graph: igraph.Graph, key:str= "name") -> dict:
     """"
@@ -481,14 +480,13 @@ def complete_citation(graph, workflow, citation_data_file, normalise = True):
         return sum(total_weight)*min(total_weight)
     
 
-def citations(workflow:list, citation_data_file:str, normalise:bool = True) -> int:
+def citations(workflow:list, citation_data_file:str) -> int:
     """
-    Simply returns the median nr citations of all of the primary publications of tools in the workflow
+    Simply returns the median number citations of all of the primary publications of tools in the workflow.
     
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param citation_data_file: A string of the name of the JSON file containing citation data. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
-    :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
 
     :return: Integer value of the median number of citations.
     
@@ -507,16 +505,16 @@ def citations(workflow:list, citation_data_file:str, normalise:bool = True) -> i
         return 0
     
     for tool in tool_list:
-        total_citations.append([t['nrCitations'] for t in citation_data_file['tools'] if t['pmid'] == tool])
+        citation_number = [t['nrCitations'] for t in citation_data_file['tools'] if t['pmid'] == tool]
+        if citation_number:
+            total_citations.append(citation_number[0]) #TODO: this does not work if no results
 
-    if normalise:
-        return sum(total_citations)/n
-    else:
-        return sum(total_citations)
+    if total_citations:
+        return statistics.median(total_citations)
     
 
 
-    ### BELOW needs updates, not because it does not work, but because it is dumb
+### BELOW needs updates, not because it does not work, but because it is dumb
 
 
 # TODO this shoudl just be an option in the previous metric, only diff is if multiplied or divided
