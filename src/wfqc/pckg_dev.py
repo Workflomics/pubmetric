@@ -18,6 +18,9 @@ import wfqc.data
 
 
 def stratified_split(data, test_size=0.2, random_state=42):
+    """
+    splits the annotated dataset from the APE in the wild paper into 4 different bins based on rating
+    """
     rating_bins = [0, 1, 2, 3]
 
     for d in data:
@@ -47,6 +50,9 @@ def stratified_split(data, test_size=0.2, random_state=42):
 
 
 def stratified_split_usecases(usecases, test_size=0.2, randomseed=42):
+    """
+    splits the annotated dataset from the APE in the wild paper into bins based on usecases. No longer used. 
+    """
     random.seed(randomseed)# make sure it is always same 
     train_set = []
     test_set = []
@@ -74,15 +80,15 @@ def stratified_split_usecases(usecases, test_size=0.2, randomseed=42):
 
 
 def parse_xml(file_paths, metadata_filename):
+    """ Function to parse the xml files from the APE in the wild paper. 
+    Saving each workflow as a list of tuples instead, along with other meta data in a dictionary """
     
     usecases = []
     id_ = 1
 
     for i, file_path in enumerate(file_paths):
-        # Load the entire Excel file
         xls = pd.ExcelFile(file_path)
         
-        # Iterate over each sheet in the Excel file
         for sheet_name in xls.sheet_names:
             df = pd.read_excel(file_path, sheet_name=sheet_name)
             
@@ -113,13 +119,8 @@ def parse_xml(file_paths, metadata_filename):
     return usecases
 
 
-
-
-
 def parse_xml_unseparated_usecases(file_paths):
-    # List of Excel file paths
-    file_paths = ['metriccomp/usecase1.xlsx', 'metriccomp/usecase2.xlsx', 'metriccomp/usecase3.xlsx', 'metriccomp/usecase4.xlsx']
-
+    """ parsing xml files split bu usecases without metadata. Old."""
     usecases = []
 
     for i, file_path in enumerate(file_paths, start=1):
@@ -183,6 +184,7 @@ def pmid_name_converter(id_, metadata_filename): # TODO change to json
 
 
 def convert_workflow_to_pmid_tuples(workflows, metadata_filename):
+    """ given a workflow represented as a list of tuples (edges) where the source and targets are tool names, this function converts them to tuples of PmIDs"""
 
     pmid_workflows = []
     for workflow in workflows:
@@ -194,6 +196,7 @@ def convert_workflow_to_pmid_tuples(workflows, metadata_filename):
     return pmid_workflows
 
 def avg_rating(repeated_workflows, workflow_json, metadata_filename =''):
+    """calculates the average rating for workflows that are repeated within the dataset""" #TODO: Look at how much these vary for each expert  
     repeated_workflow_ratings = {
         workflow: [ next(item['ratingAvg'] for item in workflow_json if item['id'] == id_) for id_ in ids]
         for workflow, ids in repeated_workflows.items()
@@ -216,6 +219,9 @@ def avg_rating(repeated_workflows, workflow_json, metadata_filename =''):
     return [new_workflow_json, new_workflow_json_repeated, new_workflow_json + new_workflow_json_repeated]
 
 def unique_workflows(workflow_json, metadata_filename):
+    """ 
+    Takes all workflows in the APE in the wild dataset and returns only the unique ones, where repeated workflows are given the average rating of all ratings they recieved. 
+    """
     all_workflows = {workflow['id']: str(sorted(workflow['workflow'])) for workflow in workflow_json} # making them sorted lists, so they arte hashable
     unique_workflows = {}
     repeated_workflows = {}
@@ -240,6 +246,7 @@ def unique_workflows(workflow_json, metadata_filename):
 
 
 async def get_citations(filename):
+    """ download citations for all tools in the meta data file"""
     pmids = wfqc.data.get_pmids_from_file(filename)
     async with aiohttp.ClientSession() as session:
         citation_list = []
