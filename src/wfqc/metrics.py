@@ -32,7 +32,7 @@ def get_graph_edge_weight(graph: igraph.Graph, edge: tuple) -> float:
     :return: A float representing the weight of a graph
     """
 
-    id_dict = get_node_ids(graph)
+    id_dict = get_node_ids(graph) # TODO: cnat regen this every time. Move out? 
 
     if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']:
         return None # if either node is not in the graph, then the weight is None
@@ -77,10 +77,12 @@ def sum_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) -> flo
 
     :return: Float value of the sum metric.
     """
+
     weights = []
-    
+    print(graph.es.attributes())
     for edge in workflow:
-        weights.append(graph.es[edge]['weight'])
+        print(edge)
+        weights.append(get_graph_edge_weight(graph, edge))
 
     if weights:
         if normalise:
