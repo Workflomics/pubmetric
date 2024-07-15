@@ -109,6 +109,6 @@ def test_logprod_metric():
     for i, workflow in enumerate(test_workflows):
         assert logprod_metric(test_coG, workflow) == round(expected_scores[i], 3)
 
-def test_complete_tree():
-    assert complete_tree(test_coG, [('TA', 'TB'), ('TA', 'TC'), ('TA', 'TD')], normalise=True) == 2.75
-    assert complete_tree(test_coG, [('TA', 'TB'), ('TA', 'TC'), ('TA', 'TD')], normalise=False) == 11
+def test_connectivity():
+    assert connectivity(test_coG, [('TA', 'TB'), ('TA', 'TC'), ('TA', 'TD')], normalise=True) == 2.75
+    assert connectivity(test_coG, [('TA', 'TB'), ('TA', 'TC'), ('TA', 'TD')], normalise=False) == 11

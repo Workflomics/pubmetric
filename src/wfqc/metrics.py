@@ -219,7 +219,7 @@ def logprod_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) ->
         return 0.0 # empty workflow has score 0 
     
 
-def complete_tree(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+def connectivity(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
     """
     Calculates the sum of the edge weights between all possible pairs of tools in a workflow. 
 
@@ -229,11 +229,11 @@ def complete_tree(graph: igraph.Graph, workflow: list, normalise: bool=True) -> 
 
     :return: Float value of the logarithmic product metric.
     """   
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)  
-    
+    if not workflow or not isinstance(workflow, list):
+        return 0
+
+    tools = {pmid for tup in workflow if tup is not None for pmid in tup if pmid is not None} # collect what tools are in the workflow, ignoring Nones
+ 
 
     total_weight = 0
     tool_list = list(tools)
@@ -255,13 +255,13 @@ def complete_tree(graph: igraph.Graph, workflow: list, normalise: bool=True) -> 
 #TODO: 1.change names - remove "metric" from the names? 2. Tree should perhaps be renamed 3make completesum not repeat code, rather call the completetree emtric again, or make it an option in the complete tree
 def complete_sum(graph: igraph.Graph, workflow: list,  normalise:bool = True, factor:float = 1.0):
     """
-    Combination metric of the sum_metric() and complete_tree() metrics, where the edges in the workflow are given more importance.
+    Combination metric of the sum_metric() and connectivity() metrics, where the edges in the workflow are given more importance.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param normalise: Boolean flag indicating whether to normalise the metric.
     :param factor: Float value specifying how much extra weight the edges that are in the workflow are given relative to the rest of the edges between nodes.
-        A factor of 0 gives no extra weight to the workflow edges and thus will give the same value as the regular complete_tree() metric. 
+        A factor of 0 gives no extra weight to the workflow edges and thus will give the same value as the regular connectivity() metric. 
 
     :return: Float value of the complete three and sum combination metric.
     """   
@@ -339,16 +339,16 @@ def age_norm_sum_metric(graph, workflow, metadata_file, normalise = True) -> flo
     else: 
         return 0.0 # empty workflow has score 0 
     
-def complete_tree_age_norm(graph, workflow, metadata_file, normalise=True):
+def connectivity_age_norm(graph, workflow, metadata_file, normalise=True):
     """
-    Combination metric of the age_norm_sum_metric() and complete_tree() metrics, where the edges in the workflow are given more importance.
+    Combination metric of the age_norm_sum_metric() and connectivity() metrics, where the edges in the workflow are given more importance.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param metadata_file: The dictionary of tool matadata. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
     :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
 
-    :return: Float value of the age-normalised complete_tree() metric.
+    :return: Float value of the age-normalised connectivity() metric.
 
     """
     tools = set()
@@ -396,13 +396,13 @@ def complete_tree_age_norm(graph, workflow, metadata_file, normalise=True):
 
 def complete_min(graph, workflow,  normalise = True): 
     """
-    The complete_tree() metric which punishes single bad links. 
+    The connectivity() metric which punishes single bad links. 
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
 
-    :return: Float value of the bad edge penalising complete_tree() metric.
+    :return: Float value of the bad edge penalising connectivity() metric.
 
     """
     tools = set()
@@ -437,14 +437,14 @@ def complete_min(graph, workflow,  normalise = True):
 
 def complete_citation(graph, workflow, citation_data_file, normalise = True):
     """
-    A variation of the complete_tree() metric, where the edges are divided by the mean number of citations of the source and target.
+    A variation of the connectivity() metric, where the edges are divided by the mean number of citations of the source and target.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param metadata_file:  A string of the name of the JSON file containing tool meta data. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
     :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
 
-    :return: Float value of the citation-normalised complete_tree() metric.
+    :return: Float value of the citation-normalised connectivity() metric.
 
     """
 
@@ -493,6 +493,8 @@ def citations(workflow:list, citation_data_file:str) -> int:
     :return: Integer value of the median number of citations.
     
     """
+    if not workflow or not isinstance(workflow, list):
+        return 0
     tools = set()
     for edge in workflow:
         if edge:
@@ -555,7 +557,7 @@ def mult_age_norm_sum_metric(graph, workflow, metadata_file, normalise = True):
     else: 
         return 0 # empty workflow has score 0 
     
-def mult_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True): # TODO this shoudl just be an option in the previous metric, only diff is if multiplied or divided
+def mult_connectivity_age_norm(graph, workflow, metadata_file, normalise=True): # TODO this shoudl just be an option in the previous metric, only diff is if multiplied or divided
     tools = set()
     for edge in workflow:
         if edge:
@@ -595,7 +597,7 @@ def mult_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True):
     
 
    
-def sub_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True): # TODO this shoudl just be an option in the previous metric, only diff is if subtracted from today or divided
+def sub_connectivity_age_norm(graph, workflow, metadata_file, normalise=True): # TODO this shoudl just be an option in the previous metric, only diff is if subtracted from today or divided
 
     tools = set()
     for edge in workflow:
@@ -638,7 +640,7 @@ def sub_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True): 
     
 
   
-def sub_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True): #TODO: make this an option in above metric
+def sub_connectivity_age_norm(graph, workflow, metadata_file, normalise=True): #TODO: make this an option in above metric
     tools = set()
     for edge in workflow:
         if edge:
