@@ -56,15 +56,22 @@ def generate_random_workflow(tool_list: list, workflow:list) -> list:
 
     :return: List of tuples representing a workflow where each tool has been replaced by another, random, one.  
     """
-    workflow_tools = np.unique([element for tuple in workflow for element in tuple])
+    sources_and_targets = [element for tuple in workflow for element in tuple]
+    
+    workflow_tools = np.unique( [element for element in sources_and_targets if element != None] )
     nr_tools = len(workflow_tools)
 
     random_workflow = []
     random_workflow_tools = np.random.choice(tool_list, nr_tools)
+    random_workflow_tools = [str(random_tool) for random_tool in random_workflow_tools]
 
     # Mapping original tools to the new ones and using the mapping to replace them. 
     tool_mapping = dict(zip(workflow_tools, random_workflow_tools))
-    random_workflow = [(str(tool_mapping[edge[0]]), str(tool_mapping[edge[1]])) for edge in workflow]
+
+    if None in sources_and_targets: # Keep Nones as they are in the wor
+        tool_mapping[None] = None 
+
+    random_workflow = [(tool_mapping[edge[0]], tool_mapping[edge[1]]) for edge in workflow]
     
     return random_workflow
 

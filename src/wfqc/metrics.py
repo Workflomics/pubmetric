@@ -482,11 +482,10 @@ def complete_citation(graph, workflow, citation_data_file, normalise = True):
         return sum(total_weight)*min(total_weight)
     
 
-def citations(workflow:list, citation_data_file:str) -> int:
+def citations(citation_data_file:str, workflow:list) -> int:
     """
     Simply returns the median number citations of all of the primary publications of tools in the workflow.
     
-    :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param citation_data_file: A string of the name of the JSON file containing citation data. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
 
