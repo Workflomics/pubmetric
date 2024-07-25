@@ -1,0 +1,71 @@
+name,url,length,tool repetitions
+CWL Macromolecular Coarse-Grained Flexibility tutorial Version 1, https://workflowhub.eu/workflows/552, 29, 
+CWL Protein Conformational Transitions calculations tutorial Version 1, https://workflowhub.eu/workflows/549, 6, 
+Porto-Sinusoidal Vascular Disease transcriptomics analysis workflow Version 1, https://workflowhub.eu/workflows/1040, 7, 
+beacon-workflow main @ 17afa9b (latest), https://workflowhub.eu/workflows/882, 1, 
+GSC (Genotype Sparse Compression) master @ f9e0b1e, https://workflowhub.eu/workflows/885,,
+Use Case 13: Novel Cell Surface Targets for Individual Cancer Patients Analyzed with Common Fund Datasets Version 1, https://workflowhub.eu/workflows/814, 13, 
+CWL Molecular Structure Checking Version 1, https://workflowhub.eu/workflows/776, 18, 
+Inclusion Body Myositis Active Subnetwork Identification Workflow master @ 7e4122f (latest), https://workflowhub.eu/workflows/681, 8, 
+rquest-omop-worker-workflow main @ 724775a (latest), https://workflowhub.eu/workflows/471, 1, 
+Metabolome Annotation Workflow (MAW) main @ 2da7fba (latest), https://workflowhub.eu/workflows/510, 1, 
+CWL-based (single-sample) workflow for germline variant calling Version 1, https://workflowhub.eu/workflows/527, 21, True
+CWL-based (multi-sample) workflow for germline variant calling Version 1 , https://workflowhub.eu/workflows/526, 31, True
+CWL-based ChIP-Seq workflow Version 1, https://workflowhub.eu/workflows/525, 32, True
+CWL-based RNA-Seq workflow Version 1, https://workflowhub.eu/workflows/524, 24, True
+Metagenome and metatranscriptome assembly in CWL master @ 39efebc (latest), https://workflowhub.eu/workflows/474, 8, 
+CroMaSt: A workflow for assessing protein domain classification by cross-mapping of structural instances between domain databases and structural alignment v1.1 (latest), https://workflowhub.eu/workflows/390, 20, False
+CWL Protein conformational ensembles generation Version 2 (latest), https://workflowhub.eu/workflows/488, 40, True
+A workflow for marine Genomic Observatories data analysis eosc-life-gos @ deb5427 (latest), https://workflowhub.eu/workflows/384, 6, 
+multiAffinity Version 1, https://workflowhub.eu/workflows/250, 1, 
+COSIFER Version 1, https://workflowhub.eu/workflows/118, 1, 
+WRF / EMEP Linear Workflow main @ 70c6a60, https://workflowhub.eu/workflows/455, 5
+ (Hybrid) Metagenomics workflow, https://workflowhub.eu/workflows/367, 28, True
+LongRead Quality Control and Filtering Version 1, https://workflowhub.eu/workflows/337, 14, 
+Workflow for Illumina Quality Control and Filtering Version 1, https://workflowhub.eu/workflows/336, 18, 
+ Nanopore Assembly Workflow - Deprecated - Version 3 (latest) ,https://workflowhub.eu/workflows/254, 23, True
+Gravitational Wave source Cone Search Version 1, https://workflowhub.eu/workflows/415,, 
+ Metagenomic GEMs from Assembly Version 1, https://workflowhub.eu/workflows/372,11, 
+Metagenomic Binning from Assembly Version 11 (latest), https://workflowhub.eu/workflows/64, 30, True
+Kallisto RNAseq Workflow Version 1,https://workflowhub.eu/workflows/344, 3, 2
+ Nanopore Guppy Basecalling Assembly Workflow Version 1,https://workflowhub.eu/workflows/253, 5, 3
+ COVID-19 PubSeq Pangenome Generate Version 1, https://workflowhub.eu/workflows/63, 11, 
+  CNV_pipeline 1.1.3 (latest), https://workflowhub.eu/workflows/278, 15, 8
+   MGnify - raw-reads analysis pipeline v5.0.7, https://workflowhub.eu/workflows/362, 4, 
+    MGnify - amplicon analysis pipeline v5.0.7, https://workflowhub.eu/workflows/361, 3, 
+ MGnify - assembly analysis pipeline v5.0.7 (latest), https://workflowhub.eu/workflows/360, 4, 
+  Assemblosis v0.1.3-beta, https://workflowhub.eu/workflows/334, 23, False
+ seurat scRNA-seq master @ f44e9e1 (latest), https://workflowhub.eu/workflows/303, 11, 
+  CWL GMX Automatic Ligand Parameterization tutorial Version 2 (latest), https://workflowhub.eu/workflows/255, 2, 2
+   CWL Protein MD Setup tutorial with mutations Version 2 (latest), https://workflowhub.eu/workflows/289,5, 
+ CWL ABC MD Setup tutorial Version 2 (latest), https://workflowhub.eu/workflows/262, 31, True
+  CWL Amber Protein Ligand Complex MD Setup tutorial Version 2 (latest), https://workflowhub.eu/workflows/261, 26, True
+   CWL Amber Protein MD Setup tutorial Version 2 (latest), https://workflowhub.eu/workflows/260, 25, True
+    CWL Protein-ligand Docking tutorial (Fpocket) Version 2 (latest), https://workflowhub.eu/workflows/259, 6, 5
+     CWL Protein Ligand Complex MD Setup tutorial Version 2 (latest), https://workflowhub.eu/workflows/258, 34, True
+  CWL Protein MD Setup tutorial Version 2 (latest), https://workflowhub.eu/workflows/279, 26, True
+   Protein MD Setup tutorial using BioExcel Building Blocks (biobb) in CWL Version 3 (latest), https://workflowhub.eu/workflows/29, 23, True
+    Protein-ligand docking (fpocket) Version 1, https://workflowhub.eu/workflows/257, 6, 
+     exome-alignment Version 1, https://workflowhub.eu/workflows/239, 8, 
+    Quality assessment amplicon classification and functional prediction Version 2 (latest) , https://workflowhub.eu/workflows/154, 10, 
+     entryTitleTest Version 1, https://workflowhub.eu/workflows/188, 2,
+      testEntryTitleNew Version 1, https://workflowhub.eu/workflows/183, 2, 
+       Cryo electron microscopy of SARS-CoV-2 spike in prefusion state Version 1, https://workflowhub.eu/workflows/160, 2, 
+        Spliced RNAseq workflow Version 1, https://workflowhub.eu/workflows/95, 8, 
+         NonSpliced RNAseq workflow Version 1, https://workflowhub.eu/workflows/77, 11, 
+ NGTax Version 7, https://workflowhub.eu/workflows/45,5 , 
+  SPARQL query (in a file) on graph database Version 2 (latest), https://workflowhub.eu/workflows/122 ,, 
+ Molecular Dynamics Simulation Version 1, https://workflowhub.eu/workflows/121, 15, 
+ VIRify v0.4.0, https://workflowhub.eu/workflows/26, 17, 
+ VariantCaller_GATK3.6 Version 1, https://workflowhub.eu/workflows/107, 15, 
+  Example of setting up a simulation system Version 2, https://workflowhub.eu/workflows/98, 15, 
+   Indices builder from GBOL RDF (TTL) Version 1, https://workflowhub.eu/workflows/75, 2, 
+    NMR pipe Version 1, https://workflowhub.eu/workflows/43, 4, 
+     Virus genome assembly with Unicycler and Spades. Version 1, https://workflowhub.eu/workflows/3, 6, 
+     var-PE Version 1 , https://workflowhub.eu/workflows/28, 17, 
+      Genomic variants - SNPs and INDELs detection using SAMTools. Version 1, https://workflowhub.eu/workflows/34, 8, 
+       Genomic variants - SNPs and INDELs detection using GATK4 spark based tools. Version 1, https://workflowhub.eu/workflows/33, 13, 
+        Genomic variants - SNPs and INDELs detection using VARSCAN2. Version 1, https://workflowhub.eu/workflows/31, 9, 
+         Genomic variants - SNPs and INDELs detection using GATK4. Version 1, https://workflowhub.eu/workflows/30,12, 
+
+
