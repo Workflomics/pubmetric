@@ -79,9 +79,7 @@ def sum_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) -> flo
     """
 
     weights = []
-    print(graph.es.attributes())
     for edge in workflow:
-        print(edge)
         weights.append(get_graph_edge_weight(graph, edge))
 
     if weights:
