@@ -18,7 +18,6 @@ setup(
         'tqdm==4.66.2',
         'numpy',
         'matplotlib',
-        'nest_asyncio',
         'jsonpath-ng',
         'ruamel.yaml',
         'cwl_utils',

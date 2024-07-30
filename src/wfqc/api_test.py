@@ -3,6 +3,10 @@ from pydantic import BaseModel
 from typing import Dict
 import tempfile
 
+from wfqc.metrics import *
+from wfqc.workflow import parse_cwl_workflows
+from wfqc.network import create_citation_network
+
 
 app = FastAPI()
 
