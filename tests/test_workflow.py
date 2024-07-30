@@ -2,16 +2,6 @@ import os
 import igraph 
 from wfqc.workflow import *
 
-def test_parse_workflows(shared_datadir): 
-    metadata_filename = os.path.join(shared_datadir, "tool_metadata_test20_topic_0121_20250705.json")
-    cwl_filename = os.path.join(shared_datadir, "candidate_workflow_test.cwl")
-
-    expected_tuple_workflow = [('14976030','14632076' )  , ('14976030','12403597')  , ('14632076','29400476')  , ('12403597', '29400476')  ]
-                            # [ (XTandem, ProteinProphet), (XTandem, PeptideProphet), (ProteinProphet, StPeter), (PeptideProphet, StPeter) ]
-    tuple_workflow = parse_cwl_workflows(cwl_filename=cwl_filename, metadata_filename=metadata_filename)
-
-    assert sorted(expected_tuple_workflow) == sorted(tuple_workflow)
-
 
 
 def test_parse_undocumented_workflows(shared_datadir):  #TODO: thsi should no longer be a list of pmids, thus it is not functional

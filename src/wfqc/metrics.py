@@ -626,50 +626,6 @@ def mult_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True):
         return float(total_weight)
     
 
-   
-def sub_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True): # TODO this shoudl just be an option in the previous metric, only diff is if subtracted from today or divided
-
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)
-    
-    total_weight = 0
-    tool_list = list(tools)
-    n = len(tool_list)
-    
-    if n == 0:
-        return 0
-
-    for i in range(n):
-        for j in range(i + 1, n):
-            edge = (tool_list[i], tool_list[j])
-            
-            if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']:
-                continue
-
-            edge_weight = get_graph_edge_weight(graph, edge)
-            if not edge_weight:
-                continue
-
-            source_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[0]]
-            target_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[1]]
-            ages = [age for age in (source_age + target_age) if age]
-
-            if ages:
-                avg_age = np.mean(ages)
-                normalised_edge_weight = edge_weight / (2025 - avg_age) # 2025 so no zero div
-                total_weight += normalised_edge_weight
-            else:
-                continue # nrom bu mean?
-
-    if normalise:
-        return float(total_weight) / n
-    else:
-        return float(total_weight)
-    
-
-  
 def sub_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True): #TODO: make this an option in above metric
     tools = set()
     for edge in workflow:
