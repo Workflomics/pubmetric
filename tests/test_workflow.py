@@ -4,17 +4,6 @@ from wfqc.workflow import *
 
 
 
-def test_parse_undocumented_workflows(shared_datadir):  #TODO: thsi should no longer be a list of pmids, thus it is not functional
-    metadata_filename = os.path.join(shared_datadir, "tool_metadata_test20_topic_0121_20250705.json")
-    cwl_filename = os.path.join(shared_datadir, "candidate_workflow_undocumented_test.cwl") # contains not yet containerised tool PEPMatch
-
-    expected_tuple_workflow = [('38110863','14632076' )  , ('38110863','12403597')  , ('14632076','29400476')  , ('12403597', '29400476')  ]
-                            # [ (PEPMatch, ProteinProphet), (PEPMatch, PeptideProphet), (ProteinProphet, StPeter), (PeptideProphet, StPeter) ]
-    tuple_workflow = parse_undocumented_workflows(cwl_filename=cwl_filename, metadata_filename=metadata_filename)
-
-    assert sorted(expected_tuple_workflow) == sorted(tuple_workflow)
-
-
 def test_generate_random_workflow():
     """"
     Comparing two igraph graphs "topologically" to assert that the random workflow generated 

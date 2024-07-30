@@ -67,7 +67,7 @@ async def score_workflows(file: UploadFile = File(None)): # or None for testing!
 @app.post("/recreate_graph/")
 async def recreate_graph(graph_request: GraphRequest): # this should be done on a schedule, is that supposed to be within my package or the main one? can I set up somethign taht runs this once a week?
     try:                                                # If I setup sth like that my own messy checking within the create graph function would not be becessary, whic would be nice to get rid of
-        graph = create_citation_network(topicID=graph_request.topic_id, Loaddata=False)
+        graph = create_citation_network(topicID=graph_request.topic_id, loadData=False)
         # how make sure this is kept in some data directory?
         # OBS here we put graph in path_to_data
         return {"message": "Graph and metadata file recreated successfully"}
