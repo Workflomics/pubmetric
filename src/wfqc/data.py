@@ -10,8 +10,8 @@ import json
 import numpy as np
 import asyncio              
 import aiohttp              
-import nest_asyncio         # For jupyter asyncio compatibility 
-nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
+# import nest_asyncio         # For jupyter asyncio compatibility 
+# nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
 
 # TODO: import jsonpath_ng.ext      # More efficient json processing look into if actually computationally more efficient 
 
@@ -285,7 +285,7 @@ async def get_publication_dates(tool_metadata: list) -> list: #TODO: do I really
 
 # TODO: Currently no timing - add tracker
 # TODO: outpath not used
-def get_tool_metadata(outpath: str, topicID: str = "topic_0121", filename: str = None, update: bool = False, testSize: int = None) -> dict:
+async def get_tool_metadata(outpath: str, topicID: str = "topic_0121", filename: str = None, update: bool = False, testSize: int = None) -> dict:
     """
     Fetches metadata about tools from bio.tools, belonging to a given topicID and returns as a dictionary, as well as saving the metadata as a JSON file. 
     If a recent enough (less than one week old) JSON file already exists, it loads the metadata from it.
@@ -328,19 +328,19 @@ def get_tool_metadata(outpath: str, topicID: str = "topic_0121", filename: str =
 
     # Download bio.tools metadata
 
-    pmid_tools, doi_tools, tot_nr_tools = asyncio.run(get_pmids(topicID, testSize))
+    pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topicID, testSize)
 
     metadata_file['totalNrTools'] = tot_nr_tools  
     metadata_file['biotoolsWOpmid'] = len(doi_tools)
 
     # Update list of doi_tools to include pmid
-    doi_tools = asyncio.run(get_pmid_from_doi(doi_tools))
+    doi_tools = await get_pmid_from_doi(doi_tools)
 
     metadata_file["nrpmidfromdoi"] = len(doi_tools)
 
     all_tools = pmid_tools + doi_tools
 
-    all_tools_with_age = asyncio.run(get_publication_dates(all_tools))
+    all_tools_with_age = await get_publication_dates(all_tools)
 
     metadata_file["tools"] = all_tools_with_age
 

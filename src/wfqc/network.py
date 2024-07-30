@@ -8,8 +8,8 @@ from datetime import datetime
 import json
 import aiohttp
 import asyncio              
-import nest_asyncio         # For jupyter asyncio compatibility 
-nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
+# import nest_asyncio         # For jupyter asyncio compatibility 
+# # nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
 import igraph 
 import sys
 
@@ -23,7 +23,7 @@ import wfqc.data
 
 # TODO: question: testSize is threaded through so many different functions, is this normal? 
 # TODO: now the default for topicID is at the bottom of the fucntions calling it, I think it should be at the top. 
-async def download_data(outpath: str, testSize: int, topicID: str, filepath: str = None) -> tuple:
+async def download_data(outpath: str, testSize: int, topicID: str, tool_metadata, filepath: str = None) -> tuple:
     """
     Runs all methods to download meta data for software tools in bio.tools; Downloads tools from specified domain, retrieves citations for PMIDs, 
     and generates co-citation network edges.
@@ -44,8 +44,6 @@ async def download_data(outpath: str, testSize: int, topicID: str, filepath: str
     if testSize != '': 
         print(f"Creating test-cocitation network of size {testSize}.")
 
-    # Retrieve the data 
-    tool_metadata = wfqc.data.get_tool_metadata(outpath=outpath, topicID=topicID, testSize= testSize, filename=filepath) #TODO: gettollmetadata needs testsize
  
     edges = []
     citation_json ={
@@ -193,7 +191,7 @@ def create_graph(edges: list, tool_dictionary: dict, cocitation: bool = True) ->
 
 
 # TODO: topic int? filepath? rearrange order of param after importance. Loaddata should be false default. 
-def create_citation_network(topicID: str = "topic_0121", testSize: str = '', randomSeed: int = 42, loadData: bool = True, filepath: str = None, outpath: str = None, inpath: str = '', save_files: bool = True) -> igraph.Graph:
+async def create_citation_network(topicID: str = "topic_0121", testSize: str = '', randomSeed: int = 42, loadData: bool = True, filepath: str = None, outpath: str = None, inpath: str = '', save_files: bool = True) -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph.
 
@@ -244,8 +242,10 @@ def create_citation_network(topicID: str = "topic_0121", testSize: str = '', ran
             outpath =  f'out_{datetime.now().strftime("%Y%m%d%H%M")}'
             os.mkdir(outpath)
 
+        tool_metadata = await wfqc.data.get_tool_metadata(outpath=outpath, topicID=topicID, testSize= testSize, filename=filepath) #TODO: gettollmetadata needs testsize
+
         # Downloading data
-        edges, tool_dictionary = asyncio.run(download_data(outpath,testSize, topicID, filepath = filepath))
+        edges, tool_dictionary = await download_data(outpath,testSize, topicID, tool_metadata, filepath = filepath)
 
         # Creating the graph using igraph
         print("Creating citation graph using igraph.")
