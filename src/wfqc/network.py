@@ -8,8 +8,8 @@ from datetime import datetime
 import json
 import aiohttp
 import asyncio              
-import nest_asyncio         # For jupyter asyncio compatibility 
-nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
+# import nest_asyncio         # For jupyter asyncio compatibility 
+# # nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
 import igraph 
 import sys
 

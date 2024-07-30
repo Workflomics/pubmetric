@@ -10,8 +10,8 @@ import json
 import numpy as np
 import asyncio              
 import aiohttp              
-import nest_asyncio         # For jupyter asyncio compatibility 
-nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
+# import nest_asyncio         # For jupyter asyncio compatibility 
+# nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
 
 # TODO: import jsonpath_ng.ext      # More efficient json processing look into if actually computationally more efficient 
 
