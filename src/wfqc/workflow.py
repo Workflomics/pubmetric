@@ -41,10 +41,9 @@ def parse_cwl_workflows(cwl_filename: str, metadata_filename:str) -> list:
     for step in cwl_obj.steps:
         step_id = step.id.split("#")[-1]
 
-        # Collecting all step names, and their corresponding pmids and names
+        # Collecting all step names, and their corresponding pmids
         tool_name = step_id.split('_')[0]
-        workflow_steps[step_id] = {'name': tool_name,
-                          'pmid': next((tool['pmid'] for tool in metadata_file['tools'] if tool['name'] == tool_name), None)}
+        workflow_steps[step_id] = next((tool['pmid'] for tool in metadata_file['tools'] if tool['name'] == tool_name), None)
 
         for input_param in step.in_:
             if input_param.source:
@@ -63,11 +62,8 @@ def parse_cwl_workflows(cwl_filename: str, metadata_filename:str) -> list:
         if source_pmid is not None and target_pmid is not None:
             pmid_edges.append((str(source_pmid), str(target_pmid)))
 
-    tools = {step['name'] for step in workflow_steps.values()}
-
     workflow = {"edges": edges,
-                "steps": workflow_steps,
-                "tools": tools,
+                "steps": workflow_steps, # steps and correspoding pmids
                 "pmid_edges": pmid_edges # Dont know if this si necessary, but it is extracted often
     }
     return workflow

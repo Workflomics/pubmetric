@@ -2,9 +2,13 @@ import igraph
 import numpy as np
 import math
 import statistics
+from typing import List
 
 #TODO: all metrics that need to think about  workflow structure need to be updated to work with the new workflow representation 
 # for ex: compelte tree needs to take into account the repeated tool several times
+
+
+# General functions for interation with graph 
 
 def get_node_ids(graph: igraph.Graph, key:str= "name") -> dict:
     """"
@@ -49,8 +53,6 @@ def get_graph_edge_weight(graph: igraph.Graph, edge: tuple) -> float:
     return float(weight)
 
 
-
-
 def invert_edge_weights(graph: igraph.Graph) -> igraph.Graph:
     """
     Inverts all edge weights in a graph
@@ -69,7 +71,10 @@ def invert_edge_weights(graph: igraph.Graph) -> igraph.Graph:
 
     return inverted_graph  
 
-def tool_level_average_sum(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+
+# Tool level metric
+
+def tool_average_sum(graph: igraph.Graph, workflow: list) -> float:
     """
     Calculates the sum (or average if normalised) of edge weights per tool within a workflow.
 
@@ -77,20 +82,22 @@ def tool_level_average_sum(graph: igraph.Graph, workflow: list, normalise: bool=
     :param workflow: Dictionary with data about the workflow. # TODO reference a certain schema used for this 
     :param normalise: Boolean flag indicating whether to normalise the metric.
 
-    :return: Float value of the sum metric.
+    :return: Dictionary of the tool level metric score for each step
     """
 
     steps = list(workflow['steps'].keys())
     edges = workflow['edges']
 
-    step_scores ={}
+    if not edges: # If it is an empty workflow
+        return {}
 
+    step_scores ={}
     for step in steps: 
         score = []
         for edge in edges:
             if step in edge:
-                pmid_source = next(step_info['pmid'] for step_id, step_info in workflow['steps'].items() if step_id == edge[0] )
-                pmid_target = next(step_info['pmid'] for step_id, step_info in workflow['steps'].items() if step_id == edge[1] )
+                pmid_source = next(pmid for step_id, pmid in workflow['steps'].items() if step_id == edge[0] )
+                pmid_target = next(pmid for step_id, pmid in workflow['steps'].items() if step_id == edge[1] )
 
                 score.append( get_graph_edge_weight(graph, edge = (pmid_source, pmid_target) ) )
         if score:
@@ -98,10 +105,11 @@ def tool_level_average_sum(graph: igraph.Graph, workflow: list, normalise: bool=
         else:
             step_scores[step] = 0
 
-    print(step_scores)
     return step_scores
 
-def workflow_level_average_sum(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+
+# Workflow level metric
+def workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
     """
     Calculates the sum (or average if normalised) of edge weights within a workflow.
 
@@ -109,23 +117,72 @@ def workflow_level_average_sum(graph: igraph.Graph, workflow: list, normalise: b
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param normalise: Boolean flag indicating whether to normalise the metric.
 
-    :return: Float value of the sum metric.
+    :return: Float value of the average sum metric calculated on the edges of the workflow.
     """
 
-    weights = []
+    if not workflow: # if there are no edges
+        return 0 
+
+    aggregated_weight = 0
     for edge in workflow:
-        weights.append(get_graph_edge_weight(graph, edge))
+        weight = get_graph_edge_weight(graph, edge) or 0
+        aggregated_weight += weight
 
-    if weights:
-        if normalise:
-            avg_cocite = sum(weights) / len(weights) 
-        else:
-            avg_cocite = sum(weights)  
-        return float(avg_cocite)
-    else:
-        return 0.0  # If workflow is empty, return 0 as default score
+    return round(float(aggregated_weight/len(workflow) ), 3)
 
-def log_sum_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+
+
+def connectivity(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+    """
+    Calculates the sum of the edge weights between all possible pairs of tools in a workflow.
+    Named after the degree of connectivity - how close it is to being a complete graph - though this is weighted.
+
+    :param graph: An igraph.Graph object representing the co-citation graph.
+    :param workflow: Dictionary representing the workflow. TODO reference schema
+    :param normalise: Boolean flag indicating whether to normalise the metric.
+
+    :return: Float value of the logarithmic product metric.
+    """   
+
+    step_dict = list(workflow['steps'].items())
+    print(step_dict)
+    nr_steps = len(step_dict)
+
+    if nr_steps == 0:
+        return 0.0
+
+    total_weight = 0
+    for i in range( nr_steps ):
+        for j in range(i + 1, nr_steps ):
+            weight = get_graph_edge_weight(graph, (step_dict[i][1], step_dict[j][1])) or 0
+            total_weight += weight # why dont I use this everywhere, skips the if else? TODO!
+
+    nr_possible_edges = nr_steps * (nr_steps - 1) // 2
+
+    return total_weight/nr_possible_edges
+
+def workflow_weighted_connectivity(graph: igraph.Graph, workflow: dict, factor:float = 1.0):
+    """
+    Combination metric of the sum_metric() and complete_tree() metrics, where the edges in the workflow are given more (or less, but I would not recommend that) importance.
+
+    :param graph: An igraph.Graph object representing the co-citation graph.
+    :param workflow: Dictionary representing the workflow. TODO schema
+    :param normalise: Boolean flag indicating whether to normalise the metric.
+    :param factor: Float value specifying how much extra weight the edges that are in the workflow are given relative to the rest of the edges between nodes.
+        A factor of 0 gives no extra weight to the workflow edges and thus will give the same value as the regular complete_tree() metric. 
+
+    :return: Float value of the complete three and sum combination metric.
+    """   
+    pmid_workflow = workflow['pmid_edges'] 
+    workflow_edge_score = workflow_average_sum(graph, pmid_workflow)
+    all_possible_edges_score = connectivity(graph, workflow)
+
+    none_workflow_edges_score = all_possible_edges_score - workflow_edge_score
+
+    workflow_weighted_score = none_workflow_edges_score + workflow_edge_score * factor
+    return float( workflow_weighted_score )
+
+def transformed_workflow_average_sum(graph: igraph.Graph, workflow: List[tuple], transform: str = "log") -> float:
     """
     Calculates the sum (or average if normalised) of the logarithm of edge weights.
 
@@ -135,29 +192,25 @@ def log_sum_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) ->
 
     :return: Float value of the log sum metric.
     """
-    weights = []
-    
+    if not workflow: # If workflow is an empty list
+        return 0 
+
+    aggregated_weight = 0
     for edge in workflow:
-        try:
-            weight = get_graph_edge_weight(graph, edge)
-            if weight: 
-                weights.append(math.log(weight + 1))  # Log of weight + 1 to avoid -inf
-        except:
-            continue  # Skip edge if it's not in the graph or other exception occurs
-
-    if weights:
-        if normalise:
-            avg_cocite = sum(weights) / len(weights)  # Average log cocitation when normalised
+        weight = get_graph_edge_weight(graph, edge) or 0
+        if transform == "log":
+            aggregated_weight += math.log(weight + 1)  # Log of weight + 1 to avoid -inf
+        elif transform == "sqrt":
+            aggregated_weight += math.sqrt(weight)
         else:
-            avg_cocite = sum(weights)  # Total log cocitation when not normalised
-        return avg_cocite
-    else:
-        return 0.0  # If no valid weights were calculated, return 0.0 as default score
+            raise ValueError(f"Unsupported transformation: {transform}")
+
+    return round(float(aggregated_weight/len(workflow) ), 3)
 
 
-def degree_norm_sum_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+def degree_workflow_average_sum(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
     """
-    Normalises edge weights by the average degree of the nodes and sums them up.
+    'Normalises' edge weights by the average degree of the nodes and sums them up.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
@@ -165,17 +218,18 @@ def degree_norm_sum_metric(graph: igraph.Graph, workflow: list, normalise: bool=
 
     :return: Float value of the degree-normalised sum metric.
     """
-    weights = []
-    id_dict = get_node_ids(graph)
 
+    if not workflow: # If workflow is an empty list
+        return 0 
+    
+    aggregated_weight = 0
+    id_dict = get_node_ids(graph)
     for edge in workflow:
-        if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']:
-            weights.append(0)
+        if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']: # igraph attribute "name" stores the pmids
             continue
 
         edge_weight = get_graph_edge_weight(graph, edge)
-        if edge_weight is None:
-            weights.append(0) # fair?
+        if edge_weight is None: # skip the rest of the calculations
             continue
 
         source_degree = graph.vs[id_dict[edge[0]]].degree()
@@ -185,19 +239,11 @@ def degree_norm_sum_metric(graph: igraph.Graph, workflow: list, normalise: bool=
 
         normalised_edge_weight = edge_weight / avg_degree
 
-        weights.append(normalised_edge_weight)
+        aggregated_weight += normalised_edge_weight
 
-    if not weights:
-        return 0.0 
+    return round(float(aggregated_weight/len(workflow) ), 3)
 
-    if normalise:
-        norm_score = sum(weights) / len(workflow)
-    else:
-        norm_score = sum(weights)  
-
-    return float(norm_score)
-
-def prod_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+def workflow_edge_product(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
     """
     Calculates the product (or normalised product) of edge weights in a workflow
 
@@ -207,23 +253,24 @@ def prod_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) -> fl
 
     :return: Float value of the product metric .
     """    
+    if not workflow: # If workflow is an empty list
+        return 0 
+    
     weights = []
     
     for edge in workflow:
-        weights.append( get_graph_edge_weight(graph, edge))
+        weight = get_graph_edge_weight(graph, edge) or 0
+        weights.append(weight)
 
-    calculated_weights = [w for w in weights if w] 
-    if calculated_weights:
-        if normalise:
-            prod_weights = np.prod(calculated_weights)/len(weights)
-        else:
-            prod_weights = np.prod(calculated_weights)
-        return float(prod_weights)
-    else: 
-        return 0.0 # empty workflow has score 0 
+    nonzero_weights = [w for w in weights if w!=0]  #only use nonzero weights
+    if nonzero_weights:
+        score =  np.prod(nonzero_weights) / len(workflow) 
+        return round(float(score), 3)
+    else:
+        return 0.0  # If there are no weights
     
 
-def logprod_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+def log_workflow_edge_product(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
     """ 
     Calculates the product (or normalised product) of the logarithm of the edge weights in a workflow
 
@@ -233,94 +280,21 @@ def logprod_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) ->
 
     :return: Float value of the logarithmic product metric.
     """
+    if not workflow: # If workflow is an empty list
+        return 0 
+    
     weights = []
-    
     for edge in workflow:
-        try:
-            weights.append( math.log(get_graph_edge_weight(graph, edge) + 1)) # adding 1 to avoid - inf
-        except:
-            continue # if the edge does not exist 
-    calculated_weights = [w for w in weights if w] 
-    if calculated_weights:
-        if normalise:
-            prod_weights = np.prod(calculated_weights)/len(weights)
-        else:
-            prod_weights  = np.prod(calculated_weights)
-        return float(round(prod_weights, 3))
-    else: 
-        return 0.0 # empty workflow has score 0 
-    
+        weight = get_graph_edge_weight(graph, edge) or 0
 
-def complete_tree(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
-    """
-    Calculates the sum of the edge weights between all possible pairs of tools in a workflow. 
+        weights.append( math.log( weight + 1)) # adding 1 to avoid - inf
 
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param normalise: Boolean flag indicating whether to normalise the metric.
-
-    :return: Float value of the logarithmic product metric.
-    """   
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)  
-    
-
-    total_weight = 0
-    tool_list = list(tools)
-    n = len(tool_list)
-    
-    if n==0:
-        return 0
-    
-    for i in range(n):
-        for j in range(i + 1, n):
-            weight = get_graph_edge_weight(graph, (tool_list[i], tool_list[j]))
-            if weight:
-                total_weight += weight
-    if normalise:
-        return total_weight/n
+    nonzero_weights = [w for w in weights if w!=0]  #only use nonzero weights
+    if nonzero_weights:
+        score =  np.prod(nonzero_weights) / len(workflow) 
+        return round(float(score), 3)
     else:
-        return total_weight
-
-#TODO: 1.change names - remove "metric" from the names? 2. Tree should perhaps be renamed 3make completesum not repeat code, rather call the completetree emtric again, or make it an option in the complete tree
-def complete_sum(graph: igraph.Graph, workflow: list,  normalise:bool = True, factor:float = 1.0):
-    """
-    Combination metric of the sum_metric() and complete_tree() metrics, where the edges in the workflow are given more importance.
-
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param normalise: Boolean flag indicating whether to normalise the metric.
-    :param factor: Float value specifying how much extra weight the edges that are in the workflow are given relative to the rest of the edges between nodes.
-        A factor of 0 gives no extra weight to the workflow edges and thus will give the same value as the regular complete_tree() metric. 
-
-    :return: Float value of the complete three and sum combination metric.
-    """   
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)  
-    
-
-    total_weight = 0
-    tool_list = list(tools)
-    n = len(tool_list)
-    
-    if n==0:
-        return 0.0
-    
-    for i in range(n):
-        for j in range(i + 1, n):
-            weight = get_graph_edge_weight(graph, (tool_list[i], tool_list[j]))
-            if weight:
-                total_weight += weight
-
-    if normalise:
-        return float(total_weight/n + workflow_level_average_sum(graph, workflow, normalise = normalise)*factor)
-    else:
-        return float(total_weight + workflow_level_average_sum(graph, workflow, normalise = normalise)*factor)
-    
+        return 0.0  # If there are no weights
 
 
 def age_norm_sum_metric(graph, workflow, metadata_file, normalise = True) -> float:
@@ -335,43 +309,9 @@ def age_norm_sum_metric(graph, workflow, metadata_file, normalise = True) -> flo
     :return: Float value of the age-normalised sum metric.
 
     """
-    weights = []
-
-    id_dict = get_node_ids(graph)
-
-    for edge in workflow:
-
-        if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']:
-            weights.append(0)
-            continue
-
-        edge_weight = get_graph_edge_weight(graph, edge)
-
-        source_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[0]]
-        target_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[1]]
-
-
-        if source_age or target_age:        
-            ages = [age for age in (source_age + target_age) if age ]
-            
-            
-            avg_age = np.mean( ages ) # perhaps too harsh 
-
-            normalised_edge_weight = edge_weight/ avg_age
-
-            weights.append(normalised_edge_weight)
-
-    calculated_weights = [w for w in weights if w] 
-    if calculated_weights:
-        if normalise:
-            norm_score = sum(calculated_weights)/len(weights) # avg cocitations
-        else: 
-            norm_score = sum(calculated_weights)
-        return float(norm_score)
-    else: 
-        return 0.0 # empty workflow has score 0 
+    return # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
     
-def complete_tree_age_norm(graph, workflow, metadata_file, normalise=True):
+def connectivity_age_norm(graph, workflow, metadata_file, normalise=True):
     """
     Combination metric of the age_norm_sum_metric() and complete_tree() metrics, where the edges in the workflow are given more importance.
 
@@ -383,50 +323,9 @@ def complete_tree_age_norm(graph, workflow, metadata_file, normalise=True):
     :return: Float value of the age-normalised complete_tree() metric.
 
     """
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)
-    
-    total_weight = 0
-    tool_list = list(tools)
-    n = len(tool_list)
-    
-    if n == 0:
-        return 0
+    return # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
 
-    for i in range(n):
-        for j in range(i + 1, n):
-            edge = (tool_list[i], tool_list[j])
-            
-            if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']:
-                continue
-
-            edge_weight = get_graph_edge_weight(graph, edge)
-            if not edge_weight:
-                continue
-
-            source_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[0]]
-            target_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[1]]
-            ages = [age for age in (source_age + target_age) if age]
-
-            if ages:
-                avg_age = np.mean(ages)
-                normalised_edge_weight = edge_weight / avg_age
-                total_weight += normalised_edge_weight
-            else:
-                continue # nrom bu mean?
-
-    if normalise:
-        return float(total_weight) / n
-    else:
-        return float(total_weight)
-
-
-
-
-
-def complete_min(graph, workflow,  normalise = True): 
+def connectivity_min(graph, workflow,  normalise = True): 
     """
     The complete_tree() metric which punishes single bad links. 
 
@@ -437,34 +336,7 @@ def complete_min(graph, workflow,  normalise = True):
     :return: Float value of the bad edge penalising complete_tree() metric.
 
     """
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)  
-    
-
-    total_weight = []
-    tool_list = list(tools)
-    n = len(tool_list)
-    
-    if n==0:
-        return 0
-    
-    for i in range(n):
-        for j in range(i + 1, n):
-            weight = get_graph_edge_weight(graph, (tool_list[i], tool_list[j]))
-            if weight:
-                total_weight.append(weight)
-    if len(total_weight)==0:
-        return 0
-    
-    if normalise:
-        return sum(total_weight)*min(total_weight)/n
-    else:
-        return sum(total_weight)*min(total_weight)
-
-
-
+    return #sum(total_weight)*min(total_weight)/n  # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
 
 
 def complete_citation(graph, workflow, citation_data_file, normalise = True):
@@ -480,39 +352,15 @@ def complete_citation(graph, workflow, citation_data_file, normalise = True):
 
     """
 
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)  
-    
+        # citations_source = [tool['nrCitations'] for tool in citation_data_file['tools'] if tool['pmid'] == tool_list[i]]
+        # citations_target = [tool['nrCitations'] for tool in citation_data_file['tools'] if tool['pmid'] == tool_list[j]]
+        # citations = [c for c in (citations_source + citations_target) if c]
 
-    total_weight = []
-    tool_list = list(tools)
-    n = len(tool_list)
-    
-    if n==0:
-        return 0
-    
-    for i in range(n):
-        for j in range(i + 1, n):
-            weight = get_graph_edge_weight(graph, (tool_list[i], tool_list[j]))
-            if weight:
-                citations_source = [tool['nrCitations'] for tool in citation_data_file['tools'] if tool['pmid'] == tool_list[i]]
-                citations_target = [tool['nrCitations'] for tool in citation_data_file['tools'] if tool['pmid'] == tool_list[j]]
-                citations = [c for c in (citations_source + citations_target) if c]
-
-                if citations:
-                    total_weight.append(weight/citations)
-                else:
-                     total_weight.append(weight)
-    if len(total_weight)==0:
-        return 0
-    
-    if normalise:
-        return sum(total_weight)*min(total_weight)/n
-    else:
-        return sum(total_weight)*min(total_weight)
-    
+        # if citations:
+        #     total_weight.append(weight/citations)
+        # else:
+        #      total_weight.append(weight)
+    return #sum(total_weight)*min(total_weight)/n  # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
 
 def citations(workflow:list, citation_data_file:str) -> int:
     """
@@ -525,6 +373,7 @@ def citations(workflow:list, citation_data_file:str) -> int:
     :return: Integer value of the median number of citations.
     
     """
+    #TODO needs update
     tools = set()
     for edge in workflow:
         if edge:

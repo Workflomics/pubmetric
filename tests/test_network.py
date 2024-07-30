@@ -70,11 +70,11 @@ Graph = igraph.Graph.TupleList(edges, directed=True)
 
 def test_testsize_citation_network(shared_datadir): 
     filename = os.path.join(shared_datadir, "tool_metadata_test20_topic_0121_20250705.json")
-    G = nw.create_citation_network(loadData=False, testSize=20, filepath=filename) 
+    G = asyncio.run(nw.create_citation_network(loadData=False, testSize=20, filepath=filename))
     assert len(G.vs['name']) > 0 
 
 def test_load_citation_network(shared_datadir):
-    G = nw.create_citation_network(loadData=True, inpath = shared_datadir) 
+    G = asyncio.run(nw.create_citation_network(loadData=True, inpath = shared_datadir)) 
     assert len(G.vs['name']) > 0 
 
 
