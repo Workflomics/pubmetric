@@ -3,6 +3,9 @@ import numpy as np
 import math
 import statistics
 
+#TODO: all metrics that need to think about  workflow structure need to be updated to work with the new workflow representation 
+# for ex: compelte tree needs to take into account the repeated tool several times
+
 def get_node_ids(graph: igraph.Graph, key:str= "name") -> dict:
     """"
     Maps node names to their igraph IDs.
@@ -66,8 +69,39 @@ def invert_edge_weights(graph: igraph.Graph) -> igraph.Graph:
 
     return inverted_graph  
 
+def tool_level_average_sum(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+    """
+    Calculates the sum (or average if normalised) of edge weights per tool within a workflow.
 
-def sum_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+    :param graph: An igraph.Graph co-citation graph.
+    :param workflow: Dictionary with data about the workflow. # TODO reference a certain schema used for this 
+    :param normalise: Boolean flag indicating whether to normalise the metric.
+
+    :return: Float value of the sum metric.
+    """
+
+    steps = list(workflow['steps'].keys())
+    edges = workflow['edges']
+
+    step_scores ={}
+
+    for step in steps: 
+        score = []
+        for edge in edges:
+            if step in edge:
+                pmid_source = next(step_info['pmid'] for step_id, step_info in workflow['steps'].items() if step_id == edge[0] )
+                pmid_target = next(step_info['pmid'] for step_id, step_info in workflow['steps'].items() if step_id == edge[1] )
+
+                score.append( get_graph_edge_weight(graph, edge = (pmid_source, pmid_target) ) )
+        if score:
+            step_scores[step] = sum(score)/len(score) 
+        else:
+            step_scores[step] = 0
+
+    print(step_scores)
+    return step_scores
+
+def workflow_level_average_sum(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
     """
     Calculates the sum (or average if normalised) of edge weights within a workflow.
 
@@ -79,9 +113,7 @@ def sum_metric(graph: igraph.Graph, workflow: list, normalise: bool=True) -> flo
     """
 
     weights = []
-    print(graph.es.attributes())
     for edge in workflow:
-        print(edge)
         weights.append(get_graph_edge_weight(graph, edge))
 
     if weights:
@@ -285,9 +317,9 @@ def complete_sum(graph: igraph.Graph, workflow: list,  normalise:bool = True, fa
                 total_weight += weight
 
     if normalise:
-        return float(total_weight/n + sum_metric(graph, workflow, normalise = normalise)*factor)
+        return float(total_weight/n + workflow_level_average_sum(graph, workflow, normalise = normalise)*factor)
     else:
-        return float(total_weight + sum_metric(graph, workflow, normalise = normalise)*factor)
+        return float(total_weight + workflow_level_average_sum(graph, workflow, normalise = normalise)*factor)
     
 
 

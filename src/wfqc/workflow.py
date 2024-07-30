@@ -3,8 +3,24 @@ from cwl_utils.parser import load_document_by_uri
 import numpy as np
 import json
 
+def parse_tuple_workflow(pmid_workflow_dictionary):
+    """"
+    Function to check the format of a workflow, without the need of a certain workflow structure like CWL. 
+    Essentially this takes a workflow of the same format as whart is produced by the function parse_cwl_workflows.
 
-def parse_workflows(cwl_filename: str, metadata_filename:str) -> list: 
+    :param pmid_workflow: Dictionary of tuples of strings 
+
+    :raises TypeError: If any part of the structure of the dictonary does not match the required format.
+
+    :return: Dictionary of tuples representing the edges in the workflow.
+
+    """
+    if type(pmid_workflow_dictionary)!= dict:
+        raise TypeError("Not a dictionary, make sure to have the right file structure")
+    # etc
+
+
+def parse_cwl_workflows(cwl_filename: str, metadata_filename:str) -> list: 
     """
     Function that turns a CWL representation of a workflow into a list of node tuples (edges), where source and target is represented by the pmid of their repecitve primary publication. 
 
@@ -16,36 +32,45 @@ def parse_workflows(cwl_filename: str, metadata_filename:str) -> list:
     """
     cwl_obj = load_document_by_uri(cwl_filename)
 
-    edges = []
-    for step in cwl_obj.steps:
-        step_id = step.id.split("#")[-1]
-        for input_param in step.in_:
-            if input_param.source:
-                source_step_id = input_param.source.split('/')[-1].split("#")[-1]
-                edges.append((source_step_id, step_id))
-        for output_param in step.out:
-            edges.append((step_id, output_param.split("/")[-1]))
-
-    pairwise_connections = set()
-    for source, target in edges:
-        if "_out_" in source:
-            tool_id = target.split("_")[0]
-            for next_target, next_source in edges:
-                if next_source == source:
-                    pairwise_connections.add(( next_target.split("_")[0], tool_id)) # feels illogical to do it this way but thats how it turns out correct
-
     with open(metadata_filename, 'r') as f:
         metadata_file =  json.load(f)
 
+    edges = []
+    workflow_steps = {}
+    # Extracting edges from the CWL
+    for step in cwl_obj.steps:
+        step_id = step.id.split("#")[-1]
+
+        # Collecting all step names, and their corresponding pmids and names
+        tool_name = step_id.split('_')[0]
+        workflow_steps[step_id] = {'name': tool_name,
+                          'pmid': next((tool['pmid'] for tool in metadata_file['tools'] if tool['name'] == tool_name), None)}
+
+        for input_param in step.in_:
+            if input_param.source:
+                source_step_id = input_param.source.split("#")[-1].split('/')[0]
+
+                if "input_" not in source_step_id: # skips the edges between input and tools
+
+                    edges.append((source_step_id, step_id))
+
+    # Saving the edges in pmid format. 
+    # OBS that this does not maintain the structure of the workflow if a tool is used more than once since both inctances link to the same pmid
     pmid_edges = []
-    for edge in pairwise_connections:
-        source_pmid = next((tool['pmid'] for tool in metadata_file['tools'] if tool['name'] == edge[0]), None)
-        target_pmid = next((tool['pmid'] for tool in metadata_file['tools'] if tool['name'] == edge[1]), None)
+    for edge in edges:
+        source_pmid = next((tool['pmid'] for tool in metadata_file['tools'] if tool['name'] == edge[0].split('_')[0]), None)
+        target_pmid = next((tool['pmid'] for tool in metadata_file['tools'] if tool['name'] == edge[1].split('_')[0]), None)
         if source_pmid is not None and target_pmid is not None:
             pmid_edges.append((str(source_pmid), str(target_pmid)))
 
+    tools = {step['name'] for step in workflow_steps.values()}
 
-    return pmid_edges
+    workflow = {"edges": edges,
+                "steps": workflow_steps,
+                "tools": tools,
+                "pmid_edges": pmid_edges # Dont know if this si necessary, but it is extracted often
+    }
+    return workflow
 
 def generate_random_workflow(tool_list: list, workflow:list) -> list: 
     """
@@ -233,7 +258,7 @@ def generate_pmid_edges(metadata_filename: str, workflow:list, handle_missing:st
 
     return new_edges
 
-def parse_undocumented_workflows(cwl_filename: str, metadata_filename:str) -> list:
+def parse_undocumented_workflows(cwl_filename: str, metadata_filename:str) -> list: #TODO: OBS! this has the old pmid list structure. Change! 
     """
     Pipeline for processing CWL files by reading them line by line. 
     Requires certain naming conventions for input and output (e.g. XTandem_out_1 ) and for tools to be named according to the bio.tools documentation (e.g. XTandem_01). 

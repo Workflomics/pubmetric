@@ -2,6 +2,8 @@
 import pytest
 from wfqc import network as nw
 from wfqc.metrics import *
+from wfqc.workflow import parse_cwl_workflows
+from wfqc.network import create_citation_network
 
 import igraph
 import numpy as np
@@ -79,11 +81,11 @@ def test_get_graph_edge_weight():
         assert weight == expected_weight
  
 
-def test_sum_metric():
+def test_workflow_level_average_sum():
     test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
     expected_scores = [2, 3]    # obs see the problem here where this metrics prefers single edged nw with good connection (msConvert to Comet for ex will always be best then)
     for i, workflow in enumerate(test_workflows):
-        assert sum_metric(test_coG, workflow) == expected_scores[i]
+        assert workflow_level_average_sum(test_coG, workflow) == expected_scores[i]
 
 def test_log_sum_metric():
     test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
@@ -112,3 +114,14 @@ def test_logprod_metric():
 def test_complete_tree():
     assert complete_tree(test_coG, [('TA', 'TB'), ('TA', 'TC'), ('TA', 'TD')], normalise=True) == 2.75
     assert complete_tree(test_coG, [('TA', 'TB'), ('TA', 'TC'), ('TA', 'TD')], normalise=False) == 11
+
+
+def test_tool_level_average_sum(shared_datadir):
+    cwl_filename = os.path.join(shared_datadir, "candidate_workflow_repeated_tool.cwl")
+    metadata_filename = os.path.join(shared_datadir, "tool_metadata_test20_topic_0121_20250705.json")
+
+    workflow = parse_cwl_workflows(cwl_filename,metadata_filename )  
+    graph = create_citation_network(inpath=shared_datadir)
+
+    tool_scores = tool_level_average_sum(graph, workflow)
+    assert list(tool_scores.keys()) == ['ProteinProphet_02', 'StPeter_04', 'XTandem_01', 'XTandem_03'] # note this only tests the format is right 
