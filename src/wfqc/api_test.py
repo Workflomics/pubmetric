@@ -23,4 +23,7 @@ async def score_workflows(file: UploadFile = File(None)):
 
 @app.post("/recreate_graph/")
 async def recreate_graph(graph_request: GraphRequest):
-    return {"message": "Graph and metadata file recreated successfully"}
+    
+    graph = create_citation_network(loadData=False, testSize=10) 
+    some_edges = graph.es['weight'][0:10]
+    return {"message": f"Graph and metadata file recreated successfully. Some graph edges: {some_edges}"}
