@@ -4,16 +4,13 @@ Module to download meta data about software in bio.tools
 """
 import os
 from tqdm import tqdm       
-from datetime import datetime, timedelta
-import glob
+from datetime import datetime
 import json
 import numpy as np
-import asyncio              
+from typing import Optional
 import aiohttp              
-# import nest_asyncio         # For jupyter asyncio compatibility 
-# nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
+from .exceptions import SchemaValidationError 
 
-# TODO: import jsonpath_ng.ext      # More efficient json processing look into if actually computationally more efficient 
 
 
 async def aggregate_requests(session: aiohttp.ClientSession, url: str) -> dict:
@@ -70,12 +67,7 @@ async def get_pmid_from_doi(doi_tools: dict, doi_library_filename: str = 'doi_pm
             url = f"http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=PubMed&retmode=json&term={doi}"
             result = await aggregate_requests(session, url)
             try:
-                doi_pmid = str(result.get('esearchresult').get('idlist')[0])   
-                print(doi_pmid)             
-                # if doi_library:
-                #     if doi_library.items()[1]:# this is no dumb need tolook into this more # solve why it gets stuck here! 
-                #         continue
-                print(doi_pmid)
+                doi_pmid = str(result.get('esearchresult').get('idlist')[0]) #TODO!!: something is up with this: cehck if unique?  
                 if doi_pmid and doi_pmid != 'null': 
                     tool["pmid"] = doi_pmid
                     doi_library[doi] = doi_pmid  # Update the library
@@ -85,58 +77,50 @@ async def get_pmid_from_doi(doi_tools: dict, doi_library_filename: str = 'doi_pm
         
     if library_updates:
         print(f"Writing new doi, pmid pairs to file {doi_library_filename}")
-        with open(doi_library_filename, 'w') as f: #TODO a ok? # appending new dict not good, wan tto extend contents
-            json.dump(doi_library, f) # but this will still be wierd. change in furture
+        with open(doi_library_filename, 'w') as f: 
+            json.dump(doi_library, f) 
     
     updated_doi_tools = [tool for tool in doi_tools if tool.get('pmid')]
-    print(updated_doi_tools)
-    print(doi_tools)
     print(f"Found {len(updated_doi_tools)} more tools with pmid using their doi's")
 
     return updated_doi_tools
 
 
-async def get_pmids(topicID: str, testSize: int = None) -> tuple:
+async def get_pmids(topic_id: str, test_size: Optional[int]) -> tuple:
     """ 
     Downloads all (or a specified amount) of the bio.tools tools for a specific topic and returns metadata about the tools.
 
-    :param topicID: str
+    :param topic_id: str
         The ID to which the tools downloaded belong, e.g., "Proteomics" or "DNA" as defined by EDAM ontology. 
-    :param testSize: int, default None
+    :param test_size: int, default None
         Determines the number of tools downloaded
 
     :return: tuple
         Tuple containing a list of tools (dictionaries) with PMIDs, a list of tools without PMIDs, and the total number of tools.
     """
 
-    pmid_tools = [] # TODO: predefine the length, means one more request 
+    pmid_tools = []
     doi_tools = [] # collect tools without pmid
-
-    # requests are made during single session
 
     page = 1 
     print("Downloading tool metadata from bio.tools")
     async with aiohttp.ClientSession() as session: 
         while page:
-            # send request for tools on the page, await further requests and return resonse in json format
-            biotools_url = f'https://bio.tools/api/t?topicID=%22{topicID}%22&format=json&page={page}'
+            # Sends request for tools on the page, await further requests and return resonse in json format
+            biotools_url = f'https://bio.tools/api/t?topic_id=%22{topic_id}%22&format=json&page={page}'
             biotool_data = await aggregate_requests(session, biotools_url)
             
 
             # TODO: Do I need to check? what happens if no response for page == 1? Maybe try/except instead
-            # Checking if there are any tools, if 
-
-            # To record nr of tools with primary
-
             if 'list' in biotool_data: 
-                biotools_lst = biotool_data['list']
+                biotools_list = biotool_data['list']
                 
-                for tool in biotools_lst: #add tqdm here 
+                for tool in biotools_list: #add tqdm here 
                     name = tool.get('name') 
                     publications = tool.get('publication') # does this cause a problem if there is no publication? 
                     topic = tool.get('topic')
                     
-                    if isinstance(publications, list): #TODO: I want them all!
+                    if isinstance(publications, list): #TODO: Expand to using all publications linked to a tool?
                         nr_publications = len(publications)
                         try:
                             for publication in publications:
@@ -152,20 +136,19 @@ async def get_pmids(topicID: str, testSize: int = None) -> tuple:
                     all_publications = [pub.get('pmid') for pub in publications]
 
                     if primary_publication.get('metadata'):
-                        age = primary_publication['metadata'].get('date') 
-                        if age:
-                            age = int(age.split('-')[0])
+                        pub_date = primary_publication['metadata'].get('date') 
+                        if pub_date:
+                            pub_date = int(pub_date.split('-')[0])
                     else: 
-                        age = None
-
+                        pub_date = None
                     if primary_publication.get('pmid'):
                         pmid_tools.append({
                             'name': name,
                             'doi': primary_publication.get('doi'), # adding doi here too 
-                            'topic': topic[0]['term'],
+                            'topic': topic[0].get('term') if topic else None,
                             'nrPublications':  nr_publications,
                             'allPublications': all_publications,
-                            'pubDate': age,
+                            'pubDate': pub_date,
                             'pmid': str(primary_publication['pmid'])
 
                         })
@@ -174,13 +157,13 @@ async def get_pmids(topicID: str, testSize: int = None) -> tuple:
                         doi_tools.append({
                             'name': name,
                             'doi': primary_publication.get('doi'),
-                            'topic': topic[0]['term'],
+                            'topic': topic[0].get('term') if topic else None,
                             'nrPublications':  nr_publications,
                             'allPublications': all_publications,
-                            'pubDate': age
+                            'pubDate': pub_date
                         })
 
-                if len(pmid_tools) + len(doi_tools) >= testSize: # TODO: this does not guar. that tot nr tools with pmid is at least testsize. only include pmid_tools in calc?
+                if len(pmid_tools) + len(doi_tools) >= test_size: # TODO: this does not guar. that tot nr tools with pmid is at least test_size. only include pmid_tools in calc?
                     break
 
                 page = biotool_data.get('next')
@@ -194,56 +177,6 @@ async def get_pmids(topicID: str, testSize: int = None) -> tuple:
     total_nr_tools = int(biotool_data['count']) if biotool_data and 'count' in biotool_data else 0
 
     return pmid_tools, doi_tools, total_nr_tools 
-
-def check_datafile(filename: str, topicID: str, update: bool = False, testSize: int = None) -> tuple: #TODO: filename default None? 
-    """
-    Checks if the metadata JSON file needs to be updated or not.
-
-    :param filename: str or None
-        User-provided filename used to load a specific file. If None, the standard filename will be created using 
-        the topic ID and current date and time.
-    :param topicID: str
-        The ID to which the tools belong, e.g., "Proteomics" or "DNA" as defined by EDAM ontology. 
-    :param update: bool, default False
-        Determines whether or not to force the creation of a new data file.
-    :param testSize: int, default None
-        Determines the size of the test file to be generated.
-
-    :return: tuple
-        Tuple containing the filename (str) and a boolean indicating whether to load the file or create a new one.
-    """
-
-    if not filename: # if no given filename 
-        if testSize:
-            prefix = f'tool_metadata_test{testSize}_{topicID}'
-        else: 
-            prefix = f'tool_metadata_{topicID}'
-
-        date_format = "%Y%m%d"
-
-        pattern = f'{prefix}*' #TODO. this means every size of a testfile needs to be regenerated 
-        matching_files = glob.glob(pattern)
-
-
-        if matching_files:
-            matching_files.sort(key=os.path.getmtime)
-            filename = matching_files[-1]          
-            file_date = datetime.strptime(filename.split('_')[-1].split('.')[0], date_format)
-            
-            if file_date < datetime.now() - timedelta(days=7) or update == True:
-                print("Old datafile. Updating...") #TODO: incorrect for update option, say sth better
-            else:
-                print("Bio.tools data loaded from existing file.")
-                return (filename, True) # True, as in load the file 
-        else:
-            print("No existing bio.tools file. Downloading data.") 
-
-        filename = f'{prefix}_{datetime.now().strftime(date_format)}.json' 
-    else:
-        print("Proceeding with custom file, please note that the contents may be dated.")
-        return (filename, True)
-    
-    return (filename, False) # False, as in create the file 
 
 
 async def get_publication_dates(tool_metadata: list) -> list: #TODO: do I really need to send the entire list of dictionaries here or should I just send a list of pmids, what is computationally better? 
@@ -283,52 +216,57 @@ async def get_publication_dates(tool_metadata: list) -> list: #TODO: do I really
     return tool_metadata # TODO: do I have to return it or can I just update it using the function, i think i can just update it? 
 
 
-# TODO: Currently no timing - add tracker
-# TODO: outpath not used
-async def get_tool_metadata(outpath: str, topicID: str = "topic_0121", filename: str = None, update: bool = False, testSize: int = None) -> dict:
+async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str], test_size: Optional[int], random_seed: int = 42) -> dict:
     """
-    Fetches metadata about tools from bio.tools, belonging to a given topicID and returns as a dictionary, as well as saving the metadata as a JSON file. 
+    Fetches metadata about tools from bio.tools, belonging to a given topic_id and returns as a dictionary, as well as saving the metadata as a JSON file. 
     If a recent enough (less than one week old) JSON file already exists, it loads the metadata from it.
 
     :param outpath: str
         Path to directory where a newly created file should be placed.
-    :param topicID: str
-        The ID to which the tools downloaded belong, e.g., the default "Proteomics" (topic_0121) as defined by EDAM ontology 
-    :param filename: str or None
-        User-provided filename used to load a specific file. If None, the standard filename will be created using 
-        topic ID and current date and time.
+    :param topic_id: str
+        The ID to which the tools downloaded belong 
+    :param inpath: The path to an already existing file which will be loaded. 
     :param update: bool, default False
         Determines whether or not to force the retrieval of a new data file.
-    :param testSize: int, default None
+    :param test_size: int, default None
         Determines the size of the test sample - the number of tools included in the final dictionary.
 
     :return: dict
         Dictionary containing metadata about the tools.
     """
+    
+    # Specifying the file name
+    metadata_file_name = f'tool_metadata.json' # I removed date from the filename, it is inside if needed
 
-
-    np.random.seed(42) #TODO: should it be configurable?
-
-    # File name checking and creation 
-    filename, load = check_datafile(filename, topicID, update, testSize)
-
-    if load:
-        with open(filename, "r") as f:
-            metadata_file = json.load(f)
-        if testSize:
-            test_tools = np.random.choice(metadata_file['tools'], size = testSize) 
-            metadata_file['tools'] = test_tools
-            return metadata_file
+    if inpath: # Indicates we want to load a file
+        metadata_path = os.path.join(outpath, metadata_file_name)
+        if os.path.isfile(metadata_path): 
+            with open(metadata_path, "r") as f:
+                metadata_file = json.load(f)
         else:
-            return metadata_file
+            raise FileNotFoundError(" ")
+        # TODO should have somoe criteria for what is loaded here. Needs to follow the metadatafile schema # TODO specify schema
+        try: # TODO: this should be a function that for each schema I have checks that it is in fact correct! 
+            type(metadata_file['tools']) == list
+            type(metadata_file['tools'][0]) ==  dict
+        except: 
+            raise SchemaValidationError("Metadata file does not have the required structure. Please refer to metadata file schema.")
+
+        if test_size: # Takes a random selection of the specified size from the file
+            np.random.seed(random_seed)
+            test_tools = np.random.choice(metadata_file['tools'], size = test_size) 
+            metadata_file['tools'] = test_tools
+        
+        return metadata_file
+
+    # If no inpath is specified we recreate the metadatafile
     
     # Creating json file 
-
     metadata_file = {"creationDate": str(datetime.now())}
+    metadata_file = {"topic": topic_id}
 
     # Download bio.tools metadata
-
-    pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topicID, testSize)
+    pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id, test_size)
 
     metadata_file['totalNrTools'] = tot_nr_tools  
     metadata_file['biotoolsWOpmid'] = len(doi_tools)
@@ -340,36 +278,18 @@ async def get_tool_metadata(outpath: str, topicID: str = "topic_0121", filename:
 
     all_tools = pmid_tools + doi_tools
 
+    #TODO: ensure only unique tools, for some reason I am seeing repetition later - in included tools
+
     all_tools_with_age = await get_publication_dates(all_tools)
 
     metadata_file["tools"] = all_tools_with_age
-
-    with open(filename, 'w') as f:
+    
+    with open(os.path.join(outpath, metadata_file_name), 'w') as f: # save in the main output folder
             json.dump(metadata_file, f)
-
-    # If there were any pages, pmid not empty, check how many tools were retrieved and how many tools had pmids
 
     print(f'Found {len(all_tools_with_age)} out of a total of {tot_nr_tools} tools with PMIDS.')
 
     return metadata_file
-
-
-def get_pmids_from_file(filename: str) -> list:
-    """
-    Retrieves a list of all PMIDs for the primary publications in the specified meta data JSON file.
-
-    :param filename: str
-        The name of the JSON file from which to retrieve the PMIDs.
-
-    :return: list
-        List of PMIDs extracted from the JSON file.
-    """
-
-    with open(filename, "r") as f:
-        metadata_file = json.load(f)
-    tools = metadata_file['tools']
-
-    return [tool['pmid'] for tool in tools]
 
 
 async def europepmc_request(session: aiohttp.ClientSession, article_id: str, page: int = 1, source: str = 'MED') -> list: 
@@ -384,6 +304,7 @@ async def europepmc_request(session: aiohttp.ClientSession, article_id: str, pag
         Page number for query.
     :param source: str
         Source ID as given by the EuropePMC API documentation (https://europepmc.org/Help#contentsources).
+    :param random_seed: int, Specifies the seed used to randomly pick tools in a test run. Default is 42.
 
     :return: list
         List of citation PMIDs.

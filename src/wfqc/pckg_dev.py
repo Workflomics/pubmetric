@@ -245,9 +245,27 @@ def unique_workflows(workflow_json, metadata_filename):
 
 
 
+def get_pmids_from_file(filename: str) -> list:
+    """
+    Retrieves a list of all PMIDs for the primary publications in the specified meta data JSON file.
+
+    :param filename: str
+        The name of the JSON file from which to retrieve the PMIDs.
+
+    :return: list
+        List of PMIDs extracted from the JSON file.
+    """
+
+    with open(filename, "r") as f:
+        metadata_file = json.load(f)
+    tools = metadata_file['tools']
+
+    return [tool['pmid'] for tool in tools]
+
+
 async def get_citations(filename):
     """ download citations for all tools in the meta data file"""
-    pmids = wfqc.data.get_pmids_from_file(filename)
+    pmids = get_pmids_from_file(filename)
     async with aiohttp.ClientSession() as session:
         citation_list = []
         for article_id in tqdm(pmids, desc='Downloading citations from EuropePMC'):

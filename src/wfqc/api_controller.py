@@ -56,7 +56,7 @@ async def score_workflows(file: UploadFile = File(None)):
         tool_ages = {}
         for step, pmid in workflow['steps'].items(): #TODO: maybe store age directly, instead of publication date - i use age often. pub year never. then we can also use this list comp nightmare below
             tool_name = step.split("_")[0]
-            tool_ages[tool_name] = [current_year - int(tool['pubDate'].split(" ")[0]) if 'pubDate' in tool and tool['pubDate'] else None for tool in metadata_file['tools'] if tool['pmid'] == pmid]
+            tool_ages[tool_name] = [current_year - tool['pubDate'] if 'pubDate' in tool and tool['pubDate'] else None for tool in metadata_file['tools'] if tool['pmid'] == pmid]
 
         # Format returned scores
         scores = {  'workflow_level_scores': workflow_level_scores,
@@ -72,6 +72,6 @@ async def score_workflows(file: UploadFile = File(None)):
 @app.post("/recreate_graph/")
 async def recreate_graph(graph_request: GraphRequest):
     
-    graph = await create_citation_network(loadData=False, topicID=graph_request.topic_id, testSize=20) # rm testsize later
+    graph = await create_citation_network(load_data=False, topic_id=graph_request.topic_id, test_size=20) # rm test_size later
     # TODO: right now the graph is saved within the create graph function. should save it to the same place as the tool_metadata and make sure that is reachable
     return {"message": f"Graph and metadata file recreated successfully."}

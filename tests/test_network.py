@@ -68,19 +68,19 @@ Graph = igraph.Graph.TupleList(edges, directed=True)
 
 # TODO: test on  fake data also or instead
 
-def test_testsize_citation_network(shared_datadir): 
+def test_test_size_citation_network(shared_datadir): 
     filename = os.path.join(shared_datadir, "tool_metadata_test20_topic_0121_20250705.json")
-    G = asyncio.run(nw.create_citation_network(loadData=False, testSize=20, filepath=filename))
+    G = asyncio.run(nw.create_citation_network(load_data=False, test_size=20, filepath=filename))
     assert len(G.vs['name']) > 0 
 
 def test_load_citation_network(shared_datadir):
-    G = asyncio.run(nw.create_citation_network(loadData=True, inpath = shared_datadir)) 
+    G = asyncio.run(nw.create_citation_network(load_data=True, inpath = shared_datadir)) 
     assert len(G.vs['name']) > 0 
 
 
-def test_cocitation_graph():
+def test_create_cocitation_graph():
     incuded_tools = [tool for tool in Graph.vs['name'] if tool in tools] #could do interrsection    
-    G = nw.cocitation_graph(Graph,incuded_tools)
+    G = nw.create_cocitation_graph(Graph,incuded_tools)
     assert sorted(tools_in_final_network) == sorted(G.vs['name'])
 
 def test_create_graph():
@@ -90,7 +90,7 @@ def test_create_graph():
 
 # need to add download data but bio.tools is down so I cant test 
 
-# def test_download_data():
+# def test_download_citation_data():
 
 
 

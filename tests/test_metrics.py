@@ -64,7 +64,7 @@ expected_edge_weights = {('TA', 'TB'): 3, ('TA', 'TC'): 2, ('TA', 'TD'): 1,
 
 testgraph = igraph.Graph.TupleList(edges, directed=True)
 incuded_tools = [tool for tool in testgraph.vs['name'] if tool in tools] #could do interrsection    
-test_coG = nw.cocitation_graph(testgraph,incuded_tools)
+test_coG = nw.create_cocitation_graph(testgraph,incuded_tools)
 
 
 

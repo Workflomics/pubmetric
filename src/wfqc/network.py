@@ -7,79 +7,57 @@ import pickle
 from datetime import datetime
 import json
 import aiohttp
-import asyncio              
-# import nest_asyncio         # For jupyter asyncio compatibility 
-# # nest_asyncio.apply()        # Automatically takes into account how jupyter handles running event loops
 import igraph 
 import sys
+from typing import Optional
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
 import wfqc.data 
 
-# TODO: import jsonpath_ng.ext      # More efficient json processing look into if actually computationally more efficient 
 
 
 
-
-# TODO: question: testSize is threaded through so many different functions, is this normal? 
-# TODO: now the default for topicID is at the bottom of the fucntions calling it, I think it should be at the top. 
-async def download_data(outpath: str, testSize: int, topicID: str, tool_metadata, filepath: str = None) -> tuple:
+# TODO: now the default for topic_id is at the bottom of the fucntions calling it, I think it should be at the top. 
+async def download_citation_data(outpath: str, topic_id: str, included_tools: list) -> tuple:
     """
     Runs all methods to download meta data for software tools in bio.tools; Downloads tools from specified domain, retrieves citations for PMIDs, 
     and generates co-citation network edges.
 
-    :param outpath: str
-        Path to directory where output files should be saved.
-    :param testSize: int
-        Determines the number of tools downloaded.
-    :param topicID: str
-        The ID to which the downloaded tools belong, e.g., "Proteomics" or "DNA" as defined by EDAM ontology. 
-    :param filepath: str, optional
-        Filepath to an existing metadata JSON file.
+    :param outpath: Path to directory where output files should be saved.
+    :param topic_id: The ID to which the downloaded tools belong, e.g., "Proteomics" or "DNA" as defined by EDAM ontology. 
+    :param included_tools: A list of the pmids for the tools for which citations should be downloaded.
 
     :return: tuple
         A tuple containing edges (list) and citation data (dict).
     """
-    # Randomly picks out a subset of the pmids
-    if testSize != '': 
-        print(f"Creating test-cocitation network of size {testSize}.")
+    # Get citations for each tool, and generate edges between them.
 
- 
     edges = []
-    citation_json ={
+    citation_dict ={
+        "topicID": topic_id,
         "tools" : []
     }
 
-    # Get citations for each tool, and generate edges between them. Should it be separate function?
-    for tool in tqdm(tool_metadata['tools'], desc="Downloading citations from PMIDs"): 
-        pmid = str(tool['pmid']) # EuropePMC requires str TODO: make sure pmids are immideately made into strings           
-
+    for pmid in tqdm(included_tools, desc="Downloading citations from PMIDs"): 
         async with aiohttp.ClientSession() as session: 
             citations = await wfqc.data.europepmc_request(session, pmid) 
             for citation in citations:
                 edges.append((citation, pmid)) # citations pointing to tools
 
-            # TODO: check why this is not generated correctly
-            citation_json['tools'].append({ # should I be recreating basically the same file, or should I jsut add the citation data to the og one?
+            # TODO: Perhaps this should be removed when finalising package as it is inly used for stats. citationnr could be saved into the main metadatafile
+            citation_dict['tools'].append({ 
                 'pmid': pmid,
-                'name': tool['name'],
-                'pubDate': tool['pubDate'],
                 'nrCitations': len(citations),
                 'citations': citations
             })
 
-    filepath = outpath + '/' + f"citations{topicID}.json" # renamed from "edges{topicID}.json", any problems? 
+    citation_filepath = outpath + '/' + f"citations.json" 
+    with open(citation_filepath, 'w') as f:
+        json.dump(citation_dict, f)
     
-    with open(filepath, 'w') as f:
-        json.dump(citation_json, f)
-    
-    return edges, citation_json
+    return edges
 
-
-
-
-
-def cocitation_graph(graph: igraph.Graph, vertices, inverted_weights: bool =False) -> igraph.Graph:
+def create_cocitation_graph(graph: igraph.Graph, vertices, inverted_weights: bool = False) -> igraph.Graph:
     """
     Generates a co-citation network graph from a given bipartite (though edges between given vertices can occur and are handeled) 
     graph and a list of vertices/nodes that will make up the CITED vertices. All other vertices are considered CITATIONS. 
@@ -125,11 +103,7 @@ def cocitation_graph(graph: igraph.Graph, vertices, inverted_weights: bool =Fals
 
     return cocitation_graph
 
-
-#TODO: only use one of nodes or vertices, not both, to be clear. 
-#TODO: tag: inlcuded_tools are here too
-# should I be sending the entire tool dictionary or just the included tools. No. TODO: only send included tools - several methods use this, find optimal placement
-def create_graph(edges: list, tool_dictionary: dict, cocitation: bool = True) -> igraph.Graph:
+def create_graph(edges: list, included_tools: list, cocitation: bool = True, workflow_length_threshold: int = 20) -> igraph.Graph:
     """
     Creates a bibliographic graph from a list of edges and ensures there are no self loops or multiples of edges.
     Removes disconnected nodes
@@ -137,78 +111,72 @@ def create_graph(edges: list, tool_dictionary: dict, cocitation: bool = True) ->
     :param edges: List of edges (tuples) representing connections between nodes in the graph.
     :param tool_dictionary: Dictionary containing metadata about tools, including PMIDs.
     :param cocitation: Flag indicating whether to make the graph a cocitation graph or not.
+    :param workflow_length_threshold: Integer representing the maximum number of tools cited by a single publication for it to be considered a workflow citation, rather than e.g. a review paper citing numerous tools.
 
     :return: Tuple containing:
         - graph: igraph.Graph object of the processed graph.
         - included_tools: List of PMIDs for tools included in the final graph.
         - node_degree_dict: Dictionary mapping node names to their respective degrees in the graph.
     """
-    
-    # Finding unique edges by converting list to a set (because tuples are hashable) and back to list.
-    unq_edges = list(set(edges)) 
+     
+    # Creating a directed graph
+    raw_graph = igraph.Graph.TupleList(edges, directed=True)
+    number_vertices_raw = len(raw_graph.vs)
 
-    included_tools = [tool['pmid'] for tool in tool_dictionary['tools']] 
-    
-    print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
-
-    # Creating a directed graph with unique edges
-    raw_graph = igraph.Graph.TupleList(unq_edges, directed=True)
-
-
-    # Removing self citations
+    # Removing self citations (loops) and multiples of edges
     graph = raw_graph.simplify(multiple=True, loops=True, combine_edges=None)
+    number_vertices_simple = len(graph.vs)
+    print(f"Removed {number_vertices_raw - number_vertices_simple} self loops and multiples of edges.")
 
-    # Removing disconnected vertices (that are not tools) that do not have information value for the (current) metric
-    print("Removing citations with degree less or equal to 1 (Non co-citations).")
+    # Removing disconnected vertices (that are not tools)
     vertices_to_remove = [v.index for v in graph.vs if v.degree() <= 1 and v['name'] not in included_tools]
-    graph.delete_vertices(vertices_to_remove)
-    vertices_to_remove = [v.index for v in graph.vs if v.degree() == 0]
+    nr_removed_vertices = len(vertices_to_remove)
     graph.delete_vertices(vertices_to_remove)
 
-    # Stats about node degrees: TODO: this does NOT have to be done here. Move outside of this function!
-    node_degrees = graph.degree(graph.vs)
-    node_names = [v['name'] for v in graph.vs]
-    node_degree_dict = dict(zip(node_names, node_degrees))
+    # Removing disconnected tools 
+    vertices_to_remove = [v.index for v in graph.vs if v.degree() == 0]
+    nr_removed_vertices += len(vertices_to_remove)
+    graph.delete_vertices(vertices_to_remove)
+    print(f"Removed {nr_removed_vertices} disconnected tools and citations (with degree less or equal to 1) in the 'bipartite' graph.")
 
     # Thresholding graph and removing non-tool nodes with node degrees greater than 20
-    threshold = 20
-    vertices_to_remove = [v for v in graph.vs if v.degree() > threshold and v['name'] not in included_tools]
+    vertices_to_remove = [v for v in graph.vs if v.degree() > workflow_length_threshold and v['name'] not in included_tools]
     graph.delete_vertices(vertices_to_remove)
+    print(f'Number of vertices removed with degree threshold {workflow_length_threshold}: {len(vertices_to_remove)}')
 
-    print(f'Number of vertices removed with degree threshold {threshold}: {len(vertices_to_remove)}')
-
-#not necessary since included tools nto used any longer?
     # Updating included_tools to only contain lists that are in the graph  
-    included_tools = [tool for tool in included_tools if tool in graph.vs['name']] 
+    included_tools = [tool for tool in included_tools if tool in graph.vs['name']]
+
 
     # Convert graph to co-citation graph
     if cocitation:
-        graph = cocitation_graph(graph, included_tools)
+        graph = create_cocitation_graph(graph, included_tools)
+        print(f"Number of remaining tools/vertices is {len(graph.vs)}, and number of remaining edges are {len(graph.es)}")
+        return graph
+    else: 
+        print(f"Number of remaining tools vertices is {len(included_tools)}, total number of vertices is {len(graph.vs)}")
+        return graph # TODO: Included tools can be recreated outside using the metadatafile, check that this is not a problem
 
-
-    return graph, included_tools, node_degree_dict
-#TODO: fix nr output, can probably be minimised 
-
-
-# TODO: topic int? filepath? rearrange order of param after importance. Loaddata should be false default. 
-async def create_citation_network(topicID: str = "topic_0121", testSize: str = '', randomSeed: int = 42, loadData: bool = True, filepath: str = None, outpath: str = None, inpath: str = '', save_files: bool = True) -> igraph.Graph:
+# WHY is optional not working here, not specifying default none is the entire reason for having is aaghh 
+async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: str = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True) -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph.
 
-    :param testSize: int
-        Determines the number of tools downloaded.
-    :param topicID: str
+
+    :param topic_id: str
         The ID to which the downloaded tools belong, e.g., "Proteomics" or "DNA" as defined by EDAM ontology. 
-    :param randomSeed: int, Specifies the seed used to randomly pick tools in a test run. Default is 42.
-    :param loadData: bool
-        Determines if an already generated graph is loaded or if it is recreated. 
+    :param test_size: int
+        Determines the number of tools downloaded.
+    :param random_seed: int, Specifies the seed used to randomly pick tools in a test run. Default is 42.
+    :param load_graph: bool
+        Determines if an already generated graph is loaded or if it is recreated. Needs the parameter inpath to be specified.  
     :param filepath: str
         Path to an already generated graph file.
     :param outpath: str
         Path to the output directory where newly generated graph files will be saved. If not provided,
         a timestamped directory will be created in the current working directory. TODO: make them all end up in a collective out dir
     :param inpath: str
-        Path to the input directory where existing graph files are located.
+        Path to an existing folder containing the metadata file and graph. Will be used to load them if possible.
     :param save_files: bool
         Determines if the newly generated graph is saved.
 
@@ -218,20 +186,18 @@ async def create_citation_network(topicID: str = "topic_0121", testSize: str = '
 
     """
 
-
-    
-    # Edge creation 
-    # Load previously created data or recreate it
-
-    if loadData: # TODO: pickle maybe is not the way to go in future, use json instead? 
-        graph_path = f'{inpath}/graph{testSize}.pkl'        
-        if os.path.isfile(graph_path): # should give option to specify these names
-            print("Loading saved data.")
+    if load_graph: 
+        if not inpath: 
+            print('You need to provide a path to the graph you want to load')
+            return  
+            
+        graph_path = f'{inpath}/graph.pkl'
+        if os.path.isfile(graph_path): 
             with open(graph_path, 'rb') as f:
                 graph = pickle.load(f) 
-
+            print(f"Graph loaded from {inpath}")
         else:
-            print(f"File not found. Please check that '{graph_path}' is in your current directory and run again. Or set loadData = False to create a new graph. ")
+            print(f"File not found. Please check that '{graph_path}' is the path to your graph and run again. Or set load_graph = False to create a new graph. ")
             return 
    
     else:
@@ -239,35 +205,31 @@ async def create_citation_network(topicID: str = "topic_0121", testSize: str = '
         if outpath: 
             os.mkdir(outpath) 
         else:
-            outpath =  f'out_{datetime.now().strftime("%Y%m%d%H%M")}'
+            if not os.path.isdir('outs'):
+                os.mkdir('outs')
+            outpath = f'outs/out_{datetime.now().strftime("%Y%m%d%H%M%S")}'
             os.mkdir(outpath)
 
-        tool_metadata = await wfqc.data.get_tool_metadata(outpath=outpath, topicID=topicID, testSize= testSize, filename=filepath) #TODO: gettollmetadata needs testsize
+        tool_metadata = await wfqc.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed)
+        
+        # Extract tool pmids which we use to greate the graph
+        included_tools = list({tool['pmid'] for tool in tool_metadata['tools']})
 
         # Downloading data
-        edges, tool_dictionary = await download_data(outpath,testSize, topicID, tool_metadata, filepath = filepath)
-
+        edges = await download_citation_data(outpath=outpath, topic_id=topic_id, included_tools=included_tools)
         # Creating the graph using igraph
         print("Creating citation graph using igraph.")
 
-        graph, included_tools, node_degree_dict =  create_graph(edges, tool_dictionary)
+        graph =  create_graph(edges=edges, included_tools=included_tools)
 
-      
         # Saving edges, graph and tools included in the graph 
         if save_files:
-            graph_path = f'{outpath}/graph{testSize}.pkl'
-            node_degree_dict_path = f'{outpath}/node_degree_dict{testSize}.pkl'
+            print(f"Saving data to directory {outpath}.")  # TODO outs should be collected in singel out folder
 
-            print(f"Saving data to directory {outpath}.") 
-            # and save them 
-            #Do this nicer later? TODO: perhaps save them all in a json instead
+            graph_path = os.path.join(outpath, 'graph.pkl') 
 
-            with open(graph_path, 'wb') as f:
+            with open(graph_path, 'wb') as f: #
                 pickle.dump(graph, f)
-
-            with open(node_degree_dict_path, 'wb') as f:
-                pickle.dump(node_degree_dict, f)
-
 
     # returns a graph and the pmids of the tools included in the graph (tools connected by cocitations)
     return graph
