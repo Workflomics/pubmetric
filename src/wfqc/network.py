@@ -51,7 +51,7 @@ async def get_citation_data(outpath: str, topic_id: str, included_tools: list) -
                 'citations': citations
             })
 
-    citation_filepath = outpath + '/' + f"citations.json" 
+    citation_filepath = os.path.join(outpath, "citations.json")
     with open(citation_filepath, 'w') as f:
         json.dump(citation_dict, f)
     

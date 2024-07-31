@@ -30,7 +30,7 @@ async def aggregate_requests(session: aiohttp.ClientSession, url: str) -> dict:
         return await response.json()
 
 
-async def get_pmid_from_doi(doi_tools: dict, doi_library_filename: str = 'doi_pmid_library.json') -> dict:
+async def get_pmid_from_doi(outpath: str, inpath: str, doi_tools: dict, doi_library_filename: str = 'doi_pmid_library.json') -> dict:
     """
     Given a list of dictionaries with data about (tool) publications, 
     this function uses their DOIs to retrieve their PMIDs from NCBI eutils API.
@@ -47,11 +47,11 @@ async def get_pmid_from_doi(doi_tools: dict, doi_library_filename: str = 'doi_pm
     # Download pmids from dois
 
     try: 
-        with open(doi_library_filename, 'r') as f:
+        with open(os.path.join(inpath, doi_library_filename), 'r') as f:
             doi_library = json.load(f)
     except FileNotFoundError:
         print(f'Doi library file not found. Creating new file named {doi_library_filename}.')
-        doi_library = {} # {doi: pmid}, should I perhaps do {name: [pmid doi ]} instead?
+        doi_library = {} 
     
 
     library_updates = False
@@ -77,7 +77,7 @@ async def get_pmid_from_doi(doi_tools: dict, doi_library_filename: str = 'doi_pm
         
     if library_updates:
         print(f"Writing new doi, pmid pairs to file {doi_library_filename}")
-        with open(doi_library_filename, 'w') as f: 
+        with open(os.path.join( outpath, doi_library_filename), 'w') as f: 
             json.dump(doi_library, f) 
     
     updated_doi_tools = [tool for tool in doi_tools if tool.get('pmid')]
@@ -277,7 +277,7 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str],
     metadata_file['biotoolsWOpmid'] = len(doi_tools)
 
     # Update list of doi_tools to include pmid
-    doi_tools = await get_pmid_from_doi(doi_tools)
+    doi_tools = await get_pmid_from_doi(outpath, doi_tools, inpath=inpath)
 
     metadata_file["nrpmidfromdoi"] = len(doi_tools)
 
