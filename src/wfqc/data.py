@@ -30,7 +30,7 @@ async def aggregate_requests(session: aiohttp.ClientSession, url: str) -> dict:
         return await response.json()
 
 
-async def get_pmid_from_doi(outpath: str, inpath: str, doi_tools: dict, doi_library_filename: str = 'doi_pmid_library.json') -> dict:
+async def get_pmid_from_doi(outpath: str, doi_lib_directory: str, doi_tools: dict, doi_library_filename: str = 'doi_pmid_library.json') -> dict:
     """
     Given a list of dictionaries with data about (tool) publications, 
     this function uses their DOIs to retrieve their PMIDs from NCBI eutils API.
@@ -47,7 +47,7 @@ async def get_pmid_from_doi(outpath: str, inpath: str, doi_tools: dict, doi_libr
     # Download pmids from dois
 
     try: 
-        with open(os.path.join(inpath, doi_library_filename), 'r') as f:
+        with open(os.path.join(doi_lib_directory, doi_library_filename), 'r') as f:
             doi_library = json.load(f)
     except FileNotFoundError:
         print(f'Doi library file not found. Creating new file named {doi_library_filename}.')
@@ -221,7 +221,7 @@ async def get_publication_dates(tool_metadata: list) -> list: #TODO: do I really
     return tool_metadata # TODO: do I have to return it or can I just update it using the function, i think i can just update it? 
 
 
-async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str], test_size: Optional[int], random_seed: int = 42) -> dict:
+async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str], test_size: Optional[int], random_seed: int = 42, doi_lib_directory: str = '') -> dict:
     """
     Fetches metadata about tools from bio.tools, belonging to a given topic_id and returns as a dictionary, as well as saving the metadata as a JSON file. 
     If a recent enough (less than one week old) JSON file already exists, it loads the metadata from it.
@@ -277,7 +277,7 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str],
     metadata_file['biotoolsWOpmid'] = len(doi_tools)
 
     # Update list of doi_tools to include pmid
-    doi_tools = await get_pmid_from_doi(outpath, doi_tools, inpath=inpath)
+    doi_tools = await get_pmid_from_doi(outpath, doi_lib_directory, doi_tools)
 
     metadata_file["nrpmidfromdoi"] = len(doi_tools)
 

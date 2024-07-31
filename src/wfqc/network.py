@@ -160,7 +160,7 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
         return graph # TODO: Included tools can be recreated outside using the metadatafile, check that this is not a problem
 
 # WHY is optional not working here, not specifying default none is the entire reason for having is aaghh 
-async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True) -> igraph.Graph:
+async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True, doi_lib_directory:str = '') -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph.
 
@@ -214,7 +214,7 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
             os.mkdir(outpath)
 
 
-        tool_metadata = await wfqc.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed)
+        tool_metadata = await wfqc.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed, doi_lib_directory=doi_lib_directory)
         
         # Extract tool pmids which we use to greate the graph
         included_tools = list({tool['pmid'] for tool in tool_metadata['tools']})

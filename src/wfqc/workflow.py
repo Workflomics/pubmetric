@@ -20,7 +20,7 @@ def parse_tuple_workflow(pmid_workflow_dictionary):
     # etc
 
 
-def parse_cwl_workflows(cwl_filename: str, metadata_filename:str) -> list: 
+def parse_cwl_workflows(cwl_filename: str, metadata_filename:str) -> list:
     """
     Function that turns a CWL representation of a workflow into a list of node tuples (edges), where source and target is represented by the pmid of their repecitve primary publication. 
 
@@ -68,7 +68,7 @@ def parse_cwl_workflows(cwl_filename: str, metadata_filename:str) -> list:
     }
     return workflow
 
-def generate_random_workflow(tool_list: list, workflow:list) -> list: 
+def generate_random_workflow(tool_list: list, workflow:list, random_seed: int = 42) -> list:  # TODO: must be updated to work with the new workflow format
     """
     Generates a workflow of the same structure as the given workflow, but where each tool is replaced with a randomly picked one from the given set.
 
@@ -77,6 +77,7 @@ def generate_random_workflow(tool_list: list, workflow:list) -> list:
 
     :return: List of tuples representing a workflow where each tool has been replaced by another, random, one.  
     """
+    np.random.seed(random_seed)
     workflow_tools = np.unique([element for tuple in workflow for element in tuple])
     nr_tools = len(workflow_tools)
 

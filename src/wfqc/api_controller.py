@@ -72,6 +72,6 @@ async def score_workflows(file: UploadFile = File(None)):
 @app.post("/recreate_graph/")
 async def recreate_graph(graph_request: GraphRequest):
     
-    graph = await create_citation_network(load_data=False, topic_id=graph_request.topic_id, test_size=20) # rm test_size later
+    graph = await create_citation_network(topic_id=graph_request.topic_id, test_size=20) # rm test_size later
     # TODO: right now the graph is saved within the create graph function. should save it to the same place as the tool_metadata and make sure that is reachable
     return {"message": f"Graph and metadata file recreated successfully."}
