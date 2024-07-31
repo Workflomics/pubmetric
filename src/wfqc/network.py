@@ -18,7 +18,7 @@ import wfqc.data
 
 
 # TODO: now the default for topic_id is at the bottom of the fucntions calling it, I think it should be at the top. 
-async def download_citation_data(outpath: str, topic_id: str, included_tools: list) -> tuple:
+async def get_citation_data(outpath: str, topic_id: str, included_tools: list) -> tuple:
     """
     Runs all methods to download meta data for software tools in bio.tools; Downloads tools from specified domain, retrieves citations for PMIDs, 
     and generates co-citation network edges.
@@ -118,9 +118,11 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
         - included_tools: List of PMIDs for tools included in the final graph.
         - node_degree_dict: Dictionary mapping node names to their respective degrees in the graph.
     """
-     
-    # Creating a directed graph
-    raw_graph = igraph.Graph.TupleList(edges, directed=True)
+
+    unq_edges = list(set(edges))     
+    print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
+    # Creating a directed graph with unique edges
+    raw_graph = igraph.Graph.TupleList(unq_edges, directed=True)
     number_vertices_raw = len(raw_graph.vs)
 
     # Removing self citations (loops) and multiples of edges
@@ -158,7 +160,7 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
         return graph # TODO: Included tools can be recreated outside using the metadatafile, check that this is not a problem
 
 # WHY is optional not working here, not specifying default none is the entire reason for having is aaghh 
-async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: str = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True) -> igraph.Graph:
+async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True) -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph.
 
@@ -186,6 +188,7 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
 
     """
 
+
     if load_graph: 
         if not inpath: 
             print('You need to provide a path to the graph you want to load')
@@ -210,13 +213,14 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
             outpath = f'outs/out_{datetime.now().strftime("%Y%m%d%H%M%S")}'
             os.mkdir(outpath)
 
+
         tool_metadata = await wfqc.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed)
         
         # Extract tool pmids which we use to greate the graph
         included_tools = list({tool['pmid'] for tool in tool_metadata['tools']})
 
         # Downloading data
-        edges = await download_citation_data(outpath=outpath, topic_id=topic_id, included_tools=included_tools)
+        edges = await get_citation_data(outpath=outpath, topic_id=topic_id, included_tools=included_tools)
         # Creating the graph using igraph
         print("Creating citation graph using igraph.")
 

@@ -86,7 +86,7 @@ async def get_pmid_from_doi(doi_tools: dict, doi_library_filename: str = 'doi_pm
     return updated_doi_tools
 
 
-async def get_pmids(topic_id: str, test_size: Optional[int]) -> tuple:
+async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
     """ 
     Downloads all (or a specified amount) of the bio.tools tools for a specific topic and returns metadata about the tools.
 
@@ -102,12 +102,17 @@ async def get_pmids(topic_id: str, test_size: Optional[int]) -> tuple:
     pmid_tools = []
     doi_tools = [] # collect tools without pmid
 
+    if topic_id:
+        base_url = f'https://bio.tools/api/t?topicID=%22{topic_id}%22&format=json&page='
+    else:
+        base_url = f'https://bio.tools/api/t?%22&format=json&page=' # this will be heavy 
+
     page = 1 
     print("Downloading tool metadata from bio.tools")
     async with aiohttp.ClientSession() as session: 
         while page:
             # Sends request for tools on the page, await further requests and return resonse in json format
-            biotools_url = f'https://bio.tools/api/t?topic_id=%22{topic_id}%22&format=json&page={page}'
+            biotools_url = base_url + str(page)
             biotool_data = await aggregate_requests(session, biotools_url)
             
 
@@ -145,7 +150,7 @@ async def get_pmids(topic_id: str, test_size: Optional[int]) -> tuple:
                         pmid_tools.append({
                             'name': name,
                             'doi': primary_publication.get('doi'), # adding doi here too 
-                            'topic': topic[0].get('term') if topic else None,
+                            'topics': [t.get('term') for t in topic] if topic else None,
                             'nrPublications':  nr_publications,
                             'allPublications': all_publications,
                             'pubDate': pub_date,
@@ -157,13 +162,13 @@ async def get_pmids(topic_id: str, test_size: Optional[int]) -> tuple:
                         doi_tools.append({
                             'name': name,
                             'doi': primary_publication.get('doi'),
-                            'topic': topic[0].get('term') if topic else None,
+                            'topics': [t.get('term') for t in topic] if topic else None,
                             'nrPublications':  nr_publications,
                             'allPublications': all_publications,
                             'pubDate': pub_date
                         })
 
-                if len(pmid_tools) + len(doi_tools) >= test_size: # TODO: this does not guar. that tot nr tools with pmid is at least test_size. only include pmid_tools in calc?
+                if test_size and len(pmid_tools) + len(doi_tools) >= test_size: # TODO: this does not guar. that tot nr tools with pmid is at least test_size. only include pmid_tools in calc?
                     break
 
                 page = biotool_data.get('next')
@@ -266,7 +271,7 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str],
     metadata_file = {"topic": topic_id}
 
     # Download bio.tools metadata
-    pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id, test_size)
+    pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id=topic_id, test_size=test_size)
 
     metadata_file['totalNrTools'] = tot_nr_tools  
     metadata_file['biotoolsWOpmid'] = len(doi_tools)

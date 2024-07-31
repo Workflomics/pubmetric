@@ -90,7 +90,7 @@ def test_create_graph():
 
 # need to add download data but bio.tools is down so I cant test 
 
-# def test_download_citation_data():
+# def test_get_citation_data():
 
 
 
