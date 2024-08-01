@@ -53,23 +53,6 @@ def get_graph_edge_weight(graph: igraph.Graph, edge: tuple) -> float:
     return float(weight)
 
 
-def invert_edge_weights(graph: igraph.Graph) -> igraph.Graph:
-    """
-    Inverts all edge weights in a graph
-
-    :param graph: igraph.Graph to be inverted
-
-    :return: igraph.Graph which has been inverted
-
-    """
-    inverted_graph = graph.copy()
-
-    for edge in inverted_graph.es:
-        current_weight = edge["weight"]
-        inverted_weight = 1.0 / current_weight 
-        edge["weight"] = inverted_weight 
-
-    return inverted_graph  
 
 
 # Tool level metric
@@ -80,7 +63,7 @@ def tool_average_sum(graph: igraph.Graph, workflow: list) -> float:
 
     :param graph: An igraph.Graph co-citation graph.
     :param workflow: Dictionary with data about the workflow. # TODO reference a certain schema used for this 
-    :param normalise: Boolean flag indicating whether to normalise the metric.
+    
 
     :return: Dictionary of the tool level metric score for each step
     """
@@ -115,7 +98,7 @@ def workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
 
     :param graph: An igraph.Graph co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param normalise: Boolean flag indicating whether to normalise the metric.
+    
 
     :return: Float value of the average sum metric calculated on the edges of the workflow.
     """
@@ -132,14 +115,14 @@ def workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
 
 
 
-def connectivity(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+def connectivity(graph: igraph.Graph, workflow: list) -> float:
     """
     Calculates the sum of the edge weights between all possible pairs of tools in a workflow.
     Named after the degree of connectivity - how close it is to being a complete graph - though this is weighted.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: Dictionary representing the workflow. TODO reference schema
-    :param normalise: Boolean flag indicating whether to normalise the metric.
+    
 
     :return: Float value of the logarithmic product metric.
     """   
@@ -167,7 +150,6 @@ def workflow_weighted_connectivity(graph: igraph.Graph, workflow: dict, factor:f
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: Dictionary representing the workflow. TODO schema
-    :param normalise: Boolean flag indicating whether to normalise the metric.
     :param factor: Float value specifying how much extra weight the edges that are in the workflow are given relative to the rest of the edges between nodes.
         A factor of 0 gives no extra weight to the workflow edges and thus will give the same value as the regular complete_tree() metric. 
 
@@ -184,11 +166,10 @@ def workflow_weighted_connectivity(graph: igraph.Graph, workflow: dict, factor:f
 
 def transformed_workflow_average_sum(graph: igraph.Graph, workflow: List[tuple], transform: str = "log") -> float:
     """
-    Calculates the sum (or average if normalised) of the logarithm of edge weights.
+    Calculates the average sum of the logarithm of edge weights.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
 
     :return: Float value of the log sum metric.
     """
@@ -208,13 +189,13 @@ def transformed_workflow_average_sum(graph: igraph.Graph, workflow: List[tuple],
     return round(float(aggregated_weight/len(workflow) ), 3)
 
 
-def degree_workflow_average_sum(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+def degree_workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
     """
     'Normalises' edge weights by the average degree of the nodes and sums them up.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
+    
 
     :return: Float value of the degree-normalised sum metric.
     """
@@ -243,13 +224,13 @@ def degree_workflow_average_sum(graph: igraph.Graph, workflow: list, normalise: 
 
     return round(float(aggregated_weight/len(workflow) ), 3)
 
-def workflow_edge_product(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+def workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
     """
-    Calculates the product (or normalised product) of edge weights in a workflow
+    Calculates the product of edge weights in a workflow
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
+    
 
     :return: Float value of the product metric .
     """    
@@ -270,13 +251,13 @@ def workflow_edge_product(graph: igraph.Graph, workflow: list, normalise: bool=T
         return 0.0  # If there are no weights
     
 
-def log_workflow_edge_product(graph: igraph.Graph, workflow: list, normalise: bool=True) -> float:
+def log_workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
     """ 
-    Calculates the product (or normalised product) of the logarithm of the edge weights in a workflow
+    Calculates the product of the logarithm of the edge weights in a workflow
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param normalise: Boolean flag indicating whether to normalise the metric.
+    
 
     :return: Float value of the logarithmic product metric.
     """
@@ -297,41 +278,41 @@ def log_workflow_edge_product(graph: igraph.Graph, workflow: list, normalise: bo
         return 0.0  # If there are no weights
 
 
-def age_norm_sum_metric(graph, workflow, metadata_file, normalise = True) -> float:
+def age_norm_sum_metric(graph, workflow, metadata_file) -> float:
     """
     Normalises edge weights by the average ages of the nodes and sums them up.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param metadata_file: The dictionary of tool matadata. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
-    :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
+    
 
     :return: Float value of the age-normalised sum metric.
 
     """
     return # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
     
-def connectivity_age_norm(graph, workflow, metadata_file, normalise=True):
+def connectivity_age_norm(graph, workflow, metadata_file):
     """
     Combination metric of the age_norm_sum_metric() and complete_tree() metrics, where the edges in the workflow are given more importance.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param metadata_file: The dictionary of tool matadata. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
-    :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
+    
 
     :return: Float value of the age-normalised complete_tree() metric.
 
     """
     return # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
 
-def connectivity_min(graph, workflow,  normalise = True): 
+def connectivity_min(graph, workflow): 
     """
     The complete_tree() metric which punishes single bad links. 
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
+    
 
     :return: Float value of the bad edge penalising complete_tree() metric.
 
@@ -339,14 +320,14 @@ def connectivity_min(graph, workflow,  normalise = True):
     return #sum(total_weight)*min(total_weight)/n  # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
 
 
-def complete_citation(graph, workflow, citation_data_file, normalise = True):
+def complete_citation(graph, workflow, citation_data_file):
     """
     A variation of the complete_tree() metric, where the edges are divided by the mean number of citations of the source and target.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
     :param metadata_file:  A string of the name of the JSON file containing tool meta data. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
-    :param normalise: Boolean flag indicating whether to normalise the metric (default=True).
+    
 
     :return: Float value of the citation-normalised complete_tree() metric.
 
@@ -401,7 +382,7 @@ def citations(workflow:list, citation_data_file:str) -> int:
 
 
 # TODO this shoudl just be an option in the previous metric, only diff is if multiplied or divided
-def mult_age_norm_sum_metric(graph, workflow, metadata_file, normalise = True):
+def mult_age_norm_sum_metric(graph, workflow, metadata_file):
     weights = []
 
     id_dict = get_node_ids(graph)
@@ -428,15 +409,12 @@ def mult_age_norm_sum_metric(graph, workflow, metadata_file, normalise = True):
 
     calculated_weights = [w for w in weights if w] 
     if calculated_weights:
-        if normalise:
-            norm_score = sum(calculated_weights)/len(weights) # avg cocitations
-        else: 
-            norm_score = sum(calculated_weights)
+
+        norm_score = sum(calculated_weights)/len(weights) # avg cocitations
         return float(norm_score)
-    else: 
-        return 0 # empty workflow has score 0 
+
     
-def mult_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True): # TODO this shoudl just be an option in the previous metric, only diff is if multiplied or divided
+def mult_complete_tree_age_norm(graph, workflow, metadata_file): # TODO this shoudl just be an option in the previous metric, only diff is if multiplied or divided
     tools = set()
     for edge in workflow:
         if edge:
@@ -469,13 +447,11 @@ def mult_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True):
                 normalised_edge_weight = edge_weight * avg_age
                 total_weight += normalised_edge_weight
 
-    if normalise:
-        return float(total_weight) / n
-    else:
-        return float(total_weight)
-    
 
-def sub_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True): #TODO: make this an option in above metric
+    return float(total_weight) / n
+
+
+def sub_complete_tree_age_norm(graph, workflow, metadata_file): #TODO: make this an option in above metric
     tools = set()
     for edge in workflow:
         if edge:
@@ -510,12 +486,6 @@ def sub_complete_tree_age_norm(graph, workflow, metadata_file, normalise=True): 
             else:
                 continue # nrom bu mean?
 
-    if normalise:
-        return float(total_weight) / n
-    else:
-        return float(total_weight)
-    
-
-    
+    return float(total_weight) / n 
 
 

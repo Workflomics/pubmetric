@@ -15,10 +15,77 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
 import wfqc.data 
 
 
+def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
+    """
+    Implement now that you know how it works
+    """
+
+    for edge in graph.es:
+        current_weight = edge["weight"]
+        inverted_weight = 1.0 / current_weight if current_weight != 0 else float('inf')
+        edge["inverted_weight"] = inverted_weight
+         
+         # add edge normalisation here
+
+    for vertex in graph.vs:
+        pmid = vertex["name"]
+        tool_metadata = next((tmd for tmd in metadata_file['tools'] if tmd['pmid'] == pmid))
+
+        vertex['pmid'] = pmid
+        vertex["tool_name"] = tool_metadata['name']  
+        vertex["age"] = datetime.now().year - tool_metadata.get('pubDate', datetime.now().year - 100) # default 100 years if publication is None
+        vertex["nr_citations"] = tool_metadata['nrCitations'] 
+
+    return graph 
 
 
-# TODO: now the default for topic_id is at the bottom of the fucntions calling it, I think it should be at the top. 
-async def get_citation_data(outpath: str, topic_id: str, included_tools: list) -> tuple:
+
+
+def add_inverted_edge_weights(graph: igraph.Graph) -> igraph.Graph:
+    """
+    Adds an 'inverted_weight' attribute to all edges in the graph.
+
+    :param graph: igraph.Graph to which inverted weights will be added
+
+    :return: igraph.Graph with the added 'inverted_weight' attribute
+    """
+    inverted_graph = graph.copy()
+
+    for edge in inverted_graph.es:
+        current_weight = edge["weight"]
+        inverted_weight = 1.0 / current_weight if current_weight != 0 else float('inf')
+        edge["inverted_weight"] = inverted_weight
+
+    return inverted_graph
+
+def normalise_weight(graph_stats: list, weight: float):
+    # do stats
+    return
+
+def add_inverted_edge_weights(graph: igraph.Graph) -> igraph.Graph:
+    """
+    Adds an 'inverted_weight' attribute to all edges in the graph.
+
+    :param graph: igraph.Graph to which inverted weights will be added
+
+    :return: igraph.Graph with the added 'inverted_weight' attribute
+    """
+    normalised_graph = graph.copy() # TODO: should I copy or just update?
+
+    ### calculate graph stats to norm:
+    graph_stats = []
+    # ... populate graph_stats
+
+    for edge in normalised_graph.es:
+        current_weight = edge["weight"]
+        norm_weight = normalise_weight(graph_stats, current_weight)
+        edge["norm_weight"] = norm_weight
+
+    return normalised_graph
+
+
+# TODO: why is optional working some times and sometimes not? why do I sometimes have to write None gosh 
+async def get_citation_data(metadata_file: list, topic_id:  Optional[str] = None, outpath: Optional[str]= None) -> tuple:
     """
     Runs all methods to download meta data for software tools in bio.tools; Downloads tools from specified domain, retrieves citations for PMIDs, 
     and generates co-citation network edges.
@@ -33,28 +100,15 @@ async def get_citation_data(outpath: str, topic_id: str, included_tools: list) -
     # Get citations for each tool, and generate edges between them.
 
     edges = []
-    citation_dict ={
-        "topicID": topic_id,
-        "tools" : []
-    }
 
-    for pmid in tqdm(included_tools, desc="Downloading citations from PMIDs"): 
+    for tool in tqdm(metadata_file['tools'], desc="Downloading citations from PMIDs"): 
+        pmid = tool['pmid']
         async with aiohttp.ClientSession() as session: 
             citations = await wfqc.data.europepmc_request(session, pmid) 
             for citation in citations:
                 edges.append((citation, pmid)) # citations pointing to tools
+            tool['nrCitations'] = len(citations) # adding the number of citations as an attribute in the metadatafile
 
-            # TODO: Perhaps this should be removed when finalising package as it is inly used for stats. citationnr could be saved into the main metadatafile
-            citation_dict['tools'].append({ 
-                'pmid': pmid,
-                'nrCitations': len(citations),
-                'citations': citations
-            })
-
-    citation_filepath = os.path.join(outpath, "citations.json")
-    with open(citation_filepath, 'w') as f:
-        json.dump(citation_dict, f)
-    
     return edges
 
 def create_cocitation_graph(graph: igraph.Graph, vertices, inverted_weights: bool = False) -> igraph.Graph:
@@ -123,15 +177,15 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
     print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
     # Creating a directed graph with unique edges
     raw_graph = igraph.Graph.TupleList(unq_edges, directed=True)
-    number_vertices_raw = len(raw_graph.vs)
+    number_edges_raw = len(raw_graph.es)
 
     # Removing self citations (loops) and multiples of edges
     graph = raw_graph.simplify(multiple=True, loops=True, combine_edges=None)
-    number_vertices_simple = len(graph.vs)
-    print(f"Removed {number_vertices_raw - number_vertices_simple} self loops and multiples of edges.")
+    number_edges_simple = len(graph.es)
+    print(f"Removed {number_edges_raw - number_edges_simple} self loops and multiples of edges.")
 
     # Removing disconnected vertices (that are not tools)
-    vertices_to_remove = [v.index for v in graph.vs if v.degree() <= 1 and v['name'] not in included_tools]
+    vertices_to_remove = [v.index for v in graph.vs if v.degree() <= 1 and v['name'] not in included_tools] # tag name
     nr_removed_vertices = len(vertices_to_remove)
     graph.delete_vertices(vertices_to_remove)
 
@@ -144,10 +198,10 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
     # Thresholding graph and removing non-tool nodes with node degrees greater than 20
     vertices_to_remove = [v for v in graph.vs if v.degree() > workflow_length_threshold and v['name'] not in included_tools]
     graph.delete_vertices(vertices_to_remove)
-    print(f'Number of vertices removed with degree threshold {workflow_length_threshold}: {len(vertices_to_remove)}')
+    print(f'Number citation of vertices removed with degree threshold {workflow_length_threshold}: {len(vertices_to_remove)}')
 
     # Updating included_tools to only contain lists that are in the graph  
-    included_tools = [tool for tool in included_tools if tool in graph.vs['name']]
+    included_tools = [tool for tool in included_tools if tool in graph.vs['name']] # tag name
 
 
     # Convert graph to co-citation graph
@@ -187,8 +241,7 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
 
 
     """
-
-
+    
     if load_graph: 
         if not inpath: 
             print('You need to provide a path to the graph you want to load')
@@ -214,17 +267,32 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
             os.mkdir(outpath)
 
 
-        tool_metadata = await wfqc.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed, doi_lib_directory=doi_lib_directory)
+        metadata_file = await wfqc.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed, doi_lib_directory=doi_lib_directory)
         
         # Extract tool pmids which we use to greate the graph
-        included_tools = list({tool['pmid'] for tool in tool_metadata['tools']})
+        included_tools = list({tool['pmid'] for tool in metadata_file['tools']})
 
         # Downloading data
-        edges = await get_citation_data(outpath=outpath, topic_id=topic_id, included_tools=included_tools)
+        edges = await get_citation_data(outpath=outpath, topic_id=topic_id, metadata_file=metadata_file) # this updates the metadata file with nr citations per tool
+
+
+        # Saving the metadata file 
+        if test_size:
+            metadata_file_name = f'tool_metadata_test{test_size}.json' # I removed date from the filename, it is inside if needed
+        else: 
+            metadata_file_name = 'tool_metadata.json' 
+        with open(os.path.join(outpath, metadata_file_name), 'w') as f: # save in the main output folder
+                json.dump(metadata_file, f)
+
+
         # Creating the graph using igraph
         print("Creating citation graph using igraph.")
 
-        graph =  create_graph(edges=edges, included_tools=included_tools)
+        graph = create_graph(edges=edges, included_tools=included_tools) # tag graph creation
+
+        print('Adding graph attributes.') # This breaks if it is a non cocitation graph 
+        attribute_graph = add_graph_attributes(graph=graph, metadata_file=metadata_file)
+
 
         # Saving edges, graph and tools included in the graph 
         if save_files:
@@ -236,5 +304,6 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
                 pickle.dump(graph, f)
 
     # returns a graph and the pmids of the tools included in the graph (tools connected by cocitations)
-    return graph
+    print("Graph creation complete") # TODO: timestapms for all updates?
+    return attribute_graph
 

@@ -30,7 +30,7 @@ async def aggregate_requests(session: aiohttp.ClientSession, url: str) -> dict:
         return await response.json()
 
 
-async def get_pmid_from_doi(outpath: str, doi_lib_directory: str, doi_tools: dict, doi_library_filename: str = 'doi_pmid_library.json') -> dict:
+async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_lib_directory: Optional[str] = None, doi_library_filename: str = 'doi_pmid_library.json') -> dict:
     """
     Given a list of dictionaries with data about (tool) publications, 
     this function uses their DOIs to retrieve their PMIDs from NCBI eutils API.
@@ -46,13 +46,14 @@ async def get_pmid_from_doi(outpath: str, doi_lib_directory: str, doi_tools: dic
 
     # Download pmids from dois
 
-    try: 
+    if doi_lib_directory and os.path.isfile(os.path.join(doi_lib_directory, doi_library_filename)):
+        print("Loading doi-pmid library")
         with open(os.path.join(doi_lib_directory, doi_library_filename), 'r') as f:
             doi_library = json.load(f)
-    except FileNotFoundError:
-        print(f'Doi library file not found. Creating new file named {doi_library_filename}.')
-        doi_library = {} 
-    
+    else: # recreate it
+        print('Creating a new doi-pmid library')
+        doi_library = {}
+
 
     library_updates = False
     async with aiohttp.ClientSession() as session: 
@@ -186,7 +187,7 @@ async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
 
 async def get_publication_dates(tool_metadata: list) -> list: #TODO: do I really need to send the entire list of dictionaries here or should I just send a list of pmids, what is computationally better? 
     """
-    Downloads the publication date from NCBI using the PMID of the file.
+    Downloads the publication date from NCBI using the PMID of the file and updates the metadat file. 
 
     :param tool_metadata: list
         List of dictionaries containing tool metadata.
@@ -199,7 +200,7 @@ async def get_publication_dates(tool_metadata: list) -> list: #TODO: do I really
     async with aiohttp.ClientSession() as session: 
         for tool in tqdm(tool_metadata, desc= 'Downloading publication dates'):
 
-            if tool['pubDate'] and tool['pubDate']!='null': # only fetch info for the ones that did not already have it 
+            if 'pubDate' in tool and tool['pubDate'] and tool['pubDate'] != 'null': # only fetch info for the ones that did not already have it 
                 continue
 
             tools_without_pubdate += 1
@@ -221,10 +222,9 @@ async def get_publication_dates(tool_metadata: list) -> list: #TODO: do I really
     return tool_metadata # TODO: do I have to return it or can I just update it using the function, i think i can just update it? 
 
 
-async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str], test_size: Optional[int], random_seed: int = 42, doi_lib_directory: str = '') -> dict:
+async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] = None, test_size: Optional[int] = None, random_seed: int = 42, doi_lib_directory: str = '') -> dict:
     """
-    Fetches metadata about tools from bio.tools, belonging to a given topic_id and returns as a dictionary, as well as saving the metadata as a JSON file. 
-    If a recent enough (less than one week old) JSON file already exists, it loads the metadata from it.
+    Fetches metadata about tools from bio.tools, belonging to a given topic_id and returns as a dictionary.
 
     :param outpath: str
         Path to directory where a newly created file should be placed.
@@ -241,10 +241,13 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str],
     """
     
     # Specifying the file name
-    metadata_file_name = f'tool_metadata.json' # I removed date from the filename, it is inside if needed
-
+    if test_size:
+        metadata_file_name = f'tool_metadata_test{test_size}.json' # I removed date from the filename, it is inside if needed
+    else: 
+        metadata_file_name = 'tool_metadata.json' 
+    print(inpath)
     if inpath: # Indicates we want to load a file
-        metadata_path = os.path.join(outpath, metadata_file_name)
+        metadata_path = os.path.join(inpath, metadata_file_name)
         if os.path.isfile(metadata_path): 
             with open(metadata_path, "r") as f:
                 metadata_file = json.load(f)
@@ -265,11 +268,11 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str],
         return metadata_file
 
     # If no inpath is specified we recreate the metadatafile
-    
     # Creating json file 
-    metadata_file = {"creationDate": str(datetime.now())}
-    metadata_file = {"topic": topic_id}
-
+    metadata_file = {
+        "creationDate": str(datetime.now()),
+        "topic": topic_id
+    }
     # Download bio.tools metadata
     pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id=topic_id, test_size=test_size)
 
@@ -277,7 +280,7 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str],
     metadata_file['biotoolsWOpmid'] = len(doi_tools)
 
     # Update list of doi_tools to include pmid
-    doi_tools = await get_pmid_from_doi(outpath, doi_lib_directory, doi_tools)
+    doi_tools = await get_pmid_from_doi(outpath=outpath, doi_lib_directory=doi_lib_directory, doi_tools=doi_tools)
 
     metadata_file["nrpmidfromdoi"] = len(doi_tools)
 
@@ -289,9 +292,6 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str],
 
     metadata_file["tools"] = all_tools_with_age
     
-    with open(os.path.join(outpath, metadata_file_name), 'w') as f: # save in the main output folder
-            json.dump(metadata_file, f)
-
     print(f'Found {len(all_tools_with_age)} out of a total of {tot_nr_tools} tools with PMIDS.')
 
     return metadata_file
