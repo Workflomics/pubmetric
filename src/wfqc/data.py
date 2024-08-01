@@ -10,7 +10,7 @@ import numpy as np
 from typing import Optional
 import aiohttp              
 from .exceptions import SchemaValidationError 
-
+from .log import log_with_timestamp
 
 
 async def aggregate_requests(session: aiohttp.ClientSession, url: str) -> dict:
@@ -47,11 +47,11 @@ async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_lib_directory: Op
     # Download pmids from dois
 
     if doi_lib_directory and os.path.isfile(os.path.join(doi_lib_directory, doi_library_filename)):
-        print("Loading doi-pmid library")
+        log_with_timestamp("Loading doi-pmid library")
         with open(os.path.join(doi_lib_directory, doi_library_filename), 'r') as f:
             doi_library = json.load(f)
     else: # recreate it
-        print('Creating a new doi-pmid library')
+        log_with_timestamp('Creating a new doi-pmid library')
         doi_library = {}
 
 
@@ -77,12 +77,12 @@ async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_lib_directory: Op
                 continue 
         
     if library_updates:
-        print(f"Writing new doi, pmid pairs to file {doi_library_filename}")
+        log_with_timestamp(f"Writing new doi, pmid pairs to file {doi_library_filename}")
         with open(os.path.join( outpath, doi_library_filename), 'w') as f: 
             json.dump(doi_library, f) 
     
     updated_doi_tools = [tool for tool in doi_tools if tool.get('pmid')]
-    print(f"Found {len(updated_doi_tools)} more tools with pmid using their doi's")
+    log_with_timestamp(f"Found {len(updated_doi_tools)} more tools with pmid using their doi's")
 
     return updated_doi_tools
 
@@ -109,7 +109,7 @@ async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
         base_url = f'https://bio.tools/api/t?%22&format=json&page=' # this will be heavy 
 
     page = 1 
-    print("Downloading tool metadata from bio.tools")
+    log_with_timestamp("Downloading tool metadata from bio.tools")
     async with aiohttp.ClientSession() as session: 
         while page:
             # Sends request for tools on the page, await further requests and return resonse in json format
@@ -176,7 +176,7 @@ async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
                 if page: # else page will be None and loop will stop 
                     page = page.split('=')[-1] # only want the page number 
             else: 
-                print(f'Error while fetching tool names from page {page}')
+                log_with_timestamp(f'Error while fetching tool names from page {page}')
                 break
 
     # Record the total nr of tools
@@ -218,7 +218,7 @@ async def get_publication_dates(tool_metadata: list) -> list: #TODO: do I really
                     tool['pubDate'] = None
             else:
                 tool['pubDate'] = None
-    print(f"Nr of tools in bio.tools without a publication date: {tools_without_pubdate}")
+    log_with_timestamp(f"Nr of tools in bio.tools without a publication date: {tools_without_pubdate}")
     return tool_metadata # TODO: do I have to return it or can I just update it using the function, i think i can just update it? 
 
 
@@ -245,7 +245,6 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
         metadata_file_name = f'tool_metadata_test{test_size}.json' # I removed date from the filename, it is inside if needed
     else: 
         metadata_file_name = 'tool_metadata.json' 
-    print(inpath)
     if inpath: # Indicates we want to load a file
         metadata_path = os.path.join(inpath, metadata_file_name)
         if os.path.isfile(metadata_path): 
@@ -292,7 +291,7 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
 
     metadata_file["tools"] = all_tools_with_age
     
-    print(f'Found {len(all_tools_with_age)} out of a total of {tot_nr_tools} tools with PMIDS.')
+    log_with_timestamp(f'Found {len(all_tools_with_age)} out of a total of {tot_nr_tools} tools with PMIDS.')
 
     return metadata_file
 
@@ -327,5 +326,5 @@ async def europepmc_request(session: aiohttp.ClientSession, article_id: str, pag
                 next_page_citations = await europepmc_request(session, article_id, page + 1, source)
                 return citation_ids + next_page_citations
         else:
-            print(f'Something went wrong with request {url}')
+            log_with_timestamp(f'Something went wrong with request {url}')
             return None

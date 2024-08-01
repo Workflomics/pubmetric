@@ -1,26 +1,25 @@
 import asyncio
 from wfqc.network import * 
 
-from data.test_graph import citation_graph, edges, tools, cocitation_expected_nodes, citation_expected_nodes, included_tools, cocitation_graph
-
+from tests.data.example_graph import citation_graph, edges, tools, cocitation_expected_nodes, citation_expected_nodes, included_tools, cocitation_graph
 
 def test_test_size_citation_network(shared_datadir): 
     graph = asyncio.run(create_citation_network(load_graph=False, test_size=20, inpath=shared_datadir))
-    assert len(graph.vs['name']) > 0 
+    assert len(graph.vs['pmid']) > 0 
 
 def test_load_citation_network(shared_datadir):
     graph = asyncio.run(create_citation_network(load_graph=True, inpath = shared_datadir)) 
-    assert len(graph.vs['name']) == 1219
+    assert len(graph.vs['pmid']) == 1219
 
 def test_create_cocitation_graph():
-    incuded_tools = [tool for tool in citation_graph.vs['name'] if tool in tools]    
+    incuded_tools = [tool for tool in citation_graph.vs['pmid'] if tool in tools]    
     graph = create_cocitation_graph(citation_graph, incuded_tools)
-    assert sorted(cocitation_expected_nodes) == sorted(graph.vs['name'])
+    assert sorted(cocitation_expected_nodes) == sorted(graph.vs['pmid'])
 
 def test_create_graph():
     graph = create_graph(edges, included_tools , cocitation=False)
-    print(sorted(citation_expected_nodes) , sorted(graph.vs['name']))
-    assert sorted(citation_expected_nodes) == sorted(graph.vs['name'])
+    print(sorted(citation_expected_nodes) , sorted(graph.vs['pmid']))
+    assert sorted(citation_expected_nodes) == sorted(graph.vs['pmid'])
 
 def test_get_citation_data():
     tools = ['14632076'] # Protein prophet. 
@@ -31,4 +30,3 @@ def test_invert_graph_weights():
     inverted_graph = add_inverted_edge_weights(cocitation_graph)
     assert sorted(inverted_graph.es['inverted_weight']) == sorted([0.5, 1.0, 1.0])
     assert inverted_graph.es.attributes() == ['weight', 'inverted_weight']
-

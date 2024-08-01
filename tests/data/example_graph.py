@@ -34,7 +34,7 @@ edges = [
 ]
 
 citation_graph = igraph.Graph.TupleList(edges, directed=True)
-included_tools = [tool for tool in citation_graph.vs['name'] if tool in tools]  
+included_tools = [tool for tool in citation_graph.vs['pmid'] if tool in tools]  
 cocitation_graph = create_cocitation_graph(citation_graph,included_tools)
 
 

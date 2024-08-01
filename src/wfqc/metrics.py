@@ -10,7 +10,7 @@ from typing import List
 
 # General functions for interation with graph 
 
-def get_node_ids(graph: igraph.Graph, key:str= "name") -> dict:
+def get_node_ids(graph: igraph.Graph, key:str= "pmid") -> dict:
     """"
     Maps node names to their igraph IDs.
 
@@ -19,12 +19,12 @@ def get_node_ids(graph: igraph.Graph, key:str= "name") -> dict:
 
     :return: Dictionary mapping names to igraph IDs
 
-    :raises ValueError: if the key is not either name or index TODO: should I have this restiction? could have other mappings 
+    :raises ValueError: if the key is not either name or index 
     """
-    if key == 'name':
-        return {v['name']:v.index for v in graph.vs}
+    if key == 'pmid':
+        return {v['pmid']:v.index for v in graph.vs}
     elif key == 'index':
-        return {v.index:v['name'] for v in graph.vs}
+        return {v.index:v['pmid'] for v in graph.vs}
     else:
         raise ValueError("Not a valid key")
 
@@ -41,7 +41,7 @@ def get_graph_edge_weight(graph: igraph.Graph, edge: tuple) -> float:
 
     id_dict = get_node_ids(graph) # TODO: cnat regen this every time. Move out? 
 
-    if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']:
+    if edge[0] not in graph.vs['pmid'] or edge[1] not in graph.vs['pmid']:
         return None # if either node is not in the graph, then the weight is None
     try:
         source = edge[0]
@@ -51,9 +51,6 @@ def get_graph_edge_weight(graph: igraph.Graph, edge: tuple) -> float:
         weight = 0.0 # if node are in the graph but they are not connected, then the weight of an edge between them is None
 
     return float(weight)
-
-
-
 
 # Tool level metric
 
@@ -90,7 +87,6 @@ def tool_average_sum(graph: igraph.Graph, workflow: list) -> float:
 
     return step_scores
 
-
 # Workflow level metric
 def workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
     """
@@ -113,9 +109,7 @@ def workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
 
     return round(float(aggregated_weight/len(workflow) ), 3)
 
-
-
-def connectivity(graph: igraph.Graph, workflow: list) -> float:
+def connectivity(graph: igraph.Graph, workflow: list) -> float: # obs the repeated workflows will have a disadvantage because there is no edge between them which defaults to 0. This must be adjusted for in the devision of edges! TODO
     """
     Calculates the sum of the edge weights between all possible pairs of tools in a workflow.
     Named after the degree of connectivity - how close it is to being a complete graph - though this is weighted.
@@ -128,7 +122,6 @@ def connectivity(graph: igraph.Graph, workflow: list) -> float:
     """   
 
     step_dict = list(workflow['steps'].items())
-    print(step_dict)
     nr_steps = len(step_dict)
 
     if nr_steps == 0:
@@ -206,7 +199,7 @@ def degree_workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
     aggregated_weight = 0
     id_dict = get_node_ids(graph)
     for edge in workflow:
-        if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']: # igraph attribute "name" stores the pmids
+        if edge[0] not in graph.vs['pmid'] or edge[1] not in graph.vs['pmid']: # igraph attribute "name" stores the pmids
             continue
 
         edge_weight = get_graph_edge_weight(graph, edge)
@@ -278,214 +271,185 @@ def log_workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
         return 0.0  # If there are no weights
 
 
-def age_norm_sum_metric(graph, workflow, metadata_file) -> float:
+def workflow_average_sum_age(graph: igraph.Graph, workflow: list, default_age: int = 100) -> float: # no recorded age will ruin this. 100 too big. Might use global average age instead?
     """
     Normalises edge weights by the average ages of the nodes and sums them up.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param metadata_file: The dictionary of tool matadata. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
+    :param default_age: An int representing the value one would like to use for tools that dont have a recorded age
     
 
     :return: Float value of the age-normalised sum metric.
 
     """
-    return # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
+    if not workflow: # If workflow is an empty list
+        return 0 
+    aggregated_weight = 0
+    for edge in workflow:
+        if edge[0] not in graph.vs['pmid'] or edge[1] not in graph.vs['pmid']: # igraph attribute "name" stores the pmids
+            continue
+
+        edge_weight = get_graph_edge_weight(graph, edge)
+        if edge_weight is None: # skip the rest of the calculations
+            continue
+
+        source_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == edge[0]), default_age)
+        target_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == edge[1]), default_age)
+
+        avg_age = np.mean([source_age, target_age]) 
+
+        normalised_edge_weight = edge_weight / avg_age # TODO: Should not necessarily devide it by age- look at the curve of the spread to see
+
+        aggregated_weight += normalised_edge_weight
+
+    return round(float(aggregated_weight/len(workflow) ), 3)
     
-def connectivity_age_norm(graph, workflow, metadata_file):
+def connectivity_age(graph: igraph.Graph, workflow: dict,  default_age: int = 100):
     """
     Combination metric of the age_norm_sum_metric() and complete_tree() metrics, where the edges in the workflow are given more importance.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param metadata_file: The dictionary of tool matadata. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
+    :param workflow: Dictionary representing the workflow. #TODO ref schema
+    :param default_age: An int representing the value one would like to use for tools that dont have a recorded age
     
-
     :return: Float value of the age-normalised complete_tree() metric.
 
     """
-    return # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
 
-def connectivity_min(graph, workflow): 
+    step_dict = list(workflow['steps'].items())
+    nr_steps = len(step_dict)
+
+    if nr_steps == 0:
+        return 0.0
+
+    total_weight = 0
+    for i in range( nr_steps ):
+        for j in range(i + 1, nr_steps ):
+            source = step_dict[i][1]
+            target = step_dict[j][1]
+
+            weight = get_graph_edge_weight(graph, (source, target)) or 0
+
+            if weight == 0:
+                continue # skip the rest of the calculations
+
+            source_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == source), default_age)
+            target_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == target), default_age)
+
+            avg_age = np.mean([source_age, target_age]) 
+
+            normalised_edge_weight = weight / avg_age 
+
+            total_weight += normalised_edge_weight
+
+    nr_possible_edges = nr_steps * (nr_steps - 1) // 2
+
+    return total_weight/nr_possible_edges
+
+def connectivity_min(graph: igraph.Graph, workflow: dict): 
     """
-    The complete_tree() metric which punishes single bad links. 
+    The connectivity() metric which punishes single bad links. 
 
     :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    
-
+    :param workflow: Dictionary representing the workflow. # TODO: schema
+    :param default_age: An int representing the value one would like to use for tools that dont have a recorded age
+   
     :return: Float value of the bad edge penalising complete_tree() metric.
 
     """
-    return #sum(total_weight)*min(total_weight)/n  # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
+
+    step_dict = list(workflow['steps'].items())
+    nr_steps = len(step_dict)
+
+    if nr_steps == 0:
+        return 0.0
+
+    min_weight = 10_000   
+    total_weight = 0
+    for i in range( nr_steps ):
+        for j in range(i + 1, nr_steps ):
+            weight = get_graph_edge_weight(graph, (step_dict[i][1], step_dict[j][1])) or 0
+            if 0 < weight < min_weight:
+                min_weight = weight
+            total_weight += weight 
+
+    nr_possible_edges = nr_steps * (nr_steps - 1) // 2
+
+    return total_weight/nr_possible_edges*min_weight 
 
 
-def complete_citation(graph, workflow, citation_data_file):
+def connectivity_citation(graph: igraph.Graph, workflow: dict, default_nr_citations: int = 0): 
     """
-    A variation of the complete_tree() metric, where the edges are divided by the mean number of citations of the source and target.
+    A variation of the connectivity() metric, where the edges are divided by the mean number of citations of the source and target.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param metadata_file:  A string of the name of the JSON file containing tool meta data. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
+    :param default_nr_citations: An int representing the value one would like to use for tools that dont have a recorded citation number. 
     
 
     :return: Float value of the citation-normalised complete_tree() metric.
 
     """
 
-        # citations_source = [tool['nrCitations'] for tool in citation_data_file['tools'] if tool['pmid'] == tool_list[i]]
-        # citations_target = [tool['nrCitations'] for tool in citation_data_file['tools'] if tool['pmid'] == tool_list[j]]
-        # citations = [c for c in (citations_source + citations_target) if c]
+    step_dict = list(workflow['steps'].items())
+    nr_steps = len(step_dict)
 
-        # if citations:
-        #     total_weight.append(weight/citations)
-        # else:
-        #      total_weight.append(weight)
-    return #sum(total_weight)*min(total_weight)/n  # needs to be updated to fit new format - age shoudl be part of metadatafile creation TODO
+    if nr_steps == 0:
+        return 0.0
 
-def citations(workflow:list, citation_data_file:str) -> int:
+    total_weight = 0
+    for i in range( nr_steps ):
+        for j in range(i + 1, nr_steps ):
+            source = step_dict[i][1]
+            target = step_dict[j][1]
+
+            weight = get_graph_edge_weight(graph, (source, target)) or 0
+
+            if weight == 0:
+                continue # skip the rest of the calculations
+
+            source_citations = next((vs['nr_citations'] for vs in graph.vs if vs['pmid'] == source), default_nr_citations)
+            target_citations = next((vs['nr_citations'] for vs in graph.vs if vs['pmid'] == target), default_nr_citations)
+
+            avg_citations = np.mean([source_citations, target_citations]) 
+
+            normalised_edge_weight = weight / avg_citations 
+
+            total_weight += normalised_edge_weight
+
+    nr_possible_edges = nr_steps * (nr_steps - 1) // 2
+
+    return total_weight/nr_possible_edges
+
+def citations(graph: igraph.Graph, workflow:dict, default_nr_citations: int = 0) -> int:
     """
     Simply returns the median number citations of all of the primary publications of tools in the workflow.
     
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param citation_data_file: A string of the name of the JSON file containing citation data. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
+    :param default_nr_citations: An int representing the value one would like to use for tools that dont have a recorded citation number. 
 
     :return: Integer value of the median number of citations.
     
     """
-    #TODO needs update
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)  
-    
+
+    steps = list(workflow['steps'].items())
 
     total_citations = []
-    tool_list = list(tools)
-    n = len(tool_list)
+    n = len(steps)
     
     if n==0:
         return 0
     
-    for tool in tool_list:
-        citation_number = [t['nrCitations'] for t in citation_data_file['tools'] if t['pmid'] == tool]
+    for step in steps:
+        pmid = step[1] # the values are pmids
+        citation_number = next((vs['nr_citations'] for vs in graph.vs if vs['pmid'] == pmid), default_nr_citations)
         if citation_number:
             total_citations.append(citation_number[0]) #TODO: this does not work if no results
 
     if total_citations:
         return statistics.median(total_citations)
     
-
-
-### BELOW needs updates, not because it does not work, but because it is dumb
-
-
-# TODO this shoudl just be an option in the previous metric, only diff is if multiplied or divided
-def mult_age_norm_sum_metric(graph, workflow, metadata_file):
-    weights = []
-
-    id_dict = get_node_ids(graph)
-
-    for edge in workflow:
-
-        if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']:
-            weights.append(0)
-            continue
-
-        edge_weight = get_graph_edge_weight(graph, edge)
-
-        source_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[0]]
-        target_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[1]]
-
-        ages = [age for age in (source_age + target_age) if age ]
-        
-        
-        avg_age = np.mean( ages ) # perhaps too harsh 
-
-        normalised_edge_weight = edge_weight* avg_age
-
-        weights.append(normalised_edge_weight)
-
-    calculated_weights = [w for w in weights if w] 
-    if calculated_weights:
-
-        norm_score = sum(calculated_weights)/len(weights) # avg cocitations
-        return float(norm_score)
-
-    
-def mult_complete_tree_age_norm(graph, workflow, metadata_file): # TODO this shoudl just be an option in the previous metric, only diff is if multiplied or divided
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)
-    
-    total_weight = 0
-    tool_list = list(tools)
-    n = len(tool_list)
-    
-    if n == 0:
-        return 0
-
-    for i in range(n):
-        for j in range(i + 1, n):
-            edge = (tool_list[i], tool_list[j])
-            
-            if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']:
-                continue
-
-            edge_weight = get_graph_edge_weight(graph, edge)
-            if not edge_weight:
-                continue
-
-            source_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[0]]
-            target_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[1]]
-            ages = [age for age in (source_age + target_age) if age]
-
-            if ages:
-                avg_age = np.mean(ages)
-                normalised_edge_weight = edge_weight * avg_age
-                total_weight += normalised_edge_weight
-
-
-    return float(total_weight) / n
-
-
-def sub_complete_tree_age_norm(graph, workflow, metadata_file): #TODO: make this an option in above metric
-    tools = set()
-    for edge in workflow:
-        if edge:
-            tools.update(edge)
-    
-    total_weight = 0
-    tool_list = list(tools)
-    n = len(tool_list)
-    
-    if n == 0:
-        return 0
-
-    for i in range(n):
-        for j in range(i + 1, n):
-            edge = (tool_list[i], tool_list[j])
-            
-            if edge[0] not in graph.vs['name'] or edge[1] not in graph.vs['name']:
-                continue
-
-            edge_weight = get_graph_edge_weight(graph, edge)
-            if not edge_weight:
-                continue
-
-            source_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[0]]
-            target_age = [tool['pubDate'] for tool in metadata_file['tools'] if tool['pmid'] == edge[1]]
-            ages = [age for age in (source_age + target_age) if age]
-
-            if ages:
-                avg_age = np.mean(ages)
-                normalised_edge_weight = edge_weight / (2025 - avg_age) # 2025 so no zero div
-                total_weight += normalised_edge_weight
-            else:
-                continue # nrom bu mean?
-
-    return float(total_weight) / n 
 
 

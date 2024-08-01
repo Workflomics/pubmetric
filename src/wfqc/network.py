@@ -13,6 +13,7 @@ from typing import Optional
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
 import wfqc.data 
+from wfqc.log import log_with_timestamp
 
 
 def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
@@ -32,14 +33,11 @@ def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
         tool_metadata = next((tmd for tmd in metadata_file['tools'] if tmd['pmid'] == pmid))
 
         vertex['pmid'] = pmid
-        vertex["tool_name"] = tool_metadata['name']  
-        vertex["age"] = datetime.now().year - tool_metadata.get('pubDate', datetime.now().year - 100) # default 100 years if publication is None
+        vertex["name"] = tool_metadata['name']  # changing name to name 
+        vertex["age"] = datetime.now().year - (tool_metadata.get('pubDate') or (datetime.now().year - 100)) # default 100 years if publication is None
         vertex["nr_citations"] = tool_metadata['nrCitations'] 
 
     return graph 
-
-
-
 
 def add_inverted_edge_weights(graph: igraph.Graph) -> igraph.Graph:
     """
@@ -174,7 +172,7 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
     """
 
     unq_edges = list(set(edges))     
-    print(f"{len(unq_edges)} unique out of {len(edges)} edges total!")
+    log_with_timestamp(f"{len(unq_edges)} unique out of {len(edges)} edges total.")
     # Creating a directed graph with unique edges
     raw_graph = igraph.Graph.TupleList(unq_edges, directed=True)
     number_edges_raw = len(raw_graph.es)
@@ -182,7 +180,7 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
     # Removing self citations (loops) and multiples of edges
     graph = raw_graph.simplify(multiple=True, loops=True, combine_edges=None)
     number_edges_simple = len(graph.es)
-    print(f"Removed {number_edges_raw - number_edges_simple} self loops and multiples of edges.")
+    log_with_timestamp(f"Removed {number_edges_raw - number_edges_simple} self loops and multiples of edges.")
 
     # Removing disconnected vertices (that are not tools)
     vertices_to_remove = [v.index for v in graph.vs if v.degree() <= 1 and v['name'] not in included_tools] # tag name
@@ -193,12 +191,12 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
     vertices_to_remove = [v.index for v in graph.vs if v.degree() == 0]
     nr_removed_vertices += len(vertices_to_remove)
     graph.delete_vertices(vertices_to_remove)
-    print(f"Removed {nr_removed_vertices} disconnected tools and citations (with degree less or equal to 1) in the 'bipartite' graph.")
+    log_with_timestamp(f"Removed {nr_removed_vertices} disconnected tools and citations (with degree less or equal to 1) in the 'bipartite' graph.")
 
     # Thresholding graph and removing non-tool nodes with node degrees greater than 20
     vertices_to_remove = [v for v in graph.vs if v.degree() > workflow_length_threshold and v['name'] not in included_tools]
     graph.delete_vertices(vertices_to_remove)
-    print(f'Number citation of vertices removed with degree threshold {workflow_length_threshold}: {len(vertices_to_remove)}')
+    log_with_timestamp(f'Number citation of vertices removed with degree threshold {workflow_length_threshold}: {len(vertices_to_remove)}')
 
     # Updating included_tools to only contain lists that are in the graph  
     included_tools = [tool for tool in included_tools if tool in graph.vs['name']] # tag name
@@ -207,10 +205,10 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
     # Convert graph to co-citation graph
     if cocitation:
         graph = create_cocitation_graph(graph, included_tools)
-        print(f"Number of remaining tools/vertices is {len(graph.vs)}, and number of remaining edges are {len(graph.es)}")
+        log_with_timestamp(f"Number of remaining tools/vertices is {len(graph.vs)}, and number of remaining edges are {len(graph.es)}")
         return graph
     else: 
-        print(f"Number of remaining tools vertices is {len(included_tools)}, total number of vertices is {len(graph.vs)}")
+        log_with_timestamp(f"Number of remaining tools vertices is {len(included_tools)}, total number of vertices is {len(graph.vs)}")
         return graph # TODO: Included tools can be recreated outside using the metadatafile, check that this is not a problem
 
 # WHY is optional not working here, not specifying default none is the entire reason for having is aaghh 
@@ -244,16 +242,16 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
     
     if load_graph: 
         if not inpath: 
-            print('You need to provide a path to the graph you want to load')
+            log_with_timestamp('You need to provide a path to the graph you want to load')
             return  
             
         graph_path = f'{inpath}/graph.pkl'
         if os.path.isfile(graph_path): 
             with open(graph_path, 'rb') as f:
                 graph = pickle.load(f) 
-            print(f"Graph loaded from {inpath}")
+            log_with_timestamp(f"Graph loaded from {inpath}")
         else:
-            print(f"File not found. Please check that '{graph_path}' is the path to your graph and run again. Or set load_graph = False to create a new graph. ")
+            log_with_timestamp(f"File not found. Please check that '{graph_path}' is the path to your graph and run again. Or set load_graph = False to create a new graph. ")
             return 
    
     else:
@@ -286,24 +284,24 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
 
 
         # Creating the graph using igraph
-        print("Creating citation graph using igraph.")
+        log_with_timestamp("Creating citation graph using igraph.")
 
         graph = create_graph(edges=edges, included_tools=included_tools) # tag graph creation
 
-        print('Adding graph attributes.') # This breaks if it is a non cocitation graph 
+        log_with_timestamp('Adding graph attributes.') # This breaks if it is a non cocitation graph 
         attribute_graph = add_graph_attributes(graph=graph, metadata_file=metadata_file)
 
 
         # Saving edges, graph and tools included in the graph 
         if save_files:
-            print(f"Saving data to directory {outpath}.")  # TODO outs should be collected in singel out folder
+            log_with_timestamp(f"Saving graph to directory {outpath}.")  # TODO outs should be collected in singel out folder
 
             graph_path = os.path.join(outpath, 'graph.pkl') 
 
             with open(graph_path, 'wb') as f: #
-                pickle.dump(graph, f)
+                pickle.dump(attribute_graph, f)
 
     # returns a graph and the pmids of the tools included in the graph (tools connected by cocitations)
-    print("Graph creation complete") # TODO: timestapms for all updates?
+    log_with_timestamp("Graph creation complete.") # TODO: timestapms for all updates?
     return attribute_graph
 
