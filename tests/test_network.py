@@ -1,9 +1,11 @@
 import asyncio
 from wfqc.network import * 
 
-from tests.data.example_graph import citation_graph, edges, tools, cocitation_expected_nodes, citation_expected_nodes, included_tools, cocitation_graph
+import os
+print("Current working directory:", os.getcwd())
+from example_graph import citation_graph, edges, tools, cocitation_expected_nodes, citation_expected_nodes, included_tools, cocitation_graph
 
-def test_test_size_citation_network(shared_datadir): 
+def test_citation_network_testsize(shared_datadir): 
     graph = asyncio.run(create_citation_network(load_graph=False, test_size=20, inpath=shared_datadir))
     assert len(graph.vs['pmid']) > 0 
 
@@ -12,9 +14,9 @@ def test_load_citation_network(shared_datadir):
     assert len(graph.vs['pmid']) == 1219
 
 def test_create_cocitation_graph():
-    incuded_tools = [tool for tool in citation_graph.vs['pmid'] if tool in tools]    
+    incuded_tools = [tool for tool in citation_graph.vs['name'] if tool in tools]    
     graph = create_cocitation_graph(citation_graph, incuded_tools)
-    assert sorted(cocitation_expected_nodes) == sorted(graph.vs['pmid'])
+    assert sorted(cocitation_expected_nodes) == sorted(graph.vs['name'])
 
 def test_create_graph():
     graph = create_graph(edges, included_tools , cocitation=False)

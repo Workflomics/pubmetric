@@ -1,5 +1,5 @@
 import igraph 
-from wfqc.network import create_cocitation_graph
+from wfqc.network import create_cocitation_graph, add_graph_attributes
 # Define the nodes 
 tools = ['TA', 'TC', 'TD', # connected cluster - included in final graph 
         # Separate cluster - included in final graph 
@@ -33,9 +33,6 @@ edges = [
 
 ]
 
-citation_graph = igraph.Graph.TupleList(edges, directed=True)
-included_tools = [tool for tool in citation_graph.vs['pmid'] if tool in tools]  
-cocitation_graph = create_cocitation_graph(citation_graph,included_tools)
 
 
 cocitation_expected_nodes = ['TA', 'TC', 'TD', 'TE', 'TF']
@@ -54,3 +51,48 @@ tool_metadata = {
         {'name': 'ToolnameF', 'pmid': 'TF', 'nrCitations': 6, 'pubdate': 2020}
     ]
 }
+
+pmid_workflow = [('TA', 'TC'), ('TC', 'TD'), ('TA', 'TD')]
+
+dictionary_workflow = {
+    "edges": [
+        [
+            "TA_01",
+            "TC_02"
+        ],
+        [
+            "TC_02",
+            "TD_04"
+        ],
+        [
+            "TA_03",
+            "TD_04"
+        ]
+    ],
+    "steps": {
+        "TC_02": "14632076",
+        "TD_04": "29400476",
+        "TA_01": "14976030",
+        "TA_03": "14976030"
+    },
+    "pmid_edges": [
+        [
+            "TA",
+            "TC"
+        ],
+        [
+            "TC",
+            "TD"
+        ],
+        [
+            "TA",
+            "TD"
+        ]
+    ]
+}
+
+
+citation_graph = igraph.Graph.TupleList(edges, directed=True)
+included_tools = [tool for tool in citation_graph.vs['name'] if tool in tools]  
+cocitation_graph = create_cocitation_graph(citation_graph,included_tools)
+cocitation_graph = add_graph_attributes(graph=cocitation_graph, metadata_file=tool_metadata)

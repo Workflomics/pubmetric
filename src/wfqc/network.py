@@ -274,7 +274,7 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
         edges = await get_citation_data(outpath=outpath, topic_id=topic_id, metadata_file=metadata_file) # this updates the metadata file with nr citations per tool
 
 
-        # Saving the metadata file 
+        # Saving the metadata file Make this optional 
         if test_size:
             metadata_file_name = f'tool_metadata_test{test_size}.json' # I removed date from the filename, it is inside if needed
         else: 
@@ -289,7 +289,7 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
         graph = create_graph(edges=edges, included_tools=included_tools) # tag graph creation
 
         log_with_timestamp('Adding graph attributes.') # This breaks if it is a non cocitation graph 
-        attribute_graph = add_graph_attributes(graph=graph, metadata_file=metadata_file)
+        graph = add_graph_attributes(graph=graph, metadata_file=metadata_file)
 
 
         # Saving edges, graph and tools included in the graph 
@@ -299,9 +299,10 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
             graph_path = os.path.join(outpath, 'graph.pkl') 
 
             with open(graph_path, 'wb') as f: #
-                pickle.dump(attribute_graph, f)
+                pickle.dump(graph, f)
 
-    # returns a graph and the pmids of the tools included in the graph (tools connected by cocitations)
-    log_with_timestamp("Graph creation complete.") # TODO: timestapms for all updates?
-    return attribute_graph
+        # returns a graph and the pmids of the tools included in the graph (tools connected by cocitations)
+        log_with_timestamp("Graph creation complete.") # TODO: timestapms for all updates?
+        
+    return graph
 
