@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='wfqc',
+    name='pubmetric',
     version='0.1.0',
     description='Cocitation based metric for workflow evaluation',
     author='Alma Nilsson',
