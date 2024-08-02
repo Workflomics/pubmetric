@@ -16,7 +16,7 @@ from typing import Optional
 
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
-import wfqc.data 
+import pubmetric.data 
 
 
 def parse_tuple_workflow(graph: igraph.Graph, pmid_edges: list): # for reading rated dataset
@@ -394,6 +394,6 @@ async def get_citations(filename):
     async with aiohttp.ClientSession() as session:
         citation_list = []
         for article_id in tqdm(pmids, desc='Downloading citations from EuropePMC'):
-            citation_ids = await wfqc.data.europepmc_request(session, article_id)
+            citation_ids = await pubmetric.data.europepmc_request(session, article_id)
             citation_list.append(citation_ids)
         return citation_list

@@ -1,6 +1,6 @@
 import os 
 import igraph 
-from wfqc.workflow import *
+from pubmetric.workflow import *
 import pickle
 
 

@@ -12,8 +12,8 @@ import sys
 from typing import Optional
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
-import wfqc.data 
-from wfqc.log import log_with_timestamp
+import pubmetric.data 
+from pubmetric.log import log_with_timestamp
 
 
 def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
@@ -102,7 +102,7 @@ async def get_citation_data(metadata_file: list, topic_id:  Optional[str] = None
     for tool in tqdm(metadata_file['tools'], desc="Downloading citations from PMIDs"): 
         pmid = tool['pmid']
         async with aiohttp.ClientSession() as session: 
-            citations = await wfqc.data.europepmc_request(session, pmid) 
+            citations = await pubmetric.data.europepmc_request(session, pmid) 
             for citation in citations:
                 edges.append((citation, pmid)) # citations pointing to tools
             tool['nrCitations'] = len(citations) # adding the number of citations as an attribute in the metadatafile
@@ -265,7 +265,7 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
             os.mkdir(outpath)
 
 
-        metadata_file = await wfqc.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed, doi_lib_directory=doi_lib_directory)
+        metadata_file = await pubmetric.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed, doi_lib_directory=doi_lib_directory)
         
         # Extract tool pmids which we use to greate the graph
         included_tools = list({tool['pmid'] for tool in metadata_file['tools']})

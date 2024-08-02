@@ -1,4 +1,4 @@
-from wfqc.exceptions import SchemaValidationError
+from pubmetric.exceptions import SchemaValidationError
 
 required_meta_keys = {
     "creationDate": str,

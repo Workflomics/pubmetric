@@ -1,5 +1,5 @@
-from wfqc.pckg_dev import *
-from wfqc import data
+from pubmetric.pckg_dev import *
+from pubmetric import data
 import asyncio
 import pickle
 

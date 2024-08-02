@@ -1,7 +1,7 @@
 
-from wfqc.metrics import *
-from wfqc.workflow import parse_cwl_workflows
-from wfqc.network import create_citation_network
+from pubmetric.metrics import *
+from pubmetric.workflow import parse_cwl_workflows
+from pubmetric.network import create_citation_network
 from datetime import datetime
 import os
 import math

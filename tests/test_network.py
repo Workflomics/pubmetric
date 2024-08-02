@@ -1,5 +1,5 @@
 import asyncio
-from wfqc.network import * 
+from pubmetric.network import * 
 
 import os
 print("Current working directory:", os.getcwd())

@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 import aiohttp
-from wfqc.data import * 
+from pubmetric.data import * 
 from data.schemas import metafile_schema_validation
 
 def test_get_tool_metadata_from_file(shared_datadir):

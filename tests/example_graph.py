@@ -1,5 +1,5 @@
 import igraph 
-from wfqc.network import create_cocitation_graph, add_graph_attributes
+from pubmetric.network import create_cocitation_graph, add_graph_attributes
 # Define the nodes 
 tools = ['TA', 'TC', 'TD', # connected cluster - included in final graph 
         # Separate cluster - included in final graph 
