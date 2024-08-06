@@ -21,7 +21,8 @@ setup(
         'jsonpath-ng',
         'ruamel.yaml',
         'cwl_utils',
-        'fastapi'
+        'fastapi',
+        'sklearn'
     ],
     extras_require={
         'test': [
