@@ -22,7 +22,7 @@ setup(
         'ruamel.yaml',
         'cwl_utils',
         'fastapi',
-        'sklearn'
+        'scikit-learn'
     ],
     extras_require={
         'test': [
