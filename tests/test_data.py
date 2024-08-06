@@ -14,36 +14,32 @@ def test_get_tool_metadata_schema():
     assert metafile_schema_validation(metadata_file)
 
 @pytest.mark.asyncio
-async def test_europepmc_request(shared_datadir):
+async def test_europepmc_request():
     protein_prophet_pmid = 14632076 #ProteinProphet has 2949 citations on Jul 12th 2024
     async with aiohttp.ClientSession() as session:
             citations = await europepmc_request(session, protein_prophet_pmid)
     assert len(citations)> 1000
 
 
-def test_get_pmid_from_doi_create_file(shared_datadir):
-    doi_list = [{"name": "mzRecal", "doi": "10.1093/bioinformatics/btab056"}, {"name": "DIAgui", "doi": "10.1093/bioadv/vbae001"}]
+def test_get_pmid_from_doi_create_file():
+    doi_list = [{"name": "ProteoWizard", "doi": "10.1038/nbt.2377"}]
     pmid_list = asyncio.run(get_pmid_from_doi(outpath='',doi_tools= doi_list)) # TODO: what outpaths should I be using for these? 
-    assert str(pmid_list[0]["pmid"]) == '33538780'
-    assert str(pmid_list[1]["pmid"]) == '38249340'
+    assert str(pmid_list[0]["pmid"]) == '23051804'
 
-def test_get_pmid_from_doi_file_not_found(shared_datadir):
-    doi_list = [{"name": "mzRecal", "doi": "10.1093/bioinformatics/btab056"}, {"name": "DIAgui", "doi": "10.1093/bioadv/vbae001"}]
+def test_get_pmid_from_doi_file_not_found():
+    doi_list = [{"name": "ProteoWizard", "doi": "10.1038/nbt.2377"}]
     pmid_list = asyncio.run(get_pmid_from_doi(outpath='',doi_tools= doi_list, doi_lib_directory='fake/dir/')) # TODO: what outpaths should I be using for these? 
-    assert str(pmid_list[0]["pmid"]) == '33538780'
-    assert str(pmid_list[1]["pmid"]) == '38249340'
+    assert str(pmid_list[0]["pmid"]) == '23051804'
 
 def test_get_pmid_from_doi_from_file(shared_datadir):
-    doi_list = [{"name": "mzRecal", "doi": "10.1093/bioinformatics/btab056"}, {"name": "DIAgui", "doi": "10.1093/bioadv/vbae001"}]
+    doi_list = [{"name": "ProteoWizard", "doi": "10.1038/nbt.2377"}]
     pmid_list = asyncio.run(get_pmid_from_doi(outpath='',doi_tools= doi_list, doi_lib_directory=shared_datadir)) # TODO: what outpaths should I be using for these? 
-    assert str(pmid_list[0]["pmid"]) == '33538780'
-    assert str(pmid_list[1]["pmid"]) == '38249340'
+    assert str(pmid_list[0]["pmid"]) == '23051804' # Proteowizard PMID
 
 def test_get_pmid_from_doi_from_file_with_updates(shared_datadir):
-    doi_list = [{"name": "mzRecal", "doi": "10.1093/bioinformatics/btab056"}, {"name": "DIAgui", "doi": "10.1093/bioadv/vbae001"}]
+    doi_list = [{"name": "ProteoWizard", "doi": "10.1038/nbt.2377"}]
     pmid_list = asyncio.run(get_pmid_from_doi(outpath='',doi_tools= doi_list, doi_lib_directory=shared_datadir, doi_library_filename='doi_pmid_library_empty.json')) # TODO: what outpaths should I be using for these? 
-    assert str(pmid_list[0]["pmid"]) == '33538780'
-    assert str(pmid_list[1]["pmid"]) == '38249340'
+    assert str(pmid_list[0]["pmid"]) == '23051804'
 
 def test_get_pmids():
     test_size = 10

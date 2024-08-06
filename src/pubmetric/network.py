@@ -57,7 +57,6 @@ def add_inverted_edge_weights(graph: igraph.Graph) -> igraph.Graph:
     return inverted_graph
 
 def normalise_weight(graph_stats: list, weight: float):
-    # do stats
     return
 
 def add_norm_edge_weights(graph: igraph.Graph) -> igraph.Graph:
