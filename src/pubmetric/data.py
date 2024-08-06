@@ -261,7 +261,7 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
 
         if test_size: # Takes a random selection of the specified size from the file
             np.random.seed(random_seed)
-            test_tools = np.random.choice(metadata_file['tools'], size = test_size) 
+            test_tools = list(np.random.choice(metadata_file['tools'], size = test_size)) 
             metadata_file['tools'] = test_tools
         
         return metadata_file

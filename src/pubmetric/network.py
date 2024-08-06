@@ -34,10 +34,10 @@ def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
 
         vertex['pmid'] = pmid
         vertex["name"] = tool_metadata['name']  # changing name to name 
-        vertex["age"] = datetime.now().year - (tool_metadata.get('pubDate') or (datetime.now().year - 100)) # default 100 years if publication is None
+        vertex["age"] = datetime.now().year - int(tool_metadata.get('pubDate') or (datetime.now().year - 100)) # default 100 years if publication is None
         vertex["nr_citations"] = tool_metadata['nrCitations'] 
 
-    return graph 
+    return graph
 
 def add_inverted_edge_weights(graph: igraph.Graph) -> igraph.Graph:
     """
@@ -60,7 +60,7 @@ def normalise_weight(graph_stats: list, weight: float):
     # do stats
     return
 
-def add_inverted_edge_weights(graph: igraph.Graph) -> igraph.Graph:
+def add_norm_edge_weights(graph: igraph.Graph) -> igraph.Graph:
     """
     Adds an 'inverted_weight' attribute to all edges in the graph.
 
@@ -83,6 +83,7 @@ def add_inverted_edge_weights(graph: igraph.Graph) -> igraph.Graph:
 
 
 # TODO: why is optional working some times and sometimes not? why do I sometimes have to write None gosh 
+# TODO: Rename
 async def get_citation_data(metadata_file: list, topic_id:  Optional[str] = None, outpath: Optional[str]= None) -> tuple:
     """
     Runs all methods to download meta data for software tools in bio.tools; Downloads tools from specified domain, retrieves citations for PMIDs, 
@@ -279,6 +280,9 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
             metadata_file_name = f'tool_metadata_test{test_size}.json' # I removed date from the filename, it is inside if needed
         else: 
             metadata_file_name = 'tool_metadata.json' 
+
+        print(os.path.join(outpath, metadata_file_name))   
+        print(metadata_file['tools'][0]) 
         with open(os.path.join(outpath, metadata_file_name), 'w') as f: # save in the main output folder
                 json.dump(metadata_file, f)
 

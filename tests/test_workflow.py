@@ -16,6 +16,9 @@ def test_parse_cwl_workflow_update(shared_datadir):
 
 def test_parse_undocumented_workflows(shared_datadir):
     cwl_filename = os.path.join(shared_datadir, "candidate_workflow_repeated_tool.cwl")
+    graph_path = os.path.join(shared_datadir, "graph.pkl") # do I have to load it every time? TODO
+    with open(graph_path, 'rb') as f:
+        graph = pickle.load(f) 
 
     workflow = parse_cwl_workflows(graph =graph, cwl_filename=cwl_filename)   
     undoc_workflow = parse_undocumented_workflows(graph =graph, cwl_filename=cwl_filename)   
