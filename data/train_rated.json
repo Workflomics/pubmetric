@@ -1,0 +1,8806 @@
+[
+    {
+        "ratingAvg": 0.5,
+        "expert1": 0.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "PeptideProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "12403597"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 177,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 0.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 173,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.5,
+        "expert1": 3.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "xml2tsv"
+            ],
+            [
+                "xml2tsv",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                null
+            ],
+            [
+                null,
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 25,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MassWolf",
+                "PEAKS De Novo"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26618079",
+                "14558135"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext ",
+        "id": 215,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "msConvert",
+                "msConvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 170,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MassWolf",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26618079",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 346,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 288,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Multi-Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "16944945"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 391,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "MapQuant"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "16470651"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full ",
+        "id": 369,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 297,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 0.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 163,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full + C",
+        "id": 120,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [],
+        "pmid_workflow": [],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "ReAdW",
+                "PEAKS De Novo"
+            ],
+            [
+                "PEAKS De Novo",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Multi-Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16988928",
+                "14558135"
+            ],
+            [
+                "14558135",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "16944945"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 384,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "TDimpute"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                null
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full ",
+        "id": 362,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "CompassXport"
+            ],
+            [
+                "CompassXport",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "20058247"
+            ],
+            [
+                "20058247",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext",
+        "id": 60,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 0.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "unfinnigan",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "MFPaQ"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23766417",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "17533220"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext + C ",
+        "id": 237,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Novor"
+            ],
+            [
+                "Novor",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "26122521"
+            ],
+            [
+                "26122521",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ext ",
+        "id": 337,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "mzBruker",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "28975713",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 400,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 299,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 3.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MassHunter File Reader",
+                "PEAKS De Novo"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "19235167",
+                "14558135"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext ",
+        "id": 214,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "MassWiz",
+                "rt"
+            ],
+            [
+                "MassWolf",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "21417338",
+                "12463368"
+            ],
+            [
+                "26618079",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "xml2tsv"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                null
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 167,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 398,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original",
+        "id": 17,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 3.0,
+        "expert1": 3.0,
+        "expert2": 3.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 269,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "ProCon (Proteomics Conversion Tool)",
+                "ProCoNA"
+            ],
+            [
+                "raw2mzDB",
+                "ProCon (Proteomics Conversion Tool)"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26182917",
+                "23724967"
+            ],
+            [
+                "25505153",
+                "26182917"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 311,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 166,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "MZmine",
+                "Mascot Server"
+            ],
+            [
+                "Mascot Server",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16026613",
+                "10612281"
+            ],
+            [
+                "10612281",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ext ",
+        "id": 339,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "mzBruker"
+            ],
+            [
+                "mzBruker",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full",
+        "id": 99,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original",
+        "id": 8,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "T2D converter"
+            ],
+            [
+                "T2D converter",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "22411703"
+            ],
+            [
+                "22411703",
+                "23724967"
+            ]
+        ],
+        "usecase": 1,
+        "scenario": "Ext",
+        "id": 133,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "DeconTools",
+                "raw2mzDB"
+            ],
+            [
+                "raw2mzDB",
+                "Mascot Server"
+            ],
+            [
+                "Mascot Server",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "10757168",
+                "25505153"
+            ],
+            [
+                "25505153",
+                "10612281"
+            ],
+            [
+                "10612281",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext",
+        "id": 53,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "unfinnigan",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23766417",
+                "23724967"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "PEAKS De Novo",
+                "T2D converter"
+            ],
+            [
+                "T2D converter",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Multi-Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14558135",
+                "22411703"
+            ],
+            [
+                "22411703",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "16944945"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 389,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "PEAKS De Novo",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14558135",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "ReAdW",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16988928",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 273,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 194,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "MassWiz",
+                "rt"
+            ],
+            [
+                "msConvert",
+                "MassWiz"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "21417338",
+                "12463368"
+            ],
+            [
+                "23051804",
+                "21417338"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 169,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 29,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 1.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "collect_mgf"
+            ],
+            [
+                "collect_mgf",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "22641853"
+            ],
+            [
+                "22641853",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 355,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 1.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "collect_mgf"
+            ],
+            [
+                "collect_mgf",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "22641853"
+            ],
+            [
+                "22641853",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext + C",
+        "id": 62,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 28,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "23148064"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full ",
+        "id": 259,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original",
+        "id": 11,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "msConvert",
+                "msConvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 3.0,
+        "expert1": 3.0,
+        "expert2": 3.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Multi-Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "16944945"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 394,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Multi-Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "16944945"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 388,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.5,
+        "expert1": 3.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full",
+        "id": 87,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "ProSight PTM",
+                "OpenSWATH"
+            ],
+            [
+                "OpenSWATH",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14632120",
+                "24727770"
+            ],
+            [
+                "24727770",
+                "23724967"
+            ]
+        ],
+        "usecase": 1,
+        "scenario": "Ext",
+        "id": 139,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 284,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "PGConverter"
+            ],
+            [
+                "PGConverter",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "25910694"
+            ],
+            [
+                "25910694",
+                "23724967"
+            ]
+        ],
+        "usecase": 1,
+        "scenario": "Ext",
+        "id": 136,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 38,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "DeconTools",
+                "Mascot Server"
+            ],
+            [
+                "Mascot Server",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "10757168",
+                "10612281"
+            ],
+            [
+                "10612281",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ext ",
+        "id": 340,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext",
+        "id": 52,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 187,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 3.0,
+        "expert1": 3.0,
+        "expert2": 3.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 21,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "unfinnigan",
+                "MapQuant"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23766417",
+                "16470651"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "MassWiz",
+                "rt"
+            ],
+            [
+                "T2D converter",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "21417338",
+                "12463368"
+            ],
+            [
+                "22411703",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "xml2tsv"
+            ],
+            [
+                "xml2tsv",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                null
+            ],
+            [
+                null,
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original",
+        "id": 7,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "23724967"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "MassWiz",
+                "rt"
+            ],
+            [
+                "ReAdW",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "21417338",
+                "12463368"
+            ],
+            [
+                "16988928",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext + C",
+        "id": 61,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.5,
+        "workflow": [
+            [
+                "PEAKS De Novo",
+                "PeptideProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14558135",
+                "12403597"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 196,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "DeconTools",
+                "MS-Fit"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "10757168",
+                "18429132"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ],
+            [
+                "T2D converter",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ],
+            [
+                "22411703",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "CompassXport",
+                "mzXML2Search"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "28975713"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "ProSight PTM",
+                "ProSight PTM"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14632120",
+                "14632120"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 272,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "MassWiz",
+                "rt"
+            ],
+            [
+                "mzBruker",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "21417338",
+                "12463368"
+            ],
+            [
+                "28975713",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "mzBruker",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "MFPaQ"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "28975713",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "17533220"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext + C ",
+        "id": 236,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "MFPaQ"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "17533220"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext + C ",
+        "id": 234,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "xml2tsv"
+            ],
+            [
+                "xml2tsv",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                null
+            ],
+            [
+                null,
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original",
+        "id": 5,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "T2D converter",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "22411703",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 162,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 200,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 354,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PTMProphet",
+                "rt"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "25631240",
+                "12463368"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "DTA to MGF File Converter"
+            ],
+            [
+                "DTA to MGF File Converter",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "19015139"
+            ],
+            [
+                "19015139",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full + C",
+        "id": 111,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext + C ",
+        "id": 238,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "mzXMLplot"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                null
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "MZmine",
+                "Mascot Server"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16026613",
+                "10612281"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 3.0,
+        "expert1": 3.0,
+        "expert2": 3.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 264,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 195,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "rt"
+            ],
+            [
+                "T2D converter",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12463368"
+            ],
+            [
+                "22411703",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "DeconTools",
+                "Mascot Server"
+            ],
+            [
+                "Mascot Server",
+                "IsobariQ"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "10757168",
+                "10612281"
+            ],
+            [
+                "10612281",
+                "21067241"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ext ",
+        "id": 336,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23724967"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original",
+        "id": 10,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.75,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ],
+            [
+                "unfinnigan",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ],
+            [
+                "23766417",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "mzBruker",
+                "MapQuant"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "28975713",
+                "16470651"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 315,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 27,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 293,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "Q4SRM",
+                "peak2bed"
+            ],
+            [
+                "peak2bed",
+                "InterMine"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "30525668",
+                null
+            ],
+            [
+                null,
+                null
+            ]
+        ],
+        "usecase": 1,
+        "scenario": "Full ",
+        "id": 159,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MassWolf",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26618079",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 279,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "PEAKS De Novo",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14558135",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 392,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "MFPaQ"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "17533220"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext + C ",
+        "id": 232,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "CompassXport",
+                "Comet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "20058247",
+                "23148064"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Multi-Q"
+            ],
+            [
+                "unfinnigan",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "16944945"
+            ],
+            [
+                "23766417",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 191,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 0.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "PEAKS De Novo",
+                "ReAdW"
+            ],
+            [
+                "ReAdW",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Multi-Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14558135",
+                "16988928"
+            ],
+            [
+                "16988928",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "16944945"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 397,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 320,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.5,
+        "workflow": [
+            [
+                "PEAKS De Novo",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14558135",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 306,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 36,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 0.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 172,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "PEAKS De Novo",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Multi-Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14558135",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "16944945"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 390,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext + C",
+        "id": 67,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 348,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "23724967"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "PEAKS De Novo",
+                "extractcentralregions"
+            ],
+            [
+                "extractcentralregions",
+                "InterMine"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14558135",
+                null
+            ],
+            [
+                null,
+                null
+            ]
+        ],
+        "usecase": 1,
+        "scenario": "Full ",
+        "id": 160,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "mzXMLplot"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                null
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "RawTools",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "30462513",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 356,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "MassWolf"
+            ],
+            [
+                "MassWolf",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "26618079"
+            ],
+            [
+                "26618079",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext",
+        "id": 57,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 0.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 174,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "ReAdW",
+                "PEAKS De Novo"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16988928",
+                "14558135"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext ",
+        "id": 219,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "rt"
+            ],
+            [
+                "MassWolf",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12463368"
+            ],
+            [
+                "26618079",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.5,
+        "expert1": 3.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 186,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 2.5,
+        "expert1": 3.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "xml2tsv"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                null
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 184,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "mzBruker",
+                "mzXMLplot"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "28975713",
+                null
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "PEAKS De Novo"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "14558135"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext ",
+        "id": 218,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [],
+        "pmid_workflow": [],
+        "usecase": 1,
+        "scenario": "Ext",
+        "id": 121,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "CompassXport",
+                "PEAKS De Novo"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "14558135"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "CompassXport"
+            ],
+            [
+                "CompassXport",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "20058247"
+            ],
+            [
+                "20058247",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext",
+        "id": 58,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 318,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 313,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "mzBruker",
+                "PEAKS De Novo"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "28975713",
+                "14558135"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext ",
+        "id": 217,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 3.0,
+        "expert1": 3.0,
+        "expert2": 3.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 280,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "mzBruker",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "28975713",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 349,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "RawTools",
+                "DTA to MGF File Converter"
+            ],
+            [
+                "DTA to MGF File Converter",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "30462513",
+                "19015139"
+            ],
+            [
+                "19015139",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext + C",
+        "id": 74,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "Novor"
+            ],
+            [
+                "Novor",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "26122521"
+            ],
+            [
+                "26122521",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full",
+        "id": 91,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 179,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 1.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "xml2tsv"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "23051804",
+                null
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 189,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "ReAdW",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16988928",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 352,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.5,
+        "workflow": [
+            [
+                "MassWiz",
+                "rt"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ],
+            [
+                "unfinnigan",
+                "mzXML2Search"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "21417338",
+                "12463368"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ],
+            [
+                "23766417",
+                "28975713"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 308,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "PEAKS De Novo"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "14558135"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext ",
+        "id": 211,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 35,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 307,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MassHunter File Reader",
+                "DTA to MGF File Converter"
+            ],
+            [
+                "DTA to MGF File Converter",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "19235167",
+                "19015139"
+            ],
+            [
+                "19015139",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 359,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "MZmine",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16026613",
+                "23724967"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "23148064"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full ",
+        "id": 247,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "MZmine",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Mascot Server"
+            ],
+            [
+                "Mascot Server",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16026613",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "10612281"
+            ],
+            [
+                "10612281",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext",
+        "id": 56,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 39,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "mzBruker"
+            ],
+            [
+                "mzBruker",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full",
+        "id": 97,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ],
+            [
+                "ReAdW",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ],
+            [
+                "16988928",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "MapQuant"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "16470651"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 317,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "MassWolf",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26618079",
+                "23724967"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "xml2tsv"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                null
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 180,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 3.0,
+        "expert1": 3.0,
+        "expert2": 3.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full + C",
+        "id": 105,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 165,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "mzXMLplot"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                null
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 285,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "unfinnigan",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23766417",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 277,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "mzXMLplot"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                null
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full ",
+        "id": 379,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 289,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 303,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "ProSight PTM",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "14632120",
+                "23724967"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "ReAdW",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16988928",
+                "23724967"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MassWolf",
+                "pyQms"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26618079",
+                "28729385"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full ",
+        "id": 365,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 37,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.5,
+        "expert1": 3.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full",
+        "id": 89,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 197,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "Novor",
+                "rt"
+            ],
+            [
+                "msConvert",
+                "Novor"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26122521",
+                "12463368"
+            ],
+            [
+                "23051804",
+                "26122521"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 1.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PeptideProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12403597"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 168,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 33,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 32,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 1.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 192,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "DeconTools",
+                "ProFound"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "10757168",
+                "10857624"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext ",
+        "id": 206,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 1.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ],
+            [
+                "PEAKS Q",
+                "TDimpute"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ],
+            [
+                "12610571",
+                null
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 387,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "DTA to MGF File Converter"
+            ],
+            [
+                "DTA to MGF File Converter",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "19015139"
+            ],
+            [
+                "19015139",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "mzBruker"
+            ],
+            [
+                "mzBruker",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full",
+        "id": 100,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "mzXMLplot"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                null
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "MassWolf",
+                "Comet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "26618079",
+                "23148064"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 31,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 298,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 314,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MassWolf",
+                "CompassXport"
+            ],
+            [
+                "CompassXport",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26618079",
+                "20058247"
+            ],
+            [
+                "20058247",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext",
+        "id": 59,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "MassWolf",
+                "MapQuant"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26618079",
+                "16470651"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 3.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "mzBruker",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "28975713",
+                "23148064"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full ",
+        "id": 253,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 2.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "ProMEX protein mass spectral library"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "22685450"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full ",
+        "id": 260,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original ",
+        "id": 171,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 283,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ],
+            [
+                "mzBruker",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ],
+            [
+                "28975713",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "ReAdW",
+                "MapQuant"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16988928",
+                "16470651"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.5,
+        "workflow": [
+            [
+                "Comet",
+                "rt"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12463368"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "MassWolf",
+                "Comet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "26618079",
+                "23148064"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 310,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "MassWiz",
+                "rt"
+            ],
+            [
+                "ThermoRawFileParser",
+                "MassWiz"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "21417338",
+                "12463368"
+            ],
+            [
+                null,
+                "21417338"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "CompassXport",
+                "Comet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "20058247",
+                "23148064"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 198,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "mzXML2Search"
+            ],
+            [
+                "mzXML2Search",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 350,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 30,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MZmine",
+                "mzBruker"
+            ],
+            [
+                "mzBruker",
+                "Mascot Server"
+            ],
+            [
+                "Mascot Server",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16026613",
+                "28975713"
+            ],
+            [
+                "28975713",
+                "10612281"
+            ],
+            [
+                "10612281",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full",
+        "id": 96,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "MassWolf",
+                "mzXMLplot"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26618079",
+                null
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MassWolf",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Multi-Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "26618079",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "16944945"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 385,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 292,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original",
+        "id": 6,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "MZmine",
+                "MS-Fit"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16026613",
+                "18429132"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "23148064"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full ",
+        "id": 255,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 40,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [],
+        "pmid_workflow": [],
+        "usecase": 2,
+        "scenario": "Full ",
+        "id": 241,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MZmine",
+                "raw2mzDB"
+            ],
+            [
+                "raw2mzDB",
+                "Mascot Server"
+            ],
+            [
+                "Mascot Server",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16026613",
+                "25505153"
+            ],
+            [
+                "25505153",
+                "10612281"
+            ],
+            [
+                "10612281",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext",
+        "id": 55,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "CompassXport",
+                "ICPL_ESIQuant"
+            ],
+            [
+                "ICPL_ESIQuant",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "20058247",
+                "23454610"
+            ],
+            [
+                "23454610",
+                "23724967"
+            ]
+        ],
+        "usecase": 1,
+        "scenario": "Full ",
+        "id": 156,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 294,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "mzBruker",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "28975713",
+                "23724967"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 316,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "RawTools",
+                "DTA to MGF File Converter"
+            ],
+            [
+                "DTA to MGF File Converter",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "30462513",
+                "19015139"
+            ],
+            [
+                "19015139",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Ect + C ",
+        "id": 357,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 193,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "CompassXport",
+                "Comet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "20058247",
+                "23148064"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 312,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 271,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "mzXMLplot"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                null
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 282,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "MassHunter File Reader",
+                "DTA to MGF File Converter"
+            ],
+            [
+                "DTA to MGF File Converter",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "19235167",
+                "19015139"
+            ],
+            [
+                "19015139",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext + C",
+        "id": 79,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ],
+            [
+                "msConvert",
+                "MassWiz"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "21417338",
+                "12610571"
+            ],
+            [
+                "23051804",
+                "21417338"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original + C",
+        "id": 34,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [],
+        "pmid_workflow": [],
+        "usecase": 1,
+        "scenario": "Full ",
+        "id": 141,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "unfinnigan",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23766417",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 275,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "workflow": [
+            [
+                "T2D converter",
+                "MapQuant"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "22411703",
+                "16470651"
+            ]
+        ],
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "workflow": [
+            [
+                "ReAdW",
+                "mzXMLplot"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16988928",
+                null
+            ]
+        ],
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 2.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "ReAdW",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "16988928",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "23724967"
+            ]
+        ],
+        "usecase": 1,
+        "scenario": "Full ",
+        "id": 147,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 1.0,
+        "workflow": [
+            [
+                "DeconTools",
+                "Mascot Server"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "10757168",
+                "10612281"
+            ]
+        ],
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "ReAdW",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "MFPaQ"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16988928",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "17533220"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Ext + C ",
+        "id": 235,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ],
+            [
+                "ProteinProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ],
+            [
+                "14632076",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 199,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 3.0,
+        "workflow": [
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "rt"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "12463368"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 0.5,
+        "expert1": 1.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "mzBruker",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "idconvert"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "28975713",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "23051804"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Full + C ",
+        "id": 276,
+        "rating_bin": "0-1"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "xml2tsv"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                null
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 188,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.5,
+        "workflow": [
+            [
+                "Comet",
+                "rt"
+            ],
+            [
+                "ReAdW",
+                "Comet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23148064",
+                "12463368"
+            ],
+            [
+                "16988928",
+                "23148064"
+            ]
+        ],
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original",
+        "id": 4,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 0.0,
+        "expert1": 0.0,
+        "expert2": 0.0,
+        "workflow": [
+            [
+                "OpenSWATH",
+                "ProCon (Proteomics Conversion Tool)"
+            ],
+            [
+                "ProCon (Proteomics Conversion Tool)",
+                "ProCoNA"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "24727770",
+                "26182917"
+            ],
+            [
+                "26182917",
+                "23724967"
+            ]
+        ],
+        "usecase": 1,
+        "scenario": "Ext",
+        "id": 137,
+        "rating_bin": "0"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "PEAKS Q"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12610571"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 383,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "ThermoRawFileParser",
+                "mzBruker"
+            ],
+            [
+                "mzBruker",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                null,
+                "28975713"
+            ],
+            [
+                "28975713",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Full",
+        "id": 98,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "MZmine",
+                "ProFound"
+            ],
+            [
+                "ProFound",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "16026613",
+                "10857624"
+            ],
+            [
+                "10857624",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Full + C ",
+        "id": 395,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "msConvert"
+            ],
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "ProteinProphet"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "14632076"
+            ]
+        ],
+        "usecase": 2,
+        "scenario": "Original + C ",
+        "id": 190,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original ",
+        "id": 286,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 1.0,
+        "expert1": 1.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "idconvert"
+            ],
+            [
+                "idconvert",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "23051804"
+            ],
+            [
+                "23051804",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Original",
+        "id": 16,
+        "rating_bin": "1-2"
+    },
+    {
+        "ratingAvg": 2.0,
+        "expert1": 2.0,
+        "expert2": 2.0,
+        "workflow": [
+            [
+                "msConvert",
+                "Comet"
+            ],
+            [
+                "Comet",
+                "PTMProphet"
+            ],
+            [
+                "PTMProphet",
+                "PeptideProphet"
+            ],
+            [
+                "PeptideProphet",
+                "Libra"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "23148064"
+            ],
+            [
+                "23148064",
+                "25631240"
+            ],
+            [
+                "25631240",
+                "12403597"
+            ],
+            [
+                "12403597",
+                "20101611"
+            ]
+        ],
+        "usecase": 3,
+        "scenario": "Original + C ",
+        "id": 304,
+        "rating_bin": "2-3"
+    },
+    {
+        "ratingAvg": 1.5,
+        "expert1": 2.0,
+        "expert2": 1.0,
+        "workflow": [
+            [
+                "msConvert",
+                "DTA to MGF File Converter"
+            ],
+            [
+                "DTA to MGF File Converter",
+                "MassWiz"
+            ],
+            [
+                "MassWiz",
+                "rt"
+            ]
+        ],
+        "pmid_workflow": [
+            [
+                "23051804",
+                "19015139"
+            ],
+            [
+                "19015139",
+                "21417338"
+            ],
+            [
+                "21417338",
+                "12463368"
+            ]
+        ],
+        "usecase": 0,
+        "scenario": "Ext + C",
+        "id": 80,
+        "rating_bin": "1-2"
+    }
+]

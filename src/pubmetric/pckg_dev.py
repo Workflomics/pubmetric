@@ -59,7 +59,7 @@ def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Opt
     """
     Generates a workflow of the same structure as the given workflow, but where each tool is replaced with a randomly picked one from the given set.
 
-    :param tool_list: List of tools to pick from. Generally this should be all tools in the domain.
+    :param tool_list: Optional if the user wants to specify the list of tools to pick from (only works if retain degree is set to False). Generally this should be all tools in the domain.
     :param workflow: Dictionary representing the workflow.
 
     :return: List of tuples representing a workflow where each tool has been replaced by another, random, one.  
@@ -77,7 +77,7 @@ def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Opt
     random_pmid_edges = []
 
 
-    pmid_mapping = {}
+    pmid_mapping = {None:None} # None will always map back to none
     for step in list(steps.items()):
         pmid = step[1]
         if pmid in pmid_mapping.keys():
@@ -87,27 +87,37 @@ def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Opt
             # Binning degrees (1-50 is 50, 51-100 is 100 etc), so the random tools are a bit more fairly chosen
             binned_degree = ((degree + 49) // 50) * 50
             tool_list = [vs['pmid'] for vs in graph.vs if  (binned_degree - 50) < vs.degree() <= (binned_degree + 50)]
-            print('nr tools to choose from at degree', degree, len(tool_list))
+            # print('nr tools to choose from at degree', degree, len(tool_list))
 
         
         random_pmid = np.random.choice(tool_list)
         pmid_mapping[pmid] = random_pmid
 
     for edge in edges:
-        source = edge[0]
-        target = edge[1]
+        source_name = edge[0]
+        target_name = edge[1]
 
-        random_source_pmid = pmid_mapping[steps[source]]
-        random_target_pmid = pmid_mapping[steps[target]]
-        
-        random_source = next(vs['name'] for vs in graph.vs if vs['pmid']== random_source_pmid) + f'_{source.split("_")[1]}' # transfering numbering to random steps
-        random_target = next(vs['name'] for vs in graph.vs if vs['pmid']== random_target_pmid) + f'_{target.split("_")[1]}'
+        if not steps[source_name]:
+            random_source_name = "MISSINGTOOL" + f'_{source_name.split("_")[1]}'
+            random_source_pmid = None
+            random_steps[random_source_name] = random_source_pmid # there is some repetition here
+        else:
+            random_source_pmid = pmid_mapping[steps[source_name]]
+            random_source_name = next(vs['name'] for vs in graph.vs if vs['pmid']== random_source_pmid) + f'_{source_name.split("_")[1]}' # transfering numbering to random steps
 
-        random_edges.append( (random_source, random_target ) )
+        if not steps[target_name]:
+            random_target_name = "MISSINGTOOL" + f'_{target_name.split("_")[1]}' 
+            random_target_pmid = None
+            random_steps[random_target_name] = random_target_pmid
+        else:
+            random_target_pmid = pmid_mapping[steps[target_name]]
+            random_target_name = next(vs['name'] for vs in graph.vs if vs['pmid']== random_target_pmid) + f'_{target_name.split("_")[1]}'
+
+        random_edges.append( (random_source_name, random_target_name ) )
         random_pmid_edges.append( (random_source_pmid, random_target_pmid) )
 
-        random_steps[random_source] = random_source_pmid # there is some repetition here but 
-        random_steps[random_target] = random_target_pmid
+        random_steps[random_source_name] = random_source_pmid # there is some repetition here but 
+        random_steps[random_target_name] = random_target_pmid
 
 
     random_workflow = {
@@ -119,7 +129,35 @@ def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Opt
     return random_workflow
 
 
+def break_workflow(workflow: list, replacing_tools: list) -> list:
+    """
+    Takes a workflow and randomly exchanges one of its tools with one from an given set
 
+    """
+    tools = set()
+
+    tools = {pmid for tup in workflow for pmid in tup if pmid is not None} # collect what tools are in the workflow, ignoring Nones
+    tool_to_replace = np.random.choice(list(tools))
+    replacing_tool = str(np.random.choice(replacing_tools)) ## do I want too also collect the comparison of their citation counts? 
+
+    broken_workflow = []
+    for source, target in workflow:
+        if source == tool_to_replace:
+            broken_workflow.append( (replacing_tool, target) )
+        elif target == tool_to_replace:
+            broken_workflow.append( (source, replacing_tool) )
+        else:
+            broken_workflow.append( (source, target) )
+    return broken_workflow
+
+def convert_to_tuples(list_of_lists):
+    """
+    Converts a list of lists into a list of tuples.
+
+    :param list_of_lists: List of lists to be converted.
+    :return: List of tuples.
+    """
+    return [tuple(inner_list) for inner_list in list_of_lists]
 
 def reconnect_edges(missing_node, workflow): 
     """

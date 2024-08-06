@@ -2,7 +2,7 @@ import igraph
 import numpy as np
 import math
 import statistics
-from typing import List
+from typing import List, Union
 
 #TODO: all metrics that need to think about  workflow structure need to be updated to work with the new workflow representation 
 # for ex: compelte tree needs to take into account the repeated tool several times
@@ -65,7 +65,7 @@ def tool_average_sum(graph: igraph.Graph, workflow: list) -> float:
     :return: Dictionary of the tool level metric score for each step
     """
 
-    steps = list(workflow['steps'].keys())
+    steps = list(workflow['steps'].values())
     edges = workflow['edges']
 
     if not edges: # If it is an empty workflow
@@ -100,7 +100,7 @@ def workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
     """
 
     if not workflow: # if there are no edges
-        return 0 
+        return 0
 
     aggregated_weight = 0
     for edge in workflow:
@@ -109,7 +109,8 @@ def workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
 
     return round(float(aggregated_weight/len(workflow) ), 3)
 
-def connectivity(graph: igraph.Graph, workflow: list) -> float: # obs the repeated workflows will have a disadvantage because there is no edge between them which defaults to 0. This must be adjusted for in the devision of edges! TODO
+def connectivity(graph: igraph.Graph, workflow: list) -> float: 
+    # obs the repeated workflows will have a disadvantage because there is no edge between them which defaults to 0. This must be adjusted for in the devision of edges! TODO
     """
     Calculates the sum of the edge weights between all possible pairs of tools in a workflow.
     Named after the degree of connectivity - how close it is to being a complete graph - though this is weighted.
@@ -119,23 +120,23 @@ def connectivity(graph: igraph.Graph, workflow: list) -> float: # obs the repeat
     
 
     :return: Float value of the logarithmic product metric.
-    """   
+    """
+    if isinstance(workflow, dict):
+        pmids = list(workflow['steps'].values())
+    elif isinstance(workflow, list):
+        pmids = list(set(element for tup in workflow for element in tup))
+    else:
+        raise TypeError
 
-    step_dict = list(workflow['steps'].items())
-    nr_steps = len(step_dict)
-
-    print(step_dict, nr_steps)
-
-    if nr_steps == 0:
+    nr_steps = len(pmids)
+    if nr_steps <=1: # if there is only one tool there can be no edges
         return 0.0
 
     total_weight = 0.0
     for i in range( nr_steps ):
         for j in range(i + 1, nr_steps ):
-            print(step_dict[i][1], step_dict[j][1])
-            weight = get_graph_edge_weight(graph, (step_dict[i][1], step_dict[j][1])) or 0.0
-            print(weight)
-            total_weight += weight 
+            weight = get_graph_edge_weight(graph, (pmids[i], pmids[j])) or 0.0
+            total_weight += weight
 
     nr_possible_edges = nr_steps * (nr_steps - 1) // 2
 
@@ -151,8 +152,14 @@ def workflow_weighted_connectivity(graph: igraph.Graph, workflow: dict, factor:f
         A factor of 0 gives no extra weight to the workflow edges and thus will give the same value as the regular complete_tree() metric. 
 
     :return: Float value of the complete three and sum combination metric.
-    """   
-    pmid_workflow = workflow['pmid_edges'] 
+    """
+    if isinstance(workflow, dict):
+        pmid_workflow = workflow['pmid_edges']
+    elif isinstance(workflow, list):
+        pmid_workflow = workflow # this is not neat #TODO
+    else:
+        raise TypeError
+     
     workflow_edge_score = workflow_average_sum(graph, pmid_workflow)
     all_possible_edges_score = connectivity(graph, workflow)
 
@@ -171,7 +178,7 @@ def transformed_workflow_average_sum(graph: igraph.Graph, workflow: List[tuple],
     :return: Float value of the log sum metric.
     """
     if not workflow: # If workflow is an empty list
-        return 0.0 
+        return 0.0
 
     aggregated_weight = 0.0
     for edge in workflow:
@@ -209,16 +216,11 @@ def degree_workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
         edge_weight = get_graph_edge_weight(graph, edge)
         if edge_weight is None: # skip the rest of the calculations
             continue
-        print(edge_weight)
         source_degree = graph.vs[id_dict[edge[0]]].degree()
         target_degree = graph.vs[id_dict[edge[1]]].degree()
 
         avg_degree = np.mean([source_degree, target_degree])
-
-        print(avg_degree, source_degree, target_degree)
-
         normalised_edge_weight = edge_weight / avg_degree
-        print(normalised_edge_weight)
         aggregated_weight += normalised_edge_weight
 
     return round(float(aggregated_weight/len(workflow) ), 3)
@@ -232,12 +234,12 @@ def workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
     
 
     :return: Float value of the product metric .
-    """    
+    """
     if not workflow: # If workflow is an empty list
-        return 0.0 
-    
+        return 0.0
+
     weights = []
-    
+
     for edge in workflow:
         weight = get_graph_edge_weight(graph, edge) or 0.0
         weights.append(weight)
@@ -246,9 +248,9 @@ def workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
     if nonzero_weights:
         score =  np.prod(nonzero_weights) / len(workflow) 
         return round(float(score), 3)
-    else:
-        return 0.0  # If there are no weights
-    
+
+    return 0.0  # If there are no weights
+
 
 def log_workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
     """ 
@@ -261,8 +263,8 @@ def log_workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
     :return: Float value of the logarithmic product metric.
     """
     if not workflow: # If workflow is an empty list
-        return 0.0 
-    
+        return 0.0
+
     weights = []
     for edge in workflow:
         weight = get_graph_edge_weight(graph, edge) or 0.0
@@ -273,11 +275,11 @@ def log_workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
     if nonzero_weights:
         score =  np.prod(nonzero_weights) / len(workflow) 
         return round(float(score), 3)
-    else:
-        return 0.0  # If there are no weights
+
+    return 0.0  # If there are no weights
 
 
-def workflow_average_sum_age(graph: igraph.Graph, workflow: list, default_age: int = 100) -> float: # no recorded age will ruin this. 100 too big. Might use global average age instead?
+def age_workflow_average_sum(graph: igraph.Graph, workflow: list, default_age: int = 100) -> float: # no recorded age will ruin this. 100 too big. Might use global average age instead?
     """
     Normalises edge weights by the average ages of the nodes and sums them up.
 
@@ -290,7 +292,7 @@ def workflow_average_sum_age(graph: igraph.Graph, workflow: list, default_age: i
 
     """
     if not workflow: # If workflow is an empty list
-        return 0 
+        return 0
     aggregated_weight = 0
     for edge in workflow:
         if edge[0] not in graph.vs['pmid'] or edge[1] not in graph.vs['pmid']: # igraph attribute "name" stores the pmids
@@ -311,7 +313,7 @@ def workflow_average_sum_age(graph: igraph.Graph, workflow: list, default_age: i
 
     return round(float(aggregated_weight/len(workflow) ), 3)
     
-def connectivity_age(graph: igraph.Graph, workflow: dict,  default_age: int = 100):
+def age_connectivity(graph: igraph.Graph, workflow: dict,  default_age: int = 100):
     """
     Combination metric of the age_norm_sum_metric() and complete_tree() metrics, where the edges in the workflow are given more importance.
 
@@ -322,18 +324,23 @@ def connectivity_age(graph: igraph.Graph, workflow: dict,  default_age: int = 10
     :return: Float value of the age-normalised complete_tree() metric.
 
     """
+    if isinstance(workflow, dict):
+        pmids = list(workflow['steps'].values())
+    elif isinstance(workflow, list):
+        pmids = list(set(element for tup in workflow for element in tup))
+    else:
+        raise TypeError
+    
+    nr_steps = len(pmids)
 
-    step_dict = list(workflow['steps'].items())
-    nr_steps = len(step_dict)
-
-    if nr_steps == 0:
+    if nr_steps <=1:
         return 0.0
 
     total_weight = 0
     for i in range( nr_steps ):
         for j in range(i + 1, nr_steps ):
-            source = step_dict[i][1]
-            target = step_dict[j][1]
+            source = pmids[i]
+            target = pmids[j]
 
             weight = get_graph_edge_weight(graph, (source, target)) or 0
 
@@ -353,7 +360,7 @@ def connectivity_age(graph: igraph.Graph, workflow: dict,  default_age: int = 10
 
     return round(total_weight/nr_possible_edges, 3)
 
-def connectivity_min(graph: igraph.Graph, workflow: dict): 
+def min_connectivity(graph: igraph.Graph, workflow: dict): 
     """
     The connectivity() metric which punishes single bad links. 
 
@@ -365,19 +372,22 @@ def connectivity_min(graph: igraph.Graph, workflow: dict):
 
     """
 
-    step_dict = list(workflow['steps'].items())
-    nr_steps = len(step_dict)
-
-    print(nr_steps)
-
-    if nr_steps == 0:
+    if isinstance(workflow, dict):
+        pmids = list(workflow['steps'].values())
+    elif isinstance(workflow, list):
+        pmids = list(set(element for tup in workflow for element in tup))
+    else:
+        raise TypeError
+    
+    nr_steps = len(pmids)
+    if nr_steps <=1:
         return 0.0
 
     min_weight = 10_000   # larger than max nr citations
     total_weight = 0
     for i in range( nr_steps ):
         for j in range(i + 1, nr_steps ):
-            weight = get_graph_edge_weight(graph, (step_dict[i][1], step_dict[j][1])) or 0
+            weight = get_graph_edge_weight(graph, (pmids[i], pmids[j])) or 0
             if 0 < weight < min_weight:
                 min_weight = weight
             total_weight += weight 
@@ -386,7 +396,7 @@ def connectivity_min(graph: igraph.Graph, workflow: dict):
     return total_weight/nr_possible_edges*min_weight 
 
 
-def connectivity_citation(graph: igraph.Graph, workflow: dict, default_nr_citations: int = 0): 
+def citation_connectivity(graph: igraph.Graph, workflow: dict, default_nr_citations: int = 0): 
     """
     A variation of the connectivity() metric, where the edges are divided by the mean number of citations of the source and target.
 
@@ -399,17 +409,23 @@ def connectivity_citation(graph: igraph.Graph, workflow: dict, default_nr_citati
 
     """
 
-    step_dict = list(workflow['steps'].items())
-    nr_steps = len(step_dict)
+    if isinstance(workflow, dict):
+        pmids = list(workflow['steps'].values())
+    elif isinstance(workflow, list):
+        pmids = list(set(element for tup in workflow for element in tup))
+    else:
+        raise TypeError
+    
+    nr_steps = len(pmids)
 
-    if nr_steps == 0:
+    if nr_steps <=1:
         return 0.0
 
     total_weight = 0
     for i in range( nr_steps ):
         for j in range(i + 1, nr_steps ):
-            source = step_dict[i][1]
-            target = step_dict[j][1]
+            source = pmids[i]
+            target = pmids[j]
 
             weight = get_graph_edge_weight(graph, (source, target)) or 0
 
@@ -421,17 +437,15 @@ def connectivity_citation(graph: igraph.Graph, workflow: dict, default_nr_citati
 
             avg_citations = np.mean([source_citations, target_citations]) 
 
-            print(avg_citations, weight)
             normalised_edge_weight = weight / avg_citations 
 
             total_weight += normalised_edge_weight
 
     nr_possible_edges = nr_steps * (nr_steps - 1) // 2
 
-    print(nr_possible_edges, total_weight)
     return round(total_weight/nr_possible_edges, 3)
 
-def citations(graph: igraph.Graph, workflow:dict, default_nr_citations: int = 0) -> int:
+def median_citations(graph: igraph.Graph, workflow:Union[dict,list], default_nr_citations: int = 0) -> int:
     """
     Simply returns the median number citations of all of the primary publications of tools in the workflow.
     
@@ -442,19 +456,20 @@ def citations(graph: igraph.Graph, workflow:dict, default_nr_citations: int = 0)
     :return: Integer value of the median number of citations.
     
     """
-
-    steps = list(workflow['steps'].items())
+    if isinstance(workflow, dict):
+        pmids = list(workflow['steps'].values())
+    elif isinstance(workflow, list):
+        pmids = list(set(element for tup in workflow for element in tup))
+    else:
+        raise TypeError
 
     total_citations = []
-    n = len(steps)
-    
-    if n==0:
+
+    if len(pmids)==0:
         return 0
-    print(graph.vs['nr_citations'])
-    for step in steps:
-        pmid = step[1] # the values are pmids
+    
+    for pmid in pmids:
         citation_number = next((vs['nr_citations'] for vs in graph.vs if vs['pmid'] == pmid), default_nr_citations)
-        print(citation_number)
         if citation_number:
             total_citations.append(citation_number)
 

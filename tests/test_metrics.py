@@ -61,26 +61,26 @@ def test_workflow_average_sum_age():
     TA_age = datetime.now().year-2015
     TC_age = datetime.now().year-2017
     TD_age = datetime.now().year-2018
-    assert workflow_average_sum_age(graph=cocitation_graph, workflow=pmid_workflow) == round(( 2 / ((TA_age + TC_age) / 2)  +  1 / ((TC_age + TD_age) / 2) ) / 3, 3)
+    assert age_workflow_average_sum(graph=cocitation_graph, workflow=pmid_workflow) == round(( 2 / ((TA_age + TC_age) / 2)  +  1 / ((TC_age + TD_age) / 2) ) / 3, 3)
 
 def test_connectivity_age():
     TA_age = datetime.now().year-2015
     TC_age = datetime.now().year-2017
     TD_age = datetime.now().year-2018
-    score = connectivity_age(cocitation_graph, workflow= dictionary_workflow)
+    score = age_connectivity(cocitation_graph, workflow= dictionary_workflow)
     assert score ==  round(( 2 / ((TA_age + TC_age) / 2)  +  2 / ((TA_age + TC_age) / 2)  + 1 / ((TD_age + TC_age) / 2)  ) / 6, 3)
 
 def test_connectivity_min():
-    score = connectivity_min(cocitation_graph, workflow= dictionary_workflow)
+    score = min_connectivity(cocitation_graph, workflow= dictionary_workflow)
     assert score == ( ( 2 + 2 + 1 + 0 + 0 + 0 ) / 6 ) * 1 # since 1 is the nonzero min 
 
 def test_connectivity_citation():
     TA_cite = 1
     TC_cite = 3
     TD_cite = 4
-    score = connectivity_citation(cocitation_graph, workflow= dictionary_workflow)
+    score = citation_connectivity(cocitation_graph, workflow= dictionary_workflow)
     assert score == round(( 2 / ((TA_cite + TC_cite) / 2) + 2 / ((TA_cite + TC_cite) / 2) + 1 / ((TC_cite + TD_cite) / 2) + 0 + 0 + 0 ) / 6, 3)
 
 def test_citations():
-    score = citations(cocitation_graph, workflow= dictionary_workflow)
+    score = median_citations(cocitation_graph, workflow= dictionary_workflow)
     assert score == statistics.median([1, 1, 3, 4]) # TA is counted twice. Cant argue what is more or less reasonable as it is not a reasonable metric
