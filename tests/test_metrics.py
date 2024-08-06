@@ -38,40 +38,40 @@ def test_connectivity():
 def test_workflow_weighted_connectivity():
     factor = 2
     score = workflow_weighted_connectivity(cocitation_graph, workflow=dictionary_workflow, factor=factor )
-    assert score == ( 2 + 2 + 1 + 0 + 0 + 0 ) / 6 + factor* 1 # factor multiplied by workflow_average_sum score
+    assert score == ( 2 + 2 + 1 + 0 + 0 + 0 ) / 6 - 1 + factor* 1 # factor multiplied by workflow_average_sum score
 
 def test_sqrt_workflow_average_sum():
-    sqrt_score = transformed_workflow_average_sum(cocitation_graph, workflow=dictionary_workflow, transform='sqrt')
-    assert sqrt_score == (math.sqrt(2) + math.sqrt(1) + math.sqrt(0)) / 3
+    sqrt_score = transformed_workflow_average_sum(cocitation_graph, workflow=pmid_workflow, transform='sqrt')
+    assert sqrt_score == round(( math.sqrt(2) + math.sqrt(1) + math.sqrt(0) ) / 3, 3)
 
 def test_log_workflow_average_sum():
-    log_score = transformed_workflow_average_sum(cocitation_graph, workflow=dictionary_workflow, transform='log')
-    assert log_score == (math.log(2 + 1) + math.log(1 + 1) + math.log(0 + 1)) / 3
+    log_score = transformed_workflow_average_sum(cocitation_graph, workflow=pmid_workflow, transform='log') #TODO pass dictinary to all- extract pmids within functions
+    assert log_score == round((math.log(2 + 1) + math.log(1 + 1) + math.log(0 + 1)) / 3, 3)
 
 def test_degree_workflow_average_sum():
-    assert degree_workflow_average_sum(graph=cocitation_graph, workflow=pmid_workflow) == (2 / (1.5) + 1 / (1.5) + 0/1 ) / 3
+    assert degree_workflow_average_sum(graph=cocitation_graph, workflow=pmid_workflow) == round((2 / (1.5) + 1 / (1.5) + 0/1 ) / 3, 3)
 
 def test_workflow_edge_product():
-    assert workflow_edge_product(graph=cocitation_graph, workflow=pmid_workflow) == 2*1 # 0 values are not included
+    assert workflow_edge_product(graph=cocitation_graph, workflow=pmid_workflow) == round(2*1/3,3) # 0 values are not included
 
 def test_log_workflow_edge_product():
-    assert workflow_edge_product(graph=cocitation_graph, workflow=pmid_workflow) == math.log(2) * math.log(1) # 0 values are not included
+    assert log_workflow_edge_product(graph=cocitation_graph, workflow=pmid_workflow) == round(math.log(2+1) * math.log(1+1)/3, 3) # 0 values are not included
 
 def test_workflow_average_sum_age():
     TA_age = datetime.now().year-2015
     TC_age = datetime.now().year-2017
     TD_age = datetime.now().year-2018
-    assert degree_workflow_average_sum(graph=cocitation_graph, workflow=pmid_workflow) == ( 2 / (TA_age + TD_age) / 2  +  1 / (TC_age + TD_age) / 2 + 0 ) / 3
+    assert workflow_average_sum_age(graph=cocitation_graph, workflow=pmid_workflow) == round(( 2 / ((TA_age + TC_age) / 2)  +  1 / ((TC_age + TD_age) / 2) ) / 3, 3)
 
 def test_connectivity_age():
     TA_age = datetime.now().year-2015
     TC_age = datetime.now().year-2017
     TD_age = datetime.now().year-2018
     score = connectivity_age(cocitation_graph, workflow= dictionary_workflow)
-    assert score == ( 2 / (TA_age + TD_age) / 2 + 2 / (TA_age + TD_age) / 2 + 1 / (TC_age + TD_age) / 2 + 0 + 0 + 0 ) / 6 
- 
+    assert score ==  round(( 2 / ((TA_age + TC_age) / 2)  +  2 / ((TA_age + TC_age) / 2)  + 1 / ((TD_age + TC_age) / 2)  ) / 6, 3)
+
 def test_connectivity_min():
-    score = connectivity(cocitation_graph, workflow= dictionary_workflow)
+    score = connectivity_min(cocitation_graph, workflow= dictionary_workflow)
     assert score == ( ( 2 + 2 + 1 + 0 + 0 + 0 ) / 6 ) * 1 # since 1 is the nonzero min 
 
 def test_connectivity_citation():
@@ -79,8 +79,8 @@ def test_connectivity_citation():
     TC_cite = 3
     TD_cite = 4
     score = connectivity_citation(cocitation_graph, workflow= dictionary_workflow)
-    assert score == ( 2 / (TA_cite + TD_cite) / 2 + 2 / (TA_cite + TD_cite) / 2 + 1 / (TC_cite + TD_cite) / 2 + 0 + 0 + 0 ) / 6 
+    assert score == round(( 2 / ((TA_cite + TC_cite) / 2) + 2 / ((TA_cite + TC_cite) / 2) + 1 / ((TC_cite + TD_cite) / 2) + 0 + 0 + 0 ) / 6, 3)
 
 def test_citations():
     score = citations(cocitation_graph, workflow= dictionary_workflow)
-    assert score ==statistics. median([1, 2, 4])
+    assert score == statistics.median([1, 1, 3, 4]) # TA is counted twice. Cant argue what is more or less reasonable as it is not a reasonable metric

@@ -1,4 +1,8 @@
 import igraph 
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from pubmetric.network import create_cocitation_graph, add_graph_attributes
 # Define the nodes 
 tools = ['TA', 'TC', 'TD', # connected cluster - included in final graph 
@@ -43,12 +47,12 @@ expected_edge_weights = {('TA', 'TC'): 2, ('TC', 'TD'): 1, ('TE', 'TF'): 1,
 
 tool_metadata = {
     "tools": [
-        {'name': 'ToolnameA', 'pmid': 'TA', 'nrCitations': 1, 'pubdate': 2015},
-        {'name': 'ToolnameB', 'pmid': 'TB', 'nrCitations': 2, 'pubdate': 2016}, 
-        {'name': 'ToolnameC', 'pmid': 'TC', 'nrCitations': 3, 'pubdate': 2017},
-        {'name': 'ToolnameD', 'pmid': 'TD', 'nrCitations': 4, 'pubdate': 2018},
-        {'name': 'ToolnameE', 'pmid': 'TE', 'nrCitations': 5, 'pubdate': 2019},
-        {'name': 'ToolnameF', 'pmid': 'TF', 'nrCitations': 6, 'pubdate': 2020}
+        {'name': 'ToolnameA', 'pmid': 'TA', 'nrCitations': 1, 'pubDate': 2015},
+        {'name': 'ToolnameB', 'pmid': 'TB', 'nrCitations': 2, 'pubDate': 2016}, 
+        {'name': 'ToolnameC', 'pmid': 'TC', 'nrCitations': 3, 'pubDate': 2017},
+        {'name': 'ToolnameD', 'pmid': 'TD', 'nrCitations': 4, 'pubDate': 2018},
+        {'name': 'ToolnameE', 'pmid': 'TE', 'nrCitations': 5, 'pubDate': 2019},
+        {'name': 'ToolnameF', 'pmid': 'TF', 'nrCitations': 6, 'pubDate': 2020}
     ]
 }
 
@@ -70,10 +74,10 @@ dictionary_workflow = {
         ]
     ],
     "steps": {
-        "TC_02": "14632076",
-        "TD_04": "29400476",
-        "TA_01": "14976030",
-        "TA_03": "14976030"
+        "TC_02": "TC",
+        "TD_04": "TD",
+        "TA_01": "TA",
+        "TA_03": "TA"
     },
     "pmid_edges": [
         [
