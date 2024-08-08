@@ -6,7 +6,7 @@ import igraph
 from typing import Optional, Union
 
 
-def parse_cwl_workflows(graph: igraph.Graph, cwl_filename: str) -> list:
+def parse_cwl_workflows(graph: igraph.Graph, cwl_filename: str) -> list: # TODO: it is in workflows, it should be called just parse_cwl 
     """
     Function that turns a CWL representation of a workflow into a list of node tuples (edges), where source and target is represented by the pmid of their repecitve primary publication. 
 

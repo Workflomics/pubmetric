@@ -52,10 +52,24 @@ def parse_tuple_workflow(graph: igraph.Graph, pmid_edges: list): # for reading r
 
     return random_workflow   
 
+def get_percentile_bin(degree, percentiles):
+    """
+    Determines the percentile bin for a given degree based on predefined percentile thresholds.
 
+    :param degree: The degree of the tool for which the percentile bin needs to be determined.
+    :param percentiles: A list of percentile thresholds to be used for binning.
+
+    :return: The percentile bin as an integer (0, 10, 20, ..., 90) representing the degree's percentile range.
+    """
+    for i, percentile in enumerate(percentiles):
+        if degree <= percentile:
+            return f'{i*5+5}th'
+    return '100th'
 
 ## tag : next step 
-def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Optional[list] = None, random_seed: int = 42, retain_degree: bool = True) -> list:  # TODO: must be updated to work with the new workflow format
+# TODO: if not retain degree then tyou need to give a tool_lsit
+# random seed? how pass it so it does not just use the same oens all the time?
+def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Optional[list] = None, retain_degree: bool = True) -> list:  # TODO: must be updated to work with the new workflow format
     """
     Generates a workflow of the same structure as the given workflow, but where each tool is replaced with a randomly picked one from the given set.
 
@@ -64,8 +78,6 @@ def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Opt
 
     :return: List of tuples representing a workflow where each tool has been replaced by another, random, one.  
     """
-
-    np.random.seed(random_seed)
 
     steps = workflow['steps']
     edges = workflow['edges']
@@ -77,19 +89,26 @@ def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Opt
     random_pmid_edges = []
 
 
+    if retain_degree:
+        degrees = [vs.degree() for vs in graph.vs]
+        percentiles = np.percentile(degrees, np.arange(5, 100, 5)) 
+        tools_by_percentile = {f'{i*5+5}th': [] for i in range(20)}  # Creating bins for every 5 percentiles
+        for vs in graph.vs:
+            degree = vs.degree()
+            bin_percentile = get_percentile_bin(degree, percentiles)
+            tools_by_percentile[bin_percentile].append(vs['pmid'])
+
+
     pmid_mapping = {None:None} # None will always map back to none
     for step in list(steps.items()):
         pmid = step[1]
         if pmid in pmid_mapping.keys():
             continue
         if retain_degree:
-            degree = next(vs.degree() for vs in graph.vs if vs['pmid']==pmid) # TODO: replace the old list comprehension with next
-            # Binning degrees (1-50 is 50, 51-100 is 100 etc), so the random tools are a bit more fairly chosen
-            binned_degree = ((degree + 49) // 50) * 50
-            tool_list = [vs['pmid'] for vs in graph.vs if  (binned_degree - 50) < vs.degree() <= (binned_degree + 50)]
-            # print('nr tools to choose from at degree', degree, len(tool_list))
-
-        
+            degree = next(vs.degree() for vs in graph.vs if vs['pmid'] == pmid)
+            bin_percentile = get_percentile_bin(degree, percentiles)
+            tool_list = tools_by_percentile[bin_percentile]
+   
         random_pmid = np.random.choice(tool_list)
         pmid_mapping[pmid] = random_pmid
 

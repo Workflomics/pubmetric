@@ -244,7 +244,8 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
     if test_size:
         metadata_file_name = f'tool_metadata_test{test_size}.json' # I removed date from the filename, it is inside if needed
     else: 
-        metadata_file_name = 'tool_metadata.json' 
+        metadata_file_name = 'tool_metadata.json'
+
     if inpath: # Indicates we want to load a file
         metadata_path = os.path.join(inpath, metadata_file_name)
         if os.path.isfile(metadata_path): 
@@ -253,10 +254,7 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
         else:
             raise FileNotFoundError(" ")
         # TODO should have somoe criteria for what is loaded here. Needs to follow the metadatafile schema # TODO specify schema
-        try: # TODO: this should be a function that for each schema I have checks that it is in fact correct! 
-            type(metadata_file['tools']) == list
-            type(metadata_file['tools'][0]) ==  dict
-        except: 
+        if not isinstance(metadata_file['tools'], list) or not isinstance(metadata_file['tools'][0], dict):
             raise SchemaValidationError("Metadata file does not have the required structure. Please refer to metadata file schema.")
 
         if test_size: # Takes a random selection of the specified size from the file

@@ -279,13 +279,13 @@ def log_workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
     return 0.0  # If there are no weights
 
 
-def age_workflow_average_sum(graph: igraph.Graph, workflow: list, default_age: int = 100) -> float: # no recorded age will ruin this. 100 too big. Might use global average age instead?
+def age_workflow_average_sum(graph: igraph.Graph, workflow: list, default_age: int = 50) -> float: # no recorded age will ruin this. 100 too big. Might use global average age instead?
     """
     Normalises edge weights by the average ages of the nodes and sums them up.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param default_age: An int representing the value one would like to use for tools that dont have a recorded age
+    :param default_age: An int representing the value one would like to use for tools that dont have a recorded age, roughly based on the maximum age of the
     
 
     :return: Float value of the age-normalised sum metric.
@@ -305,15 +305,15 @@ def age_workflow_average_sum(graph: igraph.Graph, workflow: list, default_age: i
         source_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == edge[0]), default_age)
         target_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == edge[1]), default_age)
 
-        avg_age = np.mean([source_age, target_age]) 
+        min_age = max(1, min([source_age, target_age]))
 
-        normalised_edge_weight = edge_weight / avg_age # TODO: Should not necessarily devide it by age- look at the curve of the spread to see
+        normalised_edge_weight = edge_weight / min_age 
 
         aggregated_weight += normalised_edge_weight
 
     return round(float(aggregated_weight/len(workflow) ), 3)
     
-def age_connectivity(graph: igraph.Graph, workflow: dict,  default_age: int = 100):
+def age_connectivity(graph: igraph.Graph, workflow: dict,  default_age: int = 50):
     """
     Combination metric of the age_norm_sum_metric() and complete_tree() metrics, where the edges in the workflow are given more importance.
 
@@ -350,9 +350,9 @@ def age_connectivity(graph: igraph.Graph, workflow: dict,  default_age: int = 10
             source_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == source), default_age)
             target_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == target), default_age)
 
-            avg_age = np.mean([source_age, target_age]) 
+            min_age = max(1, min([source_age, target_age])) # dont want division by 0
 
-            normalised_edge_weight = weight / avg_age 
+            normalised_edge_weight = weight / min_age 
 
             total_weight += normalised_edge_weight
 
@@ -435,9 +435,10 @@ def citation_connectivity(graph: igraph.Graph, workflow: dict, default_nr_citati
             source_citations = next((vs['nr_citations'] for vs in graph.vs if vs['pmid'] == source), default_nr_citations)
             target_citations = next((vs['nr_citations'] for vs in graph.vs if vs['pmid'] == target), default_nr_citations)
 
-            avg_citations = np.mean([source_citations, target_citations]) 
+            min_citations = max(1, min([source_citations, target_citations]))
 
-            normalised_edge_weight = weight / avg_citations 
+            
+            normalised_edge_weight = weight / min_citations 
 
             total_weight += normalised_edge_weight
 
