@@ -11,9 +11,10 @@ from typing import Optional
 import aiohttp              
 from .exceptions import SchemaValidationError 
 from .log import log_with_timestamp
+import pickle
+import asyncio
 
-
-async def aggregate_requests(session: aiohttp.ClientSession, url: str) -> dict:
+async def aggregate_requests(session: aiohttp.ClientSession, url: str, retries: int = 3, backoff: float = 2.0) -> dict:
     """
     Sync requests so they are all made in a single session
 
@@ -25,66 +26,81 @@ async def aggregate_requests(session: aiohttp.ClientSession, url: str) -> dict:
     :return: dict
         JSON response from the request
     """
-    
-    async with session.get(url) as response:
-        return await response.json()
+    attempt = 0
+    while attempt < retries:
+        try:
+            async with session.get(url) as response:
+                response.raise_for_status()
+                return await response.json()
+        except aiohttp.ClientError as e:
+            attempt += 1
+            wait_time = backoff ** attempt
+            log_with_timestamp(f"Request failed: {e}. Retrying in {wait_time:.1f} seconds...")
+            await asyncio.sleep(wait_time)
+    raise Exception(f"Failed to fetch data from {url} after {retries} attempts.")
 
 
-async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_lib_directory: Optional[str] = None, doi_library_filename: str = 'doi_pmid_library.json') -> dict:
+
+async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_library_filename: str = 'doi_pmid_library.json', save_interval: int = 10) -> dict:
     """
     Given a list of dictionaries with data about (tool) publications, 
     this function uses their DOIs to retrieve their PMIDs from NCBI eutils API.
 
-    :param doi_tools: list
-        List of dictionaries with data about publications, containing the key "doi".
+    :param doi_tools: list of dicts
+    :param outpath: str
     :param doi_library_filename: str, default 'doi_pmid_library.json'
-        The name of the JSON file with DOI to PMID conversions.
+    :param save_interval: int, default 10, Save progress after this many updates
 
-    :return: list
-        Updated list of dictionaries with PMIDs included.
+    :return: Updated list of dicts with PMIDs included.
+
     """
-
-    # Download pmids from dois
-
-    if doi_lib_directory and os.path.isfile(os.path.join(doi_lib_directory, doi_library_filename)):
+    if os.path.isfile(doi_library_filename):
         log_with_timestamp("Loading doi-pmid library")
-        with open(os.path.join(doi_lib_directory, doi_library_filename), 'r') as f:
+        with open(doi_library_filename, 'r', encoding='utf-8') as f:
             doi_library = json.load(f)
-    else: # recreate it
+    else:
         log_with_timestamp('Creating a new doi-pmid library')
         doi_library = {}
 
-
-    library_updates = False
-    async with aiohttp.ClientSession() as session: 
+    library_updates = 0
+    async with aiohttp.ClientSession() as session:
         for tool in tqdm(doi_tools, desc="Downloading pmids from dois."):
             doi = tool.get("doi")
 
-            # Check if tool is already in library 
-            if doi in doi_library: 
-                tool["pmid"] = doi_library[doi] 
+            # Check if DOI already exists in the library
+            if doi in doi_library:
+                tool["pmid"] = doi_library[doi]
                 continue
 
+            # Attempt to fetch the PMID using the DOI
             url = f"http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=PubMed&retmode=json&term={doi}"
             result = await aggregate_requests(session, url)
-            try:
-                doi_pmid = str(result.get('esearchresult').get('idlist')[0]) #TODO!!: something is up with this: cehck if unique?  
-                if doi_pmid and doi_pmid != 'null': 
-                    tool["pmid"] = doi_pmid
-                    doi_library[doi] = doi_pmid  # Update the library
-                    library_updates = True
-            except:
-                continue 
-        
-    if library_updates:
-        log_with_timestamp(f"Writing new doi, pmid pairs to file {doi_library_filename}")
-        with open(os.path.join( outpath, doi_library_filename), 'w') as f: 
-            json.dump(doi_library, f) 
-    
+            id_list = result.get('esearchresult', {}).get('idlist', [])
+            doi_pmid = next(iter(id_list), None)
+
+            if doi_pmid:
+                tool["pmid"] = doi_pmid
+                doi_library[doi] = doi_pmid
+                library_updates += 1
+            else:
+                continue
+            
+            # Save progress 
+            if library_updates >= save_interval:
+                with open(os.path.join(outpath, doi_library_filename), 'w', encoding='utf-8') as f:
+                    json.dump(doi_library, f)
+                library_updates = 0  # Reset update counter
+
+    # Final save if there were any remaining updates
+    if library_updates > 0:
+        with open(os.path.join(outpath, doi_library_filename), 'w', encoding='utf-8') as f:
+            json.dump(doi_library, f)
+
     updated_doi_tools = [tool for tool in doi_tools if tool.get('pmid')]
-    log_with_timestamp(f"Found {len(updated_doi_tools)} more tools with pmid using their doi's")
+    log_with_timestamp(f"Found {len(updated_doi_tools)} tools with PMIDs using their DOIs")
 
     return updated_doi_tools
+
 
 
 async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
@@ -106,11 +122,18 @@ async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
     if topic_id:
         base_url = f'https://bio.tools/api/t?topicID=%22{topic_id}%22&format=json&page='
     else:
-        base_url = f'https://bio.tools/api/t?%22&format=json&page=' # this will be heavy 
+        base_url = 'https://bio.tools/api/t?%22&format=json&page=' # Full bio.tools
 
-    page = 1 
+    page = 1
     log_with_timestamp("Downloading tool metadata from bio.tools")
-    async with aiohttp.ClientSession() as session: 
+
+    # graph stats:
+    primary_stat = 0
+    no_publication_stat = 0
+
+
+
+    async with aiohttp.ClientSession() as session:
         while page:
             # Sends request for tools on the page, await further requests and return resonse in json format
             biotools_url = base_url + str(page)
@@ -121,28 +144,25 @@ async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
             if 'list' in biotool_data: 
                 biotools_list = biotool_data['list']
                 
-                for tool in biotools_list: #add tqdm here 
-                    name = tool.get('name') 
-                    publications = tool.get('publication') # does this cause a problem if there is no publication? 
+                for tool in biotools_list:
+                    publications = tool.get('publication')
+                    if not publications: # Tools without linked publications can not be used in the graph
+                        no_publication_stat += 1
+                        continue
+
+                    name = tool.get('name')
                     topic = tool.get('topic')
-                    
-                    if isinstance(publications, list): #TODO: Expand to using all publications linked to a tool?
-                        nr_publications = len(publications)
-                        try:
-                            for publication in publications:
-                                if publication.get('type')[0] == 'Primary':
-                                    primary_publication = publication
-                                    break
-                        except:
-                            primary_publication = publications[0] # pick first then 
-                    else:
-                        nr_publications = 1
-                        primary_publication = publications
+                    nr_publications = len(publications)
+                    #primary_publication = next((pub for pub in publications if 'Primary' in pub.get('type')), publications[0])
+                    primary_publication = next((pub for pub in publications if 'Primary' in pub.get('type')), None)
+                    if primary_publication is None:
+                        primary_publication = publications[0]
+                        primary_stat +=1
 
                     all_publications = [pub.get('pmid') for pub in publications]
 
                     if primary_publication.get('metadata'):
-                        pub_date = primary_publication['metadata'].get('date') 
+                        pub_date = primary_publication['metadata'].get('date')
                         if pub_date:
                             pub_date = int(pub_date.split('-')[0])
                     else: 
@@ -178,7 +198,7 @@ async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
             else: 
                 log_with_timestamp(f'Error while fetching tool names from page {page}')
                 break
-
+    print(primary_stat, no_publication_stat)
     # Record the total nr of tools
     total_nr_tools = int(biotool_data['count']) if biotool_data and 'count' in biotool_data else 0
 
@@ -210,19 +230,15 @@ async def get_publication_dates(tool_metadata: list) -> list: #TODO: do I really
             data = await aggregate_requests(session, url)
             
             if 'result' in data and pmid in data['result']:
-                try:
-                    pub_date = data['result'][pmid]['pubdate']
-
-                    tool['pubDate'] = int(str(pub_date).split()[0]) # only include year
-                except:
-                    tool['pubDate'] = None
+                pub_date = data['result'].get(pmid, {}).get('pubdate', None)
+                tool['pubDate'] = int(str(pub_date).split()[0]) if pub_date else None
             else:
                 tool['pubDate'] = None
     log_with_timestamp(f"Nr of tools in bio.tools without a publication date: {tools_without_pubdate}")
     return tool_metadata # TODO: do I have to return it or can I just update it using the function, i think i can just update it? 
 
 
-async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] = None, test_size: Optional[int] = None, random_seed: int = 42, doi_lib_directory: str = '') -> dict:
+async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] = None, test_size: Optional[int] = None, random_seed: int = 42) -> dict:
     """
     Fetches metadata about tools from bio.tools, belonging to a given topic_id and returns as a dictionary.
 
@@ -239,11 +255,11 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
     :return: dict
         Dictionary containing metadata about the tools.
     """
-    
+   
     # Specifying the file name
     if test_size:
         metadata_file_name = f'tool_metadata_test{test_size}.json' # I removed date from the filename, it is inside if needed
-    else: 
+    else:
         metadata_file_name = 'tool_metadata.json'
 
     if inpath: # Indicates we want to load a file
@@ -268,16 +284,40 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
     # Creating json file 
     metadata_file = {
         "creationDate": str(datetime.now()),
-        "topic": topic_id
+        "topic": topic_id #or "full_biotools" # If topic ID is None 
     }
-    # Download bio.tools metadata
-    pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id=topic_id, test_size=test_size)
+
+    try:
+        with open("pmid_tools.pkl", 'rb') as f:
+            pmid_tools = pickle.load( f)
+        with open("doi_tools1.pkl", 'rb') as f:
+            doi_tools = pickle.load( f)
+        with open("tot_nr_tools.pkl", 'rb') as f:
+            tot_nr_tools = pickle.load( f)
+
+    except (FileNotFoundError, EOFError):
+        # Download bio.tools metadata
+        pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id=topic_id, test_size=test_size)
+        ### tmeporary save
+        with open("pmid_tools.pkl", 'wb') as f:
+            pickle.dump(pmid_tools, f)
+        with open("doi_tools1.pkl", 'wb') as f:
+            pickle.dump(doi_tools, f)
+        with open("tot_nr_tools.pkl", 'wb') as f:
+            pickle.dump(tot_nr_tools, f)
+    
 
     metadata_file['totalNrTools'] = tot_nr_tools  
     metadata_file['biotoolsWOpmid'] = len(doi_tools)
 
-    # Update list of doi_tools to include pmid
-    doi_tools = await get_pmid_from_doi(outpath=outpath, doi_lib_directory=doi_lib_directory, doi_tools=doi_tools)
+    # Update list of doi_tools to include pmid TODO server disconnection
+    try:
+        with open("doi_tools2.pkl", 'rb') as f:
+            doi_tools = pickle.load(f)
+    except (FileNotFoundError, EOFError):
+        doi_tools = await get_pmid_from_doi(outpath=outpath, doi_tools=doi_tools)
+        with open("doi_tools2.pkl", 'wb') as f:
+            pickle.dump(doi_tools, f)
 
     metadata_file["nrpmidfromdoi"] = len(doi_tools)
 

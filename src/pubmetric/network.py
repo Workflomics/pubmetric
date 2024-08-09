@@ -83,7 +83,8 @@ def add_norm_edge_weights(graph: igraph.Graph) -> igraph.Graph:
 
 # TODO: why is optional working some times and sometimes not? why do I sometimes have to write None gosh 
 # TODO: Rename
-async def get_citation_data(metadata_file: list, topic_id:  Optional[str] = None, outpath: Optional[str]= None) -> tuple:
+# TODO: move to data
+async def get_citation_data(metadata_file: list) -> tuple:
     """
     Runs all methods to download meta data for software tools in bio.tools; Downloads tools from specified domain, retrieves citations for PMIDs, 
     and generates co-citation network edges.
@@ -99,7 +100,7 @@ async def get_citation_data(metadata_file: list, topic_id:  Optional[str] = None
 
     edges = []
 
-    for tool in tqdm(metadata_file['tools'], desc="Downloading citations from PMIDs"): 
+    for tool in tqdm(metadata_file['tools'], desc="Downloading citations from PMIDs"):
         pmid = tool['pmid']
         async with aiohttp.ClientSession() as session: 
             citations = await pubmetric.data.europepmc_request(session, pmid) 
@@ -212,7 +213,7 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
         return graph # TODO: Included tools can be recreated outside using the metadatafile, check that this is not a problem
 
 # WHY is optional not working here, not specifying default none is the entire reason for having is aaghh 
-async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True, doi_lib_directory:str = '') -> igraph.Graph:
+async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True) -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph.
 
@@ -259,19 +260,25 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
         if outpath: 
             os.mkdir(outpath) 
         else:
-            if not os.path.isdir('outs'):
-                os.mkdir('outs')
-            outpath = f'outs/out_{datetime.now().strftime("%Y%m%d%H%M%S")}'
+            if not os.path.isdir('out'):
+                os.mkdir('out')
+            outpath = f'out/out_{datetime.now().strftime("%Y%m%d%H%M%S")}'
             os.mkdir(outpath)
 
 
-        metadata_file = await pubmetric.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed, doi_lib_directory=doi_lib_directory)
+        metadata_file = await pubmetric.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed)
         
         # Extract tool pmids which we use to greate the graph
         included_tools = list({tool['pmid'] for tool in metadata_file['tools']})
 
         # Downloading data
-        edges = await get_citation_data(outpath=outpath, topic_id=topic_id, metadata_file=metadata_file) # this updates the metadata file with nr citations per tool
+        try:
+            with open("edges.pkl", 'rb') as f:
+                edges = pickle.load( f)
+        except (FileNotFoundError, EOFError):
+            edges = await get_citation_data(metadata_file=metadata_file) # this updates the metadata file with nr citations per tool
+            with open("edges.pkl", 'wb') as f:
+                pickle.dump(edges, f)
 
 
         # Saving the metadata file Make this optional 
@@ -280,8 +287,6 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
         else: 
             metadata_file_name = 'tool_metadata.json' 
 
-        print(os.path.join(outpath, metadata_file_name))   
-        print(metadata_file['tools'][0]) 
         with open(os.path.join(outpath, metadata_file_name), 'w') as f: # save in the main output folder
                 json.dump(metadata_file, f)
 

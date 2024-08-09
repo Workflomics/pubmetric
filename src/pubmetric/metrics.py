@@ -87,6 +87,47 @@ def tool_average_sum(graph: igraph.Graph, workflow: list) -> float:
 
     return step_scores
 
+
+def shortest_path(graph: igraph.Graph, workflow: list, weighted: bool = True) -> dict:
+    """
+    Computes shortest paths between each pair of nodes that have an edge in the workflow.
+
+    :param graph: An igraph.Graph co-citation graph.
+    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
+    :param weighted: Boolean indicating whether to compute weighted shortest paths (True) or unweighted (False).
+
+    :return: Dictionary where keys are node pairs and values are shortest path distances.
+    """
+    if not workflow:
+        return 0 
+    
+    id_dict = get_node_ids(graph) # TODO: cnat regen this every time. Move out? 
+
+    distances = []
+
+
+    for edge in workflow:
+        u, v = edge
+
+        u_index = id_dict.get(u, None)
+        v_index = id_dict.get(v, None)
+
+        if not u_index or not v_index:
+            distances.append(10)
+            continue
+
+        try:
+            if weighted:
+                path_length = graph.get_shortest_paths(u_index, to=v_index, weights=graph.es["inverted_weight"], output="epath")
+            else:
+                path_length = graph.get_shortest_paths(u_index, to=v_index, output="epath")
+            distances.append(len(path_length[0]))
+        except:
+            distances.append(10) 
+    avg_distance = sum(distances)/len(workflow)
+    return 1/avg_distance if avg_distance != 0 else 0
+
+
 # Workflow level metric
 def workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
     """
@@ -119,7 +160,7 @@ def connectivity(graph: igraph.Graph, workflow: list) -> float:
     :param workflow: Dictionary representing the workflow. TODO reference schema
     
 
-    :return: Float value of the logarithmic product metric.
+    :return: Float value 
     """
     if isinstance(workflow, dict):
         pmids = list(workflow['steps'].values())
