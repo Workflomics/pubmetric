@@ -451,6 +451,6 @@ async def get_citations(filename):
     async with aiohttp.ClientSession() as session:
         citation_list = []
         for article_id in tqdm(pmids, desc='Downloading citations from EuropePMC'):
-            citation_ids = await pubmetric.data.europepmc_request(session, article_id)
+            citation_ids = await pubmetric.data.fetch_citations(session, article_id)
             citation_list.append(citation_ids)
         return citation_list

@@ -20,9 +20,9 @@ def test_create_graph():
     print(graph.vs.attributes())
     assert sorted(citation_expected_nodes) == sorted(graph.vs['name'])
 
-def test_get_citation_data():
+def test_process_citation_data():
     citation_test_tools = {'tools':[{'pmid':'14632076'}]} # Protein prophet, in mock metadata file structure 
-    citation_test_edges = asyncio.run(network.get_citation_data(citation_test_tools))
+    citation_test_edges = asyncio.run(network.process_citation_data(citation_test_tools))
     assert len(citation_test_edges) >= 2900 # it has 2965 citations currently (August 2024)
 
 def test_invert_graph_weights():

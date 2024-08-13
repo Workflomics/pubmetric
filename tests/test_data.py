@@ -17,7 +17,7 @@ def test_get_tool_metadata_schema():
 async def test_europepmc_request():
     protein_prophet_pmid = 14632076 #ProteinProphet has 2949 citations on Jul 12th 2024
     async with aiohttp.ClientSession() as session:
-            citations = await europepmc_request(session, protein_prophet_pmid)
+            citations = await fetch_citations(session, protein_prophet_pmid)
     assert len(citations)> 1000
 
 
@@ -63,5 +63,5 @@ def test_get_ages():
             "pmid": "12403597"
         },
      ]
-     tool_metadata_inc_ages = asyncio.run(get_publication_dates(tool_metadata))
+     tool_metadata_inc_ages = asyncio.run(process_publication_dates(tool_metadata))
      tool_metadata_inc_ages[0]['pubDate'] == 2002

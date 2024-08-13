@@ -23,6 +23,8 @@ def get_node_ids(graph: igraph.Graph, key:str= "pmid") -> dict:
     """
     if key == 'pmid':
         return {v['pmid']:v.index for v in graph.vs}
+    elif key == 'name':
+        return {v['name']:v.index for v in graph.vs}
     elif key == 'index':
         return {v.index:v['pmid'] for v in graph.vs}
     else:
@@ -178,6 +180,59 @@ def connectivity(graph: igraph.Graph, workflow: list) -> float:
         for j in range(i + 1, nr_steps ):
             weight = get_graph_edge_weight(graph, (pmids[i], pmids[j])) or 0.0
             total_weight += weight
+
+    nr_possible_edges = nr_steps * (nr_steps - 1) // 2
+
+    return total_weight/nr_possible_edges
+
+def distance_weighted_connectivity(graph: igraph.Graph, workflow: Union[dict,list]) -> float: 
+    # obs the repeated workflows will have a disadvantage because there is no edge between them which defaults to 0. This must be adjusted for in the devision of edges! TODO
+    """
+    Calculates the sum of the edge weights between all possible pairs of tools in a workflow.
+    Named after the degree of connectivity - how close it is to being a complete graph - though this is weighted.
+
+    :param graph: An igraph.Graph object representing the co-citation graph.
+    :param workflow: Dictionary representing the workflow. TODO reference schema
+    
+
+    :return: Float value 
+    """
+
+    if isinstance(workflow, dict):
+        step_names = list(workflow['steps'].keys())
+        edges = workflow['edges']
+    elif isinstance(workflow, list):
+        step_names = list(set(element for tup in workflow for element in tup))
+        edges = workflow
+    else:
+        raise TypeError
+    
+    workflow_graph =  igraph.Graph.TupleList(edges, directed=False, weights=False)
+    id_dict = get_node_ids(workflow_graph, key='name')
+    nr_steps = len(step_names)
+
+    if nr_steps <=1: # if there is only one tool there can be no edges
+        return 0.0
+    total_weight = 0.0
+    if isinstance(workflow, dict):
+        for i in range( nr_steps ):
+            for j in range(i + 1, nr_steps ):
+                weight = get_graph_edge_weight(graph, (workflow['steps'][step_names[i]], workflow['steps'][step_names[j]])) or 0.0
+                u_index = id_dict.get(step_names[i], None)
+                v_index = id_dict.get(step_names[j], None)
+                path_length = len(workflow_graph.get_shortest_paths(u_index, to=v_index, output="epath")[0]) or 1 # if there is none then the weight will be 0 
+
+                total_weight += weight / float(path_length)
+    else:
+        for i in range( nr_steps ):
+            for j in range(i + 1, nr_steps ):
+                weight = get_graph_edge_weight(graph, (step_names[i], step_names[j])) or 0.0
+                u_index = id_dict.get(step_names[i], None)
+                v_index = id_dict.get(step_names[j], None)
+
+                path_length = len(workflow_graph.get_shortest_paths(u_index, to=v_index, output="epath")[0]) or 1 # if there is none then the weight will be 0 
+
+                total_weight += weight / float(path_length)
 
     nr_possible_edges = nr_steps * (nr_steps - 1) // 2
 
