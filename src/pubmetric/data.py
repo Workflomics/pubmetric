@@ -361,9 +361,7 @@ async def fetch_citations(article_id: str, session: aiohttp.ClientSession, sourc
             citation_ids = [citation['id'] for citation in citations]
             total_hits = result.get('hitCount', 0)
             
-            # Check if there are more pages
             if len(citation_ids) < min(batch_size, total_hits):
-                # Recursive call for the next page
                 next_page_citations = await fetch_citations(article_id, session, source, batch_size, page + 1)
                 return citation_ids + next_page_citations
             else:
@@ -393,7 +391,7 @@ async def fetch_citations_batch(article_ids, session: aiohttp.ClientSession, sou
             results[article_id] = citations
         except Exception as e:
             pubmetric.log.log_with_timestamp(f"Failed to fetch citations for {article_id}: {str(e)}")
-            results[article_id] = []  # Continue processing other articles even if one fails
+            results[article_id] = []  # TODO do I want to continue processing other articles even if one fails?
 
     return results
 
@@ -401,6 +399,18 @@ async def fetch_citations_batch(article_ids, session: aiohttp.ClientSession, sou
 
 
 async def process_citation_data(metadata_file: list, threshold: int = 20,batch_size: int = 1000) -> dict:
+    """
+    Processes citation data by fetching citations for tools listed in the metadata file and filtering them
+    based on a citation threshold.
+
+    :param metadata_file: A list containing metadata for tools, including their PMIDs.
+    :param threshold: The maximum number of citations allowed for it to concievibly represent a workflow. Default is 20.
+    :param batch_size: Number of tools to process per batch when fetching citations. Default is 1000.
+    
+    :raises FileNotFoundError: If the 'paper_citations.json' file is missing and no data is available.
+    
+    :return: A dictionary where each key is a citation PMID and the value is a set of PMIDs of papers that cite it. Citations with counts exceeding the threshold or referencing only one paper are removed.
+    """
     citation_counts = Counter()
     paper_citations = defaultdict(set)
 
