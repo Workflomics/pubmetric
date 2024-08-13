@@ -14,6 +14,34 @@ import pubmetric.log
 import pickle
 import asyncio
 from collections import defaultdict, Counter
+import requests
+from tqdm.asyncio import tqdm_asyncio
+
+def download_domain_annotations(annotations: str = "full") -> set:
+    """
+    Downloads a JSON file containing domain annotations from workflomics repository.
+
+    This function retrieves the JSON file from the provided URL, parses the JSON content,
+    and extracts the 'label' (name) for each tool.
+
+    :return: A set of tool names bio.tools domain annotaion JSON file.
+             Returns None if the file could not be retrieved.
+    """
+    if annotations == "full":
+        url = "https://raw.githubusercontent.com/Workflomics/domain-annotations/main/genomics/your_file_name.json"
+    elif annotations == "workflomics":
+        url = "path/to/workflomicstools"
+    else:
+        raise TypeError("Invalid type for tool_selection string, expected 'full' or 'workflomics'.")    
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        biotools = response.json()
+        return {tool['label'] for tool in biotools["functions"]}
+    else:
+        print(f"Failed to retrieve file: {response.status_code}")
+
 
 async def aggregate_requests(session: aiohttp.ClientSession, url: str, retries: int = 3, backoff: float = 2.0) -> dict:
     """
@@ -292,24 +320,11 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
     }
 
     get_pmids_time = datetime.now()
-    try:
-        with open("pmid_tools.pkl", 'rb') as f:
-            pmid_tools = pickle.load( f)
-        with open("doi_tools1.pkl", 'rb') as f:
-            doi_tools = pickle.load( f)
-        with open("tot_nr_tools.pkl", 'rb') as f:
-            tot_nr_tools = pickle.load( f)
 
-    except (FileNotFoundError, EOFError):
-        # Download bio.tools metadata
-        pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id=topic_id, test_size=test_size)
-        ### tmeporary save
-        with open("pmid_tools.pkl", 'wb') as f:
-            pickle.dump(pmid_tools, f)
-        with open("doi_tools1.pkl", 'wb') as f:
-            pickle.dump(doi_tools, f)
-        with open("tot_nr_tools.pkl", 'wb') as f:
-            pickle.dump(tot_nr_tools, f)
+
+    
+    pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id=topic_id, test_size=test_size)
+
     pubmetric.log.step_timer(get_pmids_time, "Downloading pmids")
 
     metadata_file['totalNrTools'] = tot_nr_tools  
@@ -317,13 +332,9 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
 
     # Update list of doi_tools to include pmid TODO server disconnection
     get_pmid_from_doi_time = datetime.now()
-    try:
-        with open("doi_tools2.pkl", 'rb') as f:
-            doi_tools = pickle.load(f)
-    except (FileNotFoundError, EOFError):
-        doi_tools = await get_pmid_from_doi(outpath=outpath, doi_tools=doi_tools)
-        with open("doi_tools2.pkl", 'wb') as f:
-            pickle.dump(doi_tools, f)
+    
+    doi_tools = await get_pmid_from_doi(outpath=outpath, doi_tools=doi_tools)
+
 
     pubmetric.log.step_timer(get_pmid_from_doi_time, "Downloading pmids from doi's")
     metadata_file["nrpmidfromdoi"] = len(doi_tools)
@@ -385,7 +396,7 @@ async def fetch_citations_batch(article_ids, session: aiohttp.ClientSession, sou
     """
 
     results = {}
-    for article_id in article_ids:
+    for article_id in tqdm_asyncio(article_ids, desc="Fetching Citations", unit="article"):
         try:
             citations = await fetch_citations(article_id, session, source, batch_size)
             results[article_id] = citations
@@ -394,6 +405,7 @@ async def fetch_citations_batch(article_ids, session: aiohttp.ClientSession, sou
             results[article_id] = []  # TODO do I want to continue processing other articles even if one fails?
 
     return results
+
 
 
 
@@ -436,7 +448,7 @@ async def process_citation_data(metadata_file: list, threshold: int = 20,batch_s
 
             await asyncio.sleep(60)
     
-    for tool in metadata_file['tools']:
+    for tool in tqdm(metadata_file['tools'], desc="Processing citations", unit="tool"):
         paper_pmid = tool['pmid']
         citations = saved_data.get(paper_pmid, [])
         if citations:

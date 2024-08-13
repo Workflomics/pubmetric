@@ -7,7 +7,7 @@ from datetime import datetime
 import json
 import igraph 
 import sys
-from typing import Optional
+from typing import Optional, Union
 import math
 from tqdm import tqdm       
 
@@ -161,7 +161,7 @@ def process_chunk(chunk):
     return cocitation_counts
 
 #TODO: cocitaiton graph- rename
-async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True) -> igraph.Graph:
+async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True, tool_selection: Union[list, set, str, None]=None) -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph.
 
@@ -201,7 +201,7 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
         pubmetric.log.step_timer(load_start_time, "Loading graph")
 
     else:
-        # Create output directory      
+        # Create output directory
         if not outpath:
             outpath = f'out/out_{datetime.now().strftime("%Y%m%d%H%M%S")}'
         
@@ -212,6 +212,27 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
         metadata_start_time = datetime.now()
         metadata_file = await pubmetric.data.get_tool_metadata(outpath=outpath, inpath=inpath, topic_id=topic_id, test_size=test_size, random_seed=random_seed)
         
+        if tool_selection:
+            if tool_selection == "full":
+                selected_tools = pubmetric.data.download_domain_annotations(annotations="full")
+                if not selected_tools:
+                    raise ValueError("No tools were downloaded; please check the download source.")
+            elif tool_selection == "workflomics":
+                selected_tools = pubmetric.data.download_domain_annotations(annotations="workflomics")
+                if not selected_tools:
+                    raise ValueError("No tools were downloaded; please check the download source.")
+            elif isinstance(tool_selection, (list, set)):
+                selected_tools = [tool for tool in metadata_file['tools'] if tool['name'] in tool_selection]
+                if not selected_tools:
+                    raise ValueError("No matching tools found; check the tool names in tool_selection.")
+            else:
+                raise TypeError("Invalid type for tool_selection. Expected str, list, or set.")
+            
+            pubmetric.log.log_with_timestamp("Selecting specified subsection of tools")
+            metadata_file['tools'] = selected_tools
+            print(f"Number of selected tools: {len(metadata_file['tools'])}")
+
+
         metadata_file_name = f'tool_metadata_test{test_size}.json' if test_size else 'tool_metadata.json'
         metadata_file_path = os.path.join(outpath, metadata_file_name)
         pubmetric.log.log_with_timestamp(f"Saving metadata file to {metadata_file_path}.")
