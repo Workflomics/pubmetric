@@ -212,7 +212,7 @@ def create_graph(edges: list, included_tools: list, cocitation: bool = True, wor
         return graph # TODO: Included tools can be recreated outside using the metadatafile, check that this is not a problem
 
 # WHY is optional not working here, not specifying default none is the entire reason for having is aaghh 
-async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True, doi_lib_directory:str = '') -> igraph.Graph:
+async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True, doi_lib_directory:str = '', return_path:bool = False) -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph.
 
@@ -306,6 +306,8 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
 
         # returns a graph and the pmids of the tools included in the graph (tools connected by cocitations)
         log_with_timestamp("Graph creation complete.") # TODO: timestapms for all updates?
-        
+    
+    if return_path:
+        return outpath
     return graph
 

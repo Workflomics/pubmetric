@@ -3,14 +3,34 @@ from pydantic import BaseModel
 from typing import Dict
 import tempfile
 import os 
-import json
-from datetime import datetime
+from contextlib import asynccontextmanager
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.jobstores.memory import MemoryJobStore
 
 from pubmetric.metrics import *
 from pubmetric.workflow import parse_cwl_workflows
 from pubmetric.network import create_citation_network
 
 app = FastAPI()
+
+jobstores = {
+    'default': MemoryJobStore()
+}
+
+scheduler = AsyncIOScheduler(jobstores=jobstores, timezone='Asia/Kolkata')
+
+latest_output_path = "out_20240801231111"
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    scheduler.start()
+    try:
+        yield
+    finally:
+        scheduler.shutdown()
+
+app = FastAPI(lifespan=lifespan)
 
 class ScoreResponse(BaseModel):
     workflow_scores: List
@@ -19,11 +39,24 @@ class GraphRequest(BaseModel):
     topic_id: str
     test_size: str
 
+@scheduler.scheduled_job('interval', days=30)
+async def periodic_graph_generation():
+    global latest_output_path
+    try:
+        new_output_path = await create_citation_network(topic_id="default", test_size=20, return_path = True)
+        if os.path.exists(new_output_path + "/graph.pkl"):
+            latest_output_path = new_output_path
+            return {"message": f"Graph and metadata file recreated successfully New graph path: {latest_output_path}."}
+        else:
+            return {"error": "Error: Generated graph file not found."}
+    except Exception as e:
+        return {"error": f"An error occurred while recreating the graph: {e}. The previous graph will continue to be used."}
+scheduler.add_job(periodic_graph_generation, 'interval', days=30)
+
 @app.post("/score_workflows/", response_model=ScoreResponse)
 async def score_workflows(cwl_file: UploadFile = File(None)):
-    path_to_data = "out_20240801231111" # where does one store things later?  
 
-    graph = await create_citation_network(inpath=path_to_data, load_graph=True) # should I maybe change the name so it does not contain the date, so you have to look in the file instead, or perhaps it is regenerated outside of the package entrirely
+    graph = await create_citation_network(inpath=latest_output_path, load_graph=True) # should I maybe change the name so it does not contain the date, so you have to look in the file instead, or perhaps it is regenerated outside of the package entrirely
     # Saving the uploaded files temporarily, should this have some type of check so no bad things can be sent? 
     with tempfile.TemporaryDirectory() as temp_dir:
 
@@ -86,8 +119,17 @@ async def score_workflows(cwl_file: UploadFile = File(None)):
     return ScoreResponse(workflow_scores=benchmarks)
 
 @app.post("/recreate_graph/")
-async def recreate_graph(graph_request: GraphRequest):
+async def recreate_graph(graph_request: GraphRequest): # if you want to recreate it with a request
+    global latest_output_path
+    try:
+        new_output_path = await create_citation_network(topic_id=graph_request.topic_id, test_size=20, return_path=True)
+        if os.path.exists(os.path.join(new_output_path, "graph.pkl")):
+            latest_output_path = new_output_path
+            return {"message": f"Graph and metadata file recreated successfully New graph path: {latest_output_path}."}
+        else:
+            return {"error": "Error: Generated graph file not found."}
+    except Exception as e:
+        return {"error": f"An error occurred while recreating the graph: {e}. The previous graph will continue to be used."}
     
-    graph = await create_citation_network(topic_id=graph_request.topic_id, test_size=20) # rm test_size later # TODO: sometimes asyncio crashes - should have some function to try again
-    # TODO: right now the graph is saved within the create graph function. should save it to the same place as the tool_metadata and make sure that is reachable
-    return {"message": f"Graph and metadata file recreated successfully."}
+    
+
