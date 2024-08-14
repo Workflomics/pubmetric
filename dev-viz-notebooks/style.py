@@ -1,5 +1,4 @@
 import seaborn as sns
-import matplotlib.pyplot as plt
 
 # Define a custom colour palette with #f2634c as the primary colour
 palette = [
@@ -16,7 +15,10 @@ palette = [
     '#f4f4f4'  # Near white
 ]
 
-red_palette = sns.color_palette("Reds", n_colors=15).as_hex()[::-1]
+red_palette15 = sns.color_palette("Reds", n_colors=15).as_hex()[::-1]
+red_palette5 = sns.color_palette("Reds", n_colors=5).as_hex()[::-1]
+red_palette3 = sns.color_palette("Reds", n_colors=3).as_hex()[::-1]
+
 
 # Set the Seaborn theme with a sleek and professional style
 sns.set_theme(style="whitegrid", palette=palette, rc={

@@ -126,7 +126,7 @@ def create_cocitation_graph(paper_citations: dict, num_processes: int = 2, num_c
 
     return cocitation_graph
 
-def combine_counts(counts_list):
+def combine_counts(counts_list: list):
     """
     Combines multiple dictionaries of co-citation counts into a single dictionary by summing the counts for each co-citation pair.
 
@@ -142,7 +142,7 @@ def combine_counts(counts_list):
     
     return combined_counts
 
-def process_chunk(chunk):
+def process_chunk(chunk: dict):
     """
     Processes a chunk of paper citations to count co-citations between papers.
 
@@ -161,7 +161,7 @@ def process_chunk(chunk):
     return cocitation_counts
 
 #TODO: cocitaiton graph- rename
-async def create_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True, tool_selection: Union[list, set, str, None]=None) -> igraph.Graph:
+async def create_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True, tool_selection: Union[list, str, None]=None) -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph.
 
@@ -210,11 +210,11 @@ async def create_network(outpath: Optional[str] = None, test_size: Optional[int]
         
         if tool_selection:
             if tool_selection == "full":
-                selected_tools = pubmetric.data.download_domain_annotations(annotations="full")
+                selected_tools = pubmetric.data.download_domain_annotations(annotations="full", tools=metadata_file["tools"])
                 if not selected_tools:
                     raise ValueError("No tools were downloaded; please check the download source.")
             elif tool_selection == "workflomics":
-                selected_tools = pubmetric.data.download_domain_annotations(annotations="workflomics")
+                selected_tools = pubmetric.data.download_domain_annotations(annotations="workflomics", tools=metadata_file["tools"])
                 if not selected_tools:
                     raise ValueError("No tools were downloaded; please check the download source.")
             elif isinstance(tool_selection, (list, set)):
@@ -225,15 +225,16 @@ async def create_network(outpath: Optional[str] = None, test_size: Optional[int]
                 raise TypeError("Invalid type for tool_selection. Expected str, list, or set.")
             
             pubmetric.log.log_with_timestamp("Selecting specified subsection of tools")
+            pubmetric.log.log_with_timestamp(f"Number of selected tools: {len(selected_tools)}")
             metadata_file['tools'] = selected_tools
             tool_selection = True
-            print(f"Number of selected tools: {len(metadata_file['tools'])}")
+            
 
 
         metadata_file_name = f'tool_metadata_test{test_size}.json' if test_size else 'tool_metadata.json'
         metadata_file_path = os.path.join(outpath, metadata_file_name)
         pubmetric.log.log_with_timestamp(f"Saving metadata file to {metadata_file_path}.")
-        with open(metadata_file_path, 'w', encoding='utf-8') as f:
+        with open(metadata_file_path, 'w') as f:
             json.dump(metadata_file, f)
         
         pubmetric.log.step_timer(metadata_start_time, "Fetching and saving metadata")
@@ -242,15 +243,9 @@ async def create_network(outpath: Optional[str] = None, test_size: Optional[int]
         pubmetric.log.log_with_timestamp("Downloading citations.")
         citation_start_time = datetime.now()
         
-        paper_citations_path = "paper_citations.json"
-        if os.path.isfile(paper_citations_path):
-            pubmetric.log.log_with_timestamp(f"Loading paper citations from {paper_citations_path}.")
-            with open(paper_citations_path, 'rb') as f:
-                paper_citations = json.load(f)
-        else:
-            paper_citations = await pubmetric.data.process_citation_data(metadata_file=metadata_file)
-            with open(paper_citations_path, 'wb') as f:
-                pickle.dump(paper_citations, f)
+
+        paper_citations = await pubmetric.data.process_citation_data(metadata_file=metadata_file, inpath=inpath, outpath=outpath)
+
         
         pubmetric.log.step_timer(citation_start_time, "Downloading citations")
 
@@ -262,7 +257,7 @@ async def create_network(outpath: Optional[str] = None, test_size: Optional[int]
             graph = create_cocitation_graph(paper_citations)
         else:
             graph = create_small_cocitation_graph(paper_citations) # TODO:or should I jsut use the mapreduce version for all? 
-            
+
         pubmetric.log.step_timer(graph_creation_start_time, "Creating co-citation graph")
 
         # Add graph attributes
@@ -270,10 +265,7 @@ async def create_network(outpath: Optional[str] = None, test_size: Optional[int]
         attribute_start_time = datetime.now()
         graph = add_graph_attributes(graph=graph, metadata_file=metadata_file)
 
-        
         pubmetric.log.step_timer(attribute_start_time, "Adding graph attributes")
-
-
 
         # Save graph
         if save_files:
@@ -287,8 +279,8 @@ async def create_network(outpath: Optional[str] = None, test_size: Optional[int]
 
     # Graph level attributes
     graph["creation_date"] = datetime.now()
-    graph["topic"] = topic_id 
+    graph["topic"] = topic_id
     graph["tool_selection"] = tool_selection
-    graph["graph_creation_time"] = datetime.now() - start_time
+    graph["graph_creation_time"] = datetime.now() - start_time # this seems to not work but I dont know why TODO
 
     return graph

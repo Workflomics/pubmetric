@@ -17,19 +17,19 @@ from collections import defaultdict, Counter
 import requests
 from tqdm.asyncio import tqdm_asyncio
 
-def download_domain_annotations(annotations: str = "full") -> set:
+def download_domain_annotations(tools: list, annotations: str = "full") -> list:
     """
     Downloads a JSON file containing domain annotations from workflomics repository.
 
     This function retrieves the JSON file from the provided URL, parses the JSON content,
-    and extracts the 'label' (name) for each tool.
+    and extracts the 'label' (name) for each tool to pick out only the tools in the metadatafile within the specified domain.
 
     :return: A set of tool names bio.tools domain annotaion JSON file.
              Returns None if the file could not be retrieved.
     """
     if annotations == "full":
-        url = "https://raw.githubusercontent.com/Workflomics/domain-annotations/main/genomics/your_file_name.json"
-    elif annotations == "workflomics":
+        url = "https://raw.githubusercontent.com/Workflomics/domain-annotations/main/genomics/bio.tools.json" # Now this can not be moved witout changing this 
+    elif annotations == "workflomics": #TODO
         url = "path/to/workflomicstools"
     else:
         raise TypeError("Invalid type for tool_selection string, expected 'full' or 'workflomics'.")    
@@ -38,7 +38,8 @@ def download_domain_annotations(annotations: str = "full") -> set:
 
     if response.status_code == 200:
         biotools = response.json()
-        return {tool['label'] for tool in biotools["functions"]}
+        tool_selection = list({tool['label'] for tool in biotools["functions"]})
+        return [tool for tool in tools if tool['name'] in tool_selection]
     else:
         print(f"Failed to retrieve file: {response.status_code}")
 
@@ -86,7 +87,7 @@ async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_library_filename:
     """
     if os.path.isfile(doi_library_filename):
         pubmetric.log.log_with_timestamp("Loading doi-pmid library")
-        with open(doi_library_filename, 'r', encoding='utf-8') as f:
+        with open(doi_library_filename, 'r') as f:
             doi_library = json.load(f)
     else:
         pubmetric.log.log_with_timestamp('Creating a new doi-pmid library')
@@ -114,12 +115,12 @@ async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_library_filename:
                 continue
             
             if library_updates >= save_interval:
-                with open(os.path.join(outpath, doi_library_filename), 'w', encoding='utf-8') as f:
+                with open(os.path.join(outpath, doi_library_filename), 'w') as f:
                     json.dump(doi_library, f)
                 library_updates = 0  # Reset update counter
 
     if library_updates > 0:
-        with open(os.path.join(outpath, doi_library_filename), 'w', encoding='utf-8') as f:
+        with open(os.path.join(outpath, doi_library_filename), 'w') as f:
             json.dump(doi_library, f)
 
     updated_doi_tools = [tool for tool in doi_tools if tool.get('pmid')]
@@ -228,7 +229,7 @@ async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
     return pmid_tools, doi_tools, total_nr_tools 
 
 
-async def fetch_publication_dates(session, pmids): #  TODO: Check if the
+async def fetch_publication_dates(session: aiohttp.ClientSession, pmids: list): #  TODO: Check if the
     """Fetches publication dates for a list of PMIDs from NCBI."""
     pmid_str = ','.join(pmids)
     url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={pmid_str}&retmode=json"
@@ -337,7 +338,7 @@ async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] 
 
 
     pubmetric.log.step_timer(get_pmid_from_doi_time, "Downloading pmids from doi's")
-    metadata_file["nrpmidfromdoi"] = len(doi_tools)
+    metadata_file["pmidFromDoi"] = len(doi_tools)
 
     all_tools = pmid_tools + doi_tools
 
@@ -370,18 +371,18 @@ async def fetch_citations(article_id: str, session: aiohttp.ClientSession, sourc
             result = await response.json()
             citations = result.get('citationList', {}).get('citation', [])
             citation_ids = [citation['id'] for citation in citations]
-            total_hits = result.get('hitCount', 0)
-            
-            if len(citation_ids) < min(batch_size, total_hits):
+            total_hits = result.get('hitCount')
+
+            if len(citation_ids) < (total_hits - batch_size*( page-1 )):
                 next_page_citations = await fetch_citations(article_id, session, source, batch_size, page + 1)
                 return citation_ids + next_page_citations
-            else:
-                return citation_ids
+            
+            return citation_ids
         else:
             pubmetric.log.log_with_timestamp(f'Something went wrong with request {url}')
             return []
 
-async def fetch_citations_batch(article_ids, session: aiohttp.ClientSession, source: str = 'MED', batch_size: int = 1000) -> dict:
+async def fetch_citations_batch(article_ids:list, session: aiohttp.ClientSession, source: str = 'MED', batch_size: int = 1000) -> dict:
     """
     Asynchronously fetches all citation PMIDs for a batch of article PMIDs from EuropePMC, handling pagination recursively.
 
@@ -406,7 +407,7 @@ async def fetch_citations_batch(article_ids, session: aiohttp.ClientSession, sou
 
     return results
 
-async def process_citation_data(metadata_file: list, threshold: int = 20,batch_size: int = 1000) -> dict:
+async def process_citation_data(metadata_file: list, inpath: Optional[str], outpath: Optional[str], threshold: int = 20,batch_size: int = 1000) -> dict:
     """
     Processes citation data by fetching citations for tools listed in the metadata file and filtering them
     based on a citation threshold.
@@ -414,20 +415,19 @@ async def process_citation_data(metadata_file: list, threshold: int = 20,batch_s
     :param metadata_file: A list containing metadata for tools, including their PMIDs.
     :param threshold: The maximum number of citations allowed for it to concievibly represent a workflow. Default is 20.
     :param batch_size: Number of tools to process per batch when fetching citations. Default is 1000.
-    
+
     :raises FileNotFoundError: If the 'paper_citations.json' file is missing and no data is available.
-    
+
     :return: A dictionary where each key is a citation PMID and the value is a set of PMIDs of papers that cite it. Citations with counts exceeding the threshold or referencing only one paper are removed.
     """
     citation_counts = Counter()
     paper_citations = defaultdict(set)
 
-    if os.path.exists('paper_citations.json'):
-        with open('paper_citations.json', 'r') as f:
+    if os.path.exists(os.path.join(inpath, 'paper_citations.json')):
+        with open(os.path.join(inpath, 'paper_citations.json'), 'r') as f:
             saved_data = json.load(f)
     else:
         saved_data = {}
-
     pending_tools = [tool['pmid'] for tool in metadata_file['tools'] if tool['pmid'] not in saved_data]
 
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=60)) as session:
@@ -436,14 +436,14 @@ async def process_citation_data(metadata_file: list, threshold: int = 20,batch_s
             pending_tools = pending_tools[batch_size:]
 
             batch_results = await fetch_citations_batch(current_batch, session)
-            
+
             # Saving data incrementally
             saved_data.update(batch_results)
-            with open('paper_citations.json', 'w') as f:
+            with open(os.path.join(outpath, 'paper_citations.json'), 'w') as f:
                 json.dump(saved_data, f)
 
             await asyncio.sleep(60)
-    
+
     for tool in tqdm(metadata_file['tools'], desc="Processing citations", unit="tool"):
         paper_pmid = tool['pmid']
         citations = saved_data.get(paper_pmid, [])

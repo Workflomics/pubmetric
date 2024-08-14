@@ -5,7 +5,7 @@ required_meta_keys = {
     "topic": str,
     "totalNrTools": int,
     "biotoolsWOpmid": int,
-    "nrpmidfromdoi": int,
+    "pmidFromDoi": int,
     "tools": list
 }
 
