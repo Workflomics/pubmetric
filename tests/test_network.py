@@ -3,11 +3,11 @@ from pubmetric import network
 from example_graph import citation_graph, edges, tools, cocitation_expected_nodes, citation_expected_nodes, included_tools, cocitation_graph
 
 def test_citation_network_testsize(shared_datadir): 
-    graph = asyncio.run(network.create_citation_network(load_graph=False, test_size=20, inpath=shared_datadir))
+    graph = asyncio.run(network.create_network(load_graph=False, test_size=20, inpath=shared_datadir))
     assert len(graph.vs['pmid']) > 0 
 
 def test_load_citation_network(shared_datadir):
-    graph = asyncio.run(network.create_citation_network(load_graph=True, inpath = shared_datadir)) 
+    graph = asyncio.run(network.create_network(load_graph=True, inpath = shared_datadir)) 
     assert len(graph.vs['pmid']) > 1200
 
 def test_create_cocitation_graph():

@@ -406,10 +406,6 @@ async def fetch_citations_batch(article_ids, session: aiohttp.ClientSession, sou
 
     return results
 
-
-
-
-
 async def process_citation_data(metadata_file: list, threshold: int = 20,batch_size: int = 1000) -> dict:
     """
     Processes citation data by fetching citations for tools listed in the metadata file and filtering them

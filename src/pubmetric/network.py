@@ -47,7 +47,7 @@ def normalise_weight(graph_stats: list, weight: float):
     return
 
 
-def _create_cocitation_graph(paper_citations: dict) -> igraph.Graph:
+def create_small_cocitation_graph(paper_citations: dict) -> igraph.Graph: # perhaps use this if the size is not too big? 
     """
     Creates a co-citation graph from a dictionary where keys are citations and values 
     are sets of papers it cites.
@@ -161,7 +161,7 @@ def process_chunk(chunk):
     return cocitation_counts
 
 #TODO: cocitaiton graph- rename
-async def create_citation_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True, tool_selection: Union[list, set, str, None]=None) -> igraph.Graph:
+async def create_network(outpath: Optional[str] = None, test_size: Optional[int] = None, topic_id: Optional[str] = "topic_0121", random_seed: int = 42, load_graph: bool = False, inpath: str = '', save_files: bool = True, tool_selection: Union[list, set, str, None]=None) -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools included in the graph.
 
@@ -183,8 +183,6 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
     start_time = datetime.now()
 
     if load_graph:
-        pubmetric.log.log_with_timestamp("Loading graph process started.")
-        load_start_time = datetime.now()
 
         if not inpath:
             raise FileNotFoundError('In-path required for loading graph.')
@@ -197,8 +195,6 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
             pubmetric.log.log_with_timestamp(f"Graph loaded from {graph_path}.")
         else:
             raise FileNotFoundError(f"File not found: {graph_path}.")
-
-        pubmetric.log.step_timer(load_start_time, "Loading graph")
 
     else:
         # Create output directory
@@ -230,6 +226,7 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
             
             pubmetric.log.log_with_timestamp("Selecting specified subsection of tools")
             metadata_file['tools'] = selected_tools
+            tool_selection = True
             print(f"Number of selected tools: {len(metadata_file['tools'])}")
 
 
@@ -260,15 +257,23 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
         # Create co-citation graph
         pubmetric.log.log_with_timestamp("Creating co-citation graph.")
         graph_creation_start_time = datetime.now()
-        graph = create_cocitation_graph(paper_citations)
+
+        if len(paper_citations)>20_000:
+            graph = create_cocitation_graph(paper_citations)
+        else:
+            graph = create_small_cocitation_graph(paper_citations) # TODO:or should I jsut use the mapreduce version for all? 
+            
         pubmetric.log.step_timer(graph_creation_start_time, "Creating co-citation graph")
 
         # Add graph attributes
         pubmetric.log.log_with_timestamp("Adding graph attributes.")
         attribute_start_time = datetime.now()
         graph = add_graph_attributes(graph=graph, metadata_file=metadata_file)
+
         
         pubmetric.log.step_timer(attribute_start_time, "Adding graph attributes")
+
+
 
         # Save graph
         if save_files:
@@ -279,5 +284,11 @@ async def create_citation_network(outpath: Optional[str] = None, test_size: Opti
         pubmetric.log.log_with_timestamp(f"Graph creation complete. Graph contains {len(graph.vs)} vertices and {len(graph.es)} edges.")
 
     pubmetric.log.step_timer(start_time, "Complete data download and graph creation")
+
+    # Graph level attributes
+    graph["creation_date"] = datetime.now()
+    graph["topic"] = topic_id 
+    graph["tool_selection"] = tool_selection
+    graph["graph_creation_time"] = datetime.now() - start_time
 
     return graph

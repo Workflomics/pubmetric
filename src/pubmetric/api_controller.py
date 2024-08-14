@@ -8,7 +8,7 @@ from datetime import datetime
 
 from pubmetric.metrics import *
 from pubmetric.workflow import parse_cwl_workflows
-from pubmetric.network import create_citation_network
+from pubmetric.network import create_network
 
 app = FastAPI()
 
@@ -24,7 +24,7 @@ async def score_workflows(file: UploadFile = File(None)):
     path_to_data = "out_202407041439" # where does one store things later?  
     metadata_filename = "../tool_metadata_topic_0121_20240703.json"
 
-    graph = await create_citation_network(inpath=path_to_data) # should I maybe change the name so it does not contain the date, so you have to look in the file instead, or perhaps it is regenerated outside of the package entrirely
+    graph = await create_network(inpath=path_to_data) # should I maybe change the name so it does not contain the date, so you have to look in the file instead, or perhaps it is regenerated outside of the package entrirely
 
     workflow_scores = {}
     # Saving the uploaded files temporarily, should this have some type of check so no bad things can be sent? 
@@ -72,6 +72,6 @@ async def score_workflows(file: UploadFile = File(None)):
 @app.post("/recreate_graph/")
 async def recreate_graph(graph_request: GraphRequest):
     
-    graph = await create_citation_network(topic_id=graph_request.topic_id, test_size=20) # rm test_size later # TODO: sometimes asyncio crashes - should have some function to try again
+    graph = await create_network(topic_id=graph_request.topic_id, test_size=20) # rm test_size later # TODO: sometimes asyncio crashes - should have some function to try again
     # TODO: right now the graph is saved within the create graph function. should save it to the same place as the tool_metadata and make sure that is reachable
     return {"message": f"Graph and metadata file recreated successfully."}

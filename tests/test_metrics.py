@@ -1,7 +1,7 @@
 
 from pubmetric.metrics import *
 from pubmetric.workflow import parse_cwl_workflows
-from pubmetric.network import create_citation_network
+from pubmetric.network import create_network
 from datetime import datetime
 import os
 import math
@@ -16,7 +16,7 @@ from example_graph import cocitation_graph, expected_edge_weights, pmid_workflow
 #         graph = pickle.load(f) 
 #     workflow = parse_cwl_workflows(graph=graph , cwl_filename=cwl_filename)  
 
-#     graph = asyncio.run(create_citation_network(inpath=shared_datadir, test_size=20))
+#     graph = asyncio.run(create_network(inpath=shared_datadir, test_size=20))
 #     tool_scores = tool_average_sum(graph, workflow)
 #     assert list(tool_scores.keys()) == ['ProteinProphet_02', 'StPeter_04', 'XTandem_01', 'XTandem_03'] # note this only tests the format is right 
 
