@@ -62,8 +62,8 @@ async def periodic_graph_generation():
         return {"error": f"An error occurred while recreating the graph: {e}. The previous graph will continue to be used."}
 scheduler.add_job(periodic_graph_generation, 'interval', days=30)
 
-@app.post("/score_workflows/", response_model=ScoreResponse)
-async def score_workflows(cwl_file: UploadFile = File(None)):
+@app.post("/score_workflow/", response_model=ScoreResponse)
+async def score_workflow(cwl_file: UploadFile = File(None)):
     """
     Processes an uploaded CWL file to score workflows based on the current citation network graph. Returns scores for the tool- and workflow-level metrics, and ages.
 
