@@ -72,22 +72,22 @@ async def aggregate_requests(session: aiohttp.ClientSession, url: str, retries: 
 
 
 
-async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_library_filename: str = 'doi_pmid_library.json', save_interval: int = 10) -> dict:
+async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_library_filepath: str = 'doi_pmid_library.json', save_interval: int = 10) -> dict:
     """
     Given a list of dictionaries with data about (tool) publications, 
     this function uses their DOIs to retrieve their PMIDs from NCBI eutils API.
 
     :param doi_tools: list of dicts
     :param outpath: str
-    :param doi_library_filename: str, default 'doi_pmid_library.json'
+    :param doi_library_filepath: str, default 'doi_pmid_library.json'. To load this is assumed to be in main directory. 
     :param save_interval: int, default 10, Save progress after this many updates
 
     :return: Updated list of dicts with PMIDs included.
 
     """
-    if os.path.isfile(doi_library_filename):
+    if os.path.isfile(doi_library_filepath):
         pubmetric.log.log_with_timestamp("Loading doi-pmid library")
-        with open(doi_library_filename, 'r') as f:
+        with open(doi_library_filepath, 'r') as f:
             doi_library = json.load(f)
     else:
         pubmetric.log.log_with_timestamp('Creating a new doi-pmid library')
@@ -115,12 +115,12 @@ async def get_pmid_from_doi(doi_tools: dict, outpath: str, doi_library_filename:
                 continue
             
             if library_updates >= save_interval:
-                with open(os.path.join(outpath, doi_library_filename), 'w') as f:
+                with open(os.path.join(outpath, doi_library_filepath), 'w') as f:
                     json.dump(doi_library, f)
                 library_updates = 0  # Reset update counter
 
     if library_updates > 0:
-        with open(os.path.join(outpath, doi_library_filename), 'w') as f:
+        with open(os.path.join(outpath, doi_library_filepath), 'w') as f:
             json.dump(doi_library, f)
 
     updated_doi_tools = [tool for tool in doi_tools if tool.get('pmid')]
@@ -236,9 +236,9 @@ async def fetch_publication_dates(session: aiohttp.ClientSession, pmids: list): 
     async with session.get(url) as response:
         return await response.json()
     
-async def process_publication_dates(tool_metadata: list) -> list: #TODO: do I really need to send the entire list of dictionaries here or should I just send a list of pmids, what is computationally better? 
+async def process_publication_dates(tool_metadata: list) -> list:
     """
-    Downloads the publication date from NCBI using the PMID of the file and updates the metadat file. 
+    Downloads the publication date from NCBI using the PMID of the file and updates the metadat file.
 
     :param tool_metadata: list
         List of dictionaries containing tool metadata.
@@ -247,7 +247,11 @@ async def process_publication_dates(tool_metadata: list) -> list: #TODO: do I re
         Updated list of tool metadata with publication dates included.
     """
 
-    pmid_to_tool = {tool['pmid']: tool for tool in tool_metadata if 'pubDate' not in tool or not tool['pubDate'] or tool['pubDate'] == 'null'}
+    pmid_to_tool = {
+    tool['pmid']: tool
+    for tool in tool_metadata
+    if 'pubDate' not in tool or not tool['pubDate'] or tool['pubDate'] == 'null'
+    }
     pmids = list(pmid_to_tool.keys())
 
     # If no pmids need updates return the original list
@@ -268,10 +272,16 @@ async def process_publication_dates(tool_metadata: list) -> list: #TODO: do I re
         else:
             tools_without_pubdate += 1
 
-    pubmetric.log.log_with_timestamp(f"Nr of tools for which publication date could not be found: {tools_without_pubdate}")
+    pubmetric.log.log_with_timestamp(
+        f"Nr of tools for which publication date could not be found: {tools_without_pubdate}"
+    )
     return tool_metadata
 
-async def get_tool_metadata(outpath: str, topic_id: str , inpath: Optional[str] = None, test_size: Optional[int] = None, random_seed: int = 42) -> dict:
+async def get_tool_metadata(outpath: str, 
+                            topic_id: str , 
+                            inpath: Optional[str] = None, 
+                            test_size: Optional[int] = None, 
+                            random_seed: int = 42) -> dict:
     """
     Fetches metadata about tools from bio.tools, belonging to a given topic_id and returns as a dictionary.
 
@@ -407,7 +417,7 @@ async def fetch_citations_batch(article_ids:list, session: aiohttp.ClientSession
 
     return results
 
-async def process_citation_data(metadata_file: list, inpath: Optional[str], outpath: Optional[str], threshold: int = 20,batch_size: int = 1000) -> dict:
+async def process_citation_data(metadata_file: list, inpath: Optional[str], outpath: Optional[str], threshold: int = 20, batch_size: int = 1000) -> dict:
     """
     Processes citation data by fetching citations for tools listed in the metadata file and filtering them
     based on a citation threshold.
@@ -447,8 +457,8 @@ async def process_citation_data(metadata_file: list, inpath: Optional[str], outp
     for tool in tqdm(metadata_file['tools'], desc="Processing citations", unit="tool"):
         paper_pmid = tool['pmid']
         citations = saved_data.get(paper_pmid, [])
+        tool['nrCitations'] = len(citations)
         if citations:
-            tool['nrCitations'] = len(citations)
             for citation_pmid in citations:
                 if citation_pmid == paper_pmid:
                     continue

@@ -13,21 +13,21 @@ tools = ['TA', 'TC', 'TD', # connected cluster - included in final graph
 
 citations = ['CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG']
 
-
 edges = [
 
     # Single citations of tools
     ('CA', 'TA'), ('CB', 'TB'),
 
     # Citations to multiple tools
-    ('CC', 'TA'), ('CC', 'TC'),  
+    ('CC', 'TA'), ('CC', 'TC'),
     ('CD', 'TA'), ('CD', 'TC'),
+    ('CE', 'TC'), ('CE', 'TD'),
 
-    # Tools citing each other
-    ('TC', 'TD'), 
+    # Tools citing each other, excluded
+    ('TC', 'TD'),
 
-    # Duplicate edges
-    ('CE', 'TF'), ('CE', 'TF'),
+    # Duplicate edges, removed
+    ('CX', 'TF'), ('CX', 'TF'),
 
     # Tools citing themselves
     ('TA', 'TA'),
@@ -36,6 +36,15 @@ edges = [
     ('CF', 'TE'), ('CF', 'TF')
 
 ]
+
+paper_citations = {
+    'CA':['TA'], 
+    'CB':['TB'], 
+    'CC':['TA', 'TC'], 
+    'CD':['TA', 'TC'], 
+    'CE': ['TC', 'TD'],
+    'CF':['TE', 'TF'], 
+}
 
 
 
@@ -48,7 +57,7 @@ expected_edge_weights = {('TA', 'TC'): 2, ('TC', 'TD'): 1, ('TE', 'TF'): 1,
 tool_metadata = {
     "tools": [
         {'name': 'ToolnameA', 'pmid': 'TA', 'nrCitations': 1, 'pubDate': 2015},
-        {'name': 'ToolnameB', 'pmid': 'TB', 'nrCitations': 2, 'pubDate': 2016}, 
+        {'name': 'ToolnameB', 'pmid': 'TB', 'nrCitations': 2, 'pubDate': 2016},
         {'name': 'ToolnameC', 'pmid': 'TC', 'nrCitations': 3, 'pubDate': 2017},
         {'name': 'ToolnameD', 'pmid': 'TD', 'nrCitations': 4, 'pubDate': 2018},
         {'name': 'ToolnameE', 'pmid': 'TE', 'nrCitations': 5, 'pubDate': 2019},
@@ -96,7 +105,6 @@ dictionary_workflow = {
 }
 
 
-citation_graph = igraph.Graph.TupleList(edges, directed=True)
-included_tools = [tool for tool in citation_graph.vs['name'] if tool in tools]  
-cocitation_graph = create_cocitation_graph(citation_graph,included_tools)
+
+cocitation_graph = create_cocitation_graph(paper_citations)
 cocitation_graph = add_graph_attributes(graph=cocitation_graph, metadata_file=tool_metadata)

@@ -2,21 +2,23 @@
 Bibliographic graph creation
 """
 import os
-import pickle
-from datetime import datetime
-import json
-import igraph 
-import sys
-from typing import Optional, Union
-import math
-from tqdm import tqdm       
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
-import pubmetric.data 
-import pubmetric.log
 from collections import defaultdict
 import itertools
 from multiprocessing import Pool
+import sys
+from typing import Optional, Union
+import math
+
+import pickle
+from datetime import datetime
+import json
+import igraph
+from tqdm import tqdm
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
+import pubmetric.data
+import pubmetric.log
+
 
 def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
     """
@@ -36,15 +38,11 @@ def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
         tool_metadata = next((tmd for tmd in metadata_file['tools'] if tmd['pmid'] == pmid))
 
         vertex['pmid'] = pmid
-        vertex["name"] = tool_metadata['name']  # changing name to name 
-        vertex["age"] = datetime.now().year - int(tool_metadata.get('pubDate') or (datetime.now().year - 100)) # default 100 years if publication is None
+        vertex["name"] = tool_metadata['name']  # changing name to name
+        vertex["age"] = datetime.now().year - int(tool_metadata.get('pubDate') or (datetime.now().year - 40)) # default 40 years if publication is None
         vertex["nr_citations"] = tool_metadata['nrCitations'] 
-
+        vertex['degree'] = vertex.degree() # for compatibility with cytoscape, and to retain full graph stats even if a subgraph is extracted
     return graph
-
-
-def normalise_weight(graph_stats: list, weight: float):
-    return
 
 
 def create_small_cocitation_graph(paper_citations: dict) -> igraph.Graph: # perhaps use this if the size is not too big? 

@@ -2,7 +2,7 @@
     "creationDate": "2024-07-03 13:23:06.173361",
     "totalNrTools": 1873,
     "biotoolsWOpmid": 500,
-    "nrpmidfromdoi": 457,
+    "pmidFromDoi": 457,
     "tools": [
         {
             "name": "xMarkerFinder",
