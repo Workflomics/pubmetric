@@ -1,13 +1,14 @@
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 from typing import Dict, Optional, List
+import numpy as np
 import tempfile
 import os 
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.memory import MemoryJobStore
 
-from pubmetric.metrics import *
+import pubmetric.metrics as met
 from pubmetric.workflow import parse_cwl_workflows
 from pubmetric.network import create_citation_network
 
@@ -86,36 +87,48 @@ async def score_workflows(cwl_file: UploadFile = File(None)):
         pmid_workflow = workflow['pmid_edges'] # for the metrics that do not need to take into account the structure
 
         # Metrics
-        workflow_level_scores =  workflow_average_sum(graph, pmid_workflow)
-        tool_level_scores = tool_average_sum(graph, workflow)
+        workflow_level_scores =  met.workflow_average_sum(graph, pmid_workflow)
+        workflow_desirability = met.calculate_desirability(workflow_level_scores, 10, 400)
+        tool_level_scores = met.tool_average_sum(graph, workflow)
+
 
         tool_level_output = []
         for tool_name, score in tool_level_scores.items():
+            desirability = met.calculate_desirability(score, 10, 400) # TODO make dependent on the highest nr in that particular graph 
+            if not score or score == 0:
+                score = 'Unknown'
             tool_level_output.append({
-                    "desirability": 8.0,# based on the 95th percentile of the nr of cocitations in the proteomics graph
-                    "label": score, # should this be the tool name? or is this what is used on hover? 
-                    "value": score
+                    "desirability": desirability,# based on the 95th percentile of the nr of cocitations in the proteomics graph
+                    "label": str(score), # should this be the tool name? or is this what is used on hover? 
+                    "value": str(score)
                 })
 
         ages_output = []
         ages = []
         for _, pmid in workflow['steps'].items():
             age = next(tool['age'] for tool in graph.vs if tool['pmid'] == pmid)
+            if not age or age == 40:
+                age = "Unknown"
+                desirability = 0
+            else:
+                desirability = met.calculate_desirability(age, 3, 20, inverse=True)
             ages.append(age)
             ages_output.append({
-                    "desirability": 0, # Because green == new?  
-                    "label": age, # should this be the tool name? or is this what is used on hover? 
-                    "value": age
+                    "desirability": desirability, # Because green == new?  
+                    "label": str(age),
+                    "value": str(age)
                 })
-   
+            
+        
+
         metric_benchmark = {
             "unit": "metric",
             "description": "The tool- and workflow-level metric",
             "title": "Pubmetric",
             "steps": tool_level_output,
             "aggregate_value": {
-                "desirability": 8.0, # again based on the 95th percentile 
-                "value": workflow_level_scores 
+                "desirability": workflow_desirability, # again based on the 95th percentile 
+                "value": str(workflow_level_scores)
             }
         }
         age_benchmark = {
@@ -124,12 +137,12 @@ async def score_workflows(cwl_file: UploadFile = File(None)):
             "title": "Age",
             "steps": ages_output,
             "aggregate_value": {
-                "desirability": 1, # unclear what to put here
-                "value": np.median(ages) # median age as the aggregate value? 
+                "desirability": 1.0, # unclear what to put here
+                "value": str(np.median(ages)) # median age as the aggregate value? 
             }
         }
 
-    benchmarks = [metric_benchmark, age_benchmark]   
+    benchmarks = [metric_benchmark, age_benchmark]
 
     return ScoreResponse(workflow_scores=benchmarks)
 
