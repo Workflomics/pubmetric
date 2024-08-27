@@ -76,6 +76,24 @@ def get_graph_edge_weight(graph: igraph.Graph,
 
     return float(weight)
 
+def calculate_desirability(weight, mid_threshold, upper_threshold, inverse=False):
+    if inverse:
+        normalized_weight = (upper_threshold - weight) / (upper_threshold - mid_threshold)
+    else:
+        normalized_weight = (weight - mid_threshold) / (upper_threshold - mid_threshold)
+    
+    # tapering off desirability if it is outside the specified thresholds
+    desirability = 1 / (1 + math.exp(-2 * (normalized_weight - 0.5)))
+
+    if normalized_weight <= 0:
+        desirability = 0.5 * desirability
+    elif 0 < normalized_weight < 1:
+        desirability = 0.5 + 0.5 * desirability
+    else:
+        desirability = 1.0
+
+    return round(desirability, 2)
+
 # Tool level metric
 
 def tool_average_sum(graph: igraph.Graph,

@@ -22,7 +22,8 @@ setup(
         'ruamel.yaml',
         'cwl_utils',
         'fastapi',
-        'scikit-learn'
+        'scikit-learn',
+        'apscheduler'
     ],
     extras_require={
         'test': [
