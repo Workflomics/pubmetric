@@ -478,13 +478,10 @@ async def process_citation_data(metadata_file: list,
                      for tool in metadata_file['tools']
                      if tool['pmid'] not in saved_data]
     
-    print(pending_tools)
-
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=60)) as session:
         while pending_tools:
             current_batch = pending_tools[:batch_size]
             pending_tools = pending_tools[batch_size:]
-            print(current_batch, pending_tools)
 
             batch_results = await fetch_citations_batch(current_batch, session)
 
