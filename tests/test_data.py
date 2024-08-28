@@ -35,12 +35,17 @@ def test_get_pmid_from_doi_create_file():
     """Tests the creation of a new doi to pmid library"""
     doi_list = [{"name": "ProteoWizard", "doi": "10.1038/nbt.2377"}]
     pmid_list = asyncio.run(data.get_pmid_from_doi(outpath='',doi_tools= doi_list))
+    if os.path.exists('doi_pmid_library.json'): # rm file after completion
+        os.remove('doi_pmid_library.json')
     assert str(pmid_list[0]["pmid"]) == '23051804'
 
 def test_get_pmid_from_doi_file_not_found():
     """Tests the handling of a given but non existing doi to pmid library"""
     doi_list = [{"name": "ProteoWizard", "doi": "10.1038/nbt.2377"}]
-    pmid_list = asyncio.run(data.get_pmid_from_doi(outpath='',doi_tools= doi_list, doi_library_filepath='fake'))
+    filepath="./remove_me.json"
+    pmid_list = asyncio.run(data.get_pmid_from_doi(outpath='.',doi_tools= doi_list, inpath='.', doi_library_filename="remove_me.json"))
+    if os.path.exists(filepath): # rm file after completion
+        os.remove(filepath)
     assert str(pmid_list[0]["pmid"]) == '23051804'
 
 def test_get_pmid_from_doi_from_file(shared_datadir):
@@ -69,8 +74,8 @@ def test_get_pmids():
 def test_process_citation_data():
     """Tests downloading the citations for one tool"""
     citation_test_tools = {'tools':[{'pmid':'14632076'}]} # Protein prophet, in mock metadata file structure 
-    citation_test_edges = asyncio.run(data.process_citation_data(citation_test_tools))
-    assert len(citation_test_edges) >= 2900 # it has 2965 citations currently (August 2024)
+    _ = asyncio.run(data.process_citation_data(metadata_file=citation_test_tools))
+    assert citation_test_tools['tools'][0]['nrCitations'] >= 2900 # it has 2965 citations currently (August 2024)
 
 def test_get_ages():
      tool_metadata = [

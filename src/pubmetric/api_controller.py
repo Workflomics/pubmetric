@@ -1,16 +1,17 @@
-from fastapi import FastAPI, UploadFile, File
-from pydantic import BaseModel
-from typing import Dict, Optional, List
-import numpy as np
+import os
 import tempfile
-import os 
 from contextlib import asynccontextmanager
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 from apscheduler.jobstores.memory import MemoryJobStore
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from fastapi import FastAPI, File, UploadFile
+from pydantic import BaseModel
+from typing import List, Optional
 
 import pubmetric.metrics
-import pubmetric.workflow 
-import pubmetric.network 
+import pubmetric.network
+import pubmetric.workflow
+
 
 app = FastAPI()
 
@@ -66,7 +67,6 @@ scheduler.add_job(periodic_graph_generation, 'interval', days=30)
 async def score_workflow(cwl_file: UploadFile = File(None)):
     """
     Processes an uploaded CWL file to score workflows based on the current citation network graph. Returns scores for the tool- and workflow-level metrics, and ages.
-
     :param cwl_file: UploadFile
         The uploaded CWL file to be processed.
 
@@ -83,45 +83,44 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
             f.write(cwl_file.file.read())
 
         
-        workflow = pubmetric.workflow.parse_cwl_workflows(cwl_filename=cwl_file_path, graph=graph)  
+        workflow = pubmetric.workflow.parse_cwl(cwl_filename=cwl_file_path, graph=graph)  
         pmid_workflow = workflow['pmid_edges'] # for the metrics that do not need to take into account the structure
 
         # Metrics
-        workflow_level_scores =  pubmetric.metrics.workflow_average(graph=graph, workflow=pmid_workflow)
-        workflow_desirability = pubmetric.metrics.calculate_desirability(weight=workflow_level_scores, mid_threshold=10, upper_threshold =400)
+        workflow_level_score =  pubmetric.metrics.workflow_average(graph=graph, workflow=pmid_workflow)
+        workflow_desirability = pubmetric.metrics.calculate_desirability(score=workflow_level_score,thresholds= [0, 400])
         tool_level_scores = pubmetric.metrics.tool_average_sum(graph, workflow)
 
 
         tool_level_output = []
-        for _, score in tool_level_scores.items():
-            desirability = pubmetric.metrics.calculate_desirability(weight=score, mid_threshold=10, upper_threshold=400) # TODO make dependent on the highest nr in that particular graph 
+        for tool_name, score in tool_level_scores.items():
+            desirability = pubmetric.metrics.calculate_desirability(score=score,thresholds= [0,200]) # lower since they are multiplied by the desirability of workflows
                                                                                                                         # right now # based on the 95th percentile of the nr of cocitations in the proteomics graph
             if not score or score == 0:
                 score = 'Unknown'
             tool_level_output.append({
                     "desirability": desirability,
-                    "label": str(score), # should this be the tool name? or is this what is used on hover? 
+                    "label": f'{tool_name.split("_")[0]}: {score}', # should this be the tool name? or is this what is used on hover? 
                     "value": str(score)
                 })
 
         ages_output = []
         ages = []
-        for _, pmid in workflow['steps'].items():
+        for tool_name, pmid in workflow['steps'].items():
             age = next(tool['age'] for tool in graph.vs if tool['pmid'] == pmid)
-            if not age or age == 40:
+            if not age or age == 40: # should never be turned into 40
                 age = "Unknown"
                 desirability = 0
             else:
-                desirability = pubmetric.metrics.calculate_desirability(age, 3, 20, inverse=True)
+                desirability = pubmetric.metrics.calculate_desirability(score=age,thresholds= [0, 45], inverted=True, transform = False) # capped by putting the upper threshold above maximum 
             ages.append(age)
             ages_output.append({
                     "desirability": desirability, # Because green == new?  
-                    "label": str(age),
+                    "label":  f'{tool_name.split("_")[0]}: {age}',
                     "value": str(age)
                 })
             
         
-
         metric_benchmark = {
             "unit": "metric",
             "description": "The tool- and workflow-level metric",
@@ -129,17 +128,17 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
             "steps": tool_level_output,
             "aggregate_value": {
                 "desirability": workflow_desirability, # again based on the 95th percentile 
-                "value": str(workflow_level_scores)
+                "value": str(workflow_level_score)
             }
         }
         age_benchmark = {
             "unit": "age",
-            "description": "Ages of primary publications",
+            "description": "Time since release of primary publications",
             "title": "Age",
             "steps": ages_output,
             "aggregate_value": {
                 "desirability": 1.0, # unclear what to put here
-                "value": str(np.median(ages)) # median age as the aggregate value? 
+                "value": f'{len([age for age in ages_output if age["value"] != "Unknown"])}/{len(ages_output)}' # median age as the aggregate value? 
             }
         }
 

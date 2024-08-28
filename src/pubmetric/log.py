@@ -1,3 +1,4 @@
+""" Logging methods"""
 from datetime import datetime
 
 def log_with_timestamp(message: str):

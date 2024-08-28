@@ -8,7 +8,7 @@ import statistics
 import example_graph as ex_graph
 
 import pubmetric.metrics as met
-from pubmetric.workflow import parse_cwl_workflows
+from pubmetric.workflow import parse_cwl
 from pubmetric.network import create_network
 
  
@@ -17,7 +17,7 @@ def test_tool_level_average_sum(shared_datadir):
     graph_path = os.path.join(shared_datadir, "graph.pkl")
     with open(graph_path, 'rb') as f:
         graph = pickle.load(f) 
-    workflow = parse_cwl_workflows(graph=graph , cwl_filename=cwl_filename)
+    workflow = parse_cwl(graph=graph , cwl_filename=cwl_filename)
     # graph = asyncio.run(create_network(inpath=shared_datadir, test_size=20, load_graph=True))
     tool_scores = met.tool_average_sum(graph, workflow)
     assert list(tool_scores.keys()) == ['ProteinProphet_02', 'StPeter_04', 'XTandem_01', 'XTandem_03'] # note this only tests the format is right

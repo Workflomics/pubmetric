@@ -1,27 +1,29 @@
-
-
-import pandas as pd
-import numpy as np
-import json 
+"""
+Functions used for the development and evaluation of Pubmetric
+"""
+import os
+import sys
+import json
 import random
 import copy
 import ast
-from sklearn.model_selection import train_test_split
-import sys
-import os
-import aiohttp
-from tqdm import tqdm       
-import igraph
 from typing import Optional
 
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+import aiohttp
+from tqdm import tqdm
+import igraph
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
-import pubmetric.data 
+import pubmetric.data
+
 
 
 def parse_tuple_workflow(graph: igraph.Graph, pmid_edges: list): # for reading rated dataset
     """"
-    Takes a list of tuples of pmids and turns it into the format produced by the parse_cwl_workflows function. 
+    Takes a list of tuples of pmids and turns it into the format produced by the parse_cwl function. 
     Note that this representation does not take into account if a workflow has tool repetitions. 
 
     :param pmid_workflow: List of tuples of pmids 
