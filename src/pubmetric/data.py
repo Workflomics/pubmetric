@@ -266,8 +266,8 @@ async def process_publication_dates(tool_metadata: list) -> list:
     pmid_to_tool = {
         tool['pmid']: tool
         for tool in tool_metadata
-        if 'publication_date' not in tool 
-        or not tool['publication_date'] 
+        if 'publication_date' not in tool
+        or not tool['publication_date']
         or tool['publication_date'] == 'null'
         }
     pmids = list(pmid_to_tool.keys())
@@ -284,7 +284,7 @@ async def process_publication_dates(tool_metadata: list) -> list:
 
     for pmid in pmids:
         tool = pmid_to_tool.get(pmid)
-        pub_date = results.get(pmid, {}).get('publication_date', None)
+        pub_date = results.get(pmid, {}).get('pubdate', None)
         if pub_date:
             tool['publication_date'] = int(str(pub_date).split()[0])
         else:
@@ -295,10 +295,10 @@ async def process_publication_dates(tool_metadata: list) -> list:
     )
     return tool_metadata
 
-async def get_tool_metadata(outpath: str, 
-                            topic_id: str , 
-                            inpath: Optional[str] = None, 
-                            test_size: Optional[int] = None, 
+async def get_tool_metadata(outpath: str,
+                            topic_id: str ,
+                            inpath: Optional[str] = None,
+                            test_size: Optional[int] = None,
                             random_seed: int = 42) -> dict:
     """
     Fetches metadata about tools from bio.tools, belonging to a given topic_id
@@ -353,7 +353,7 @@ async def get_tool_metadata(outpath: str,
 
     get_pmids_time = datetime.now()
 
-    pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id=topic_id, 
+    pmid_tools, doi_tools, tot_nr_tools = await get_pmids(topic_id=topic_id,
                                                           test_size=test_size)
 
     pubmetric.log.step_timer(get_pmids_time, "Downloading pmids")
