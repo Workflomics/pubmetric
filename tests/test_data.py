@@ -51,13 +51,13 @@ def test_get_pmid_from_doi_file_not_found():
 def test_get_pmid_from_doi_from_file(shared_datadir):
     """Tests loading a doi to pmid library"""
     doi_list = [{"name": "ProteoWizard", "doi": "10.1038/nbt.2377"}]
-    pmid_list = asyncio.run(data.get_pmid_from_doi(outpath='',doi_tools= doi_list, doi_library_filepath=os.path.join(shared_datadir, 'doi_pmid_library.json')))
+    pmid_list = asyncio.run(data.get_pmid_from_doi(outpath='',doi_tools= doi_list, inpath= shared_datadir, doi_library_filename='doi_pmid_library.json'))
     assert str(pmid_list[0]["pmid"]) == '23051804' # Proteowizard PMID
 
 def test_get_pmid_from_doi_from_file_with_updates(shared_datadir):
     """Tests updating an existing doi to pmid library"""
     doi_list = [{"name": "ProteoWizard", "doi": "10.1038/nbt.2377"}]
-    pmid_list = asyncio.run(data.get_pmid_from_doi(outpath='',doi_tools= doi_list, doi_library_filepath=os.path.join(shared_datadir, 'doi_pmid_library_empty.json')))
+    pmid_list = asyncio.run(data.get_pmid_from_doi(outpath='',doi_tools= doi_list, inpath= shared_datadir, doi_library_filename= 'doi_pmid_library_empty.json'))
     assert str(pmid_list[0]["pmid"]) == '23051804'
 
 def test_get_pmids():
@@ -68,26 +68,26 @@ def test_get_pmids():
     assert len(pmid_tools) + len(doi_tools) >= test_size
     assert total_nr_tools >= 1800 # As of August 2024 there are 1874 tools in the topic proteomics in bio.tools  
     assert type(pmid_tools[0]['name']) == str
-    assert type(pmid_tools[0]['allPublications']) == list
+    assert type(pmid_tools[0]['all_publications']) == list
 
 
 def test_process_citation_data():
     """Tests downloading the citations for one tool"""
     citation_test_tools = {'tools':[{'pmid':'14632076'}]} # Protein prophet, in mock metadata file structure 
     _ = asyncio.run(data.process_citation_data(metadata_file=citation_test_tools))
-    assert citation_test_tools['tools'][0]['nrCitations'] >= 2900 # it has 2965 citations currently (August 2024)
+    assert citation_test_tools['tools'][0]['nr_citations'] >= 2900 # it has 2965 citations currently (August 2024)
 
 def test_get_ages():
      tool_metadata = [
             {"name": "PeptideProphet",
             "doi": None,
             "topic": "Proteomics",
-            "nrPublications": 1,
-            "allPublications": [
+            "nr_publications": 1,
+            "all_publications": [
                 "12403597"
             ],
             "pmid": "12403597"
         },
      ]
      tool_metadata_inc_ages = asyncio.run(data.process_publication_dates(tool_metadata))
-     assert tool_metadata_inc_ages[0]['pubDate'] == 2002
+     assert tool_metadata_inc_ages[0]['publication_date'] == 2002

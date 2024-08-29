@@ -56,12 +56,12 @@ expected_edge_weights = {('TA', 'TC'): 2, ('TC', 'TD'): 1, ('TE', 'TF'): 1,
 
 tool_metadata = {
     "tools": [
-        {'name': 'ToolnameA', 'pmid': 'TA', 'nrCitations': 1, 'pubDate': 2015},
-        {'name': 'ToolnameB', 'pmid': 'TB', 'nrCitations': 2, 'pubDate': 2016},
-        {'name': 'ToolnameC', 'pmid': 'TC', 'nrCitations': 3, 'pubDate': 2017},
-        {'name': 'ToolnameD', 'pmid': 'TD', 'nrCitations': 4, 'pubDate': 2018},
-        {'name': 'ToolnameE', 'pmid': 'TE', 'nrCitations': 5, 'pubDate': 2019},
-        {'name': 'ToolnameF', 'pmid': 'TF', 'nrCitations': 6, 'pubDate': 2020}
+        {'name': 'ToolnameA', 'pmid': 'TA', 'nr_citations': 1, 'publication_date': 2015},
+        {'name': 'ToolnameB', 'pmid': 'TB', 'nr_citations': 2, 'publication_date': 2016},
+        {'name': 'ToolnameC', 'pmid': 'TC', 'nr_citations': 3, 'publication_date': 2017},
+        {'name': 'ToolnameD', 'pmid': 'TD', 'nr_citations': 4, 'publication_date': 2018},
+        {'name': 'ToolnameE', 'pmid': 'TE', 'nr_citations': 5, 'publication_date': 2019},
+        {'name': 'ToolnameF', 'pmid': 'TF', 'nr_citations': 6, 'publication_date': 2020}
     ]
 }
 

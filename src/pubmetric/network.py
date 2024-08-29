@@ -40,9 +40,9 @@ def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
 
         vertex['pmid'] = pmid
         vertex["name"] = tool_metadata['name']  # changing name to name
-        vertex["age"] = datetime.now().year - int(tool_metadata.get('pubDate')
+        vertex["age"] = datetime.now().year - int(tool_metadata.get('publication_date')
                                                   or 50) # igraph requires that all arguments are of same type so we use 50 as none 
-        vertex["nr_citations"] = tool_metadata['nrCitations']
+        vertex["nr_citations"] = tool_metadata['nr_citations']
         vertex['degree'] = vertex.degree()  # for compatibility with cytoscape,
                                             # and to retain full graph stats even 
                                             # if a subgraph is extracted
@@ -180,7 +180,7 @@ async def create_network(outpath: Optional[str] = None,
 
     :param topic_id: The ID to which the downloaded tools belong,
         e.g., "Proteomics" or "DNA" as defined by EDAM ontology.
-    :param test_size: Determines the number of tools downloaded.
+    :param test_size: Determines the minimum number of tools downloaded.
     :param random_seed: Specifies the seed used to randomly pick tools in a test run.
         Default is 42.
     :param load_graph: Determines if an already generated graph is loaded or if it

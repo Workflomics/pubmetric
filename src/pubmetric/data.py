@@ -77,7 +77,7 @@ async def aggregate_requests(session: aiohttp.ClientSession,
 
 async def get_pmid_from_doi(doi_tools: dict,
                             outpath: str,
-                            inpath: str,
+                            inpath: str = None,
                             doi_library_filename: str = 'doi_pmid_library.json',
                             save_interval: int = 10) -> dict:
     """
@@ -85,8 +85,9 @@ async def get_pmid_from_doi(doi_tools: dict,
     this function uses their DOIs to retrieve their PMIDs from NCBI eutils API.
 
     :param doi_tools: list of dicts
-    :param outpath: str path to where you want the file to be 
-    :param doi_library_filepath: str, default 'doi_pmid_library.json'.
+    :param outpath: str path to the directory where you want the file to be 
+    :param inpath: str path to the directory where an old file is
+    :param doi_library_filename: str, default 'doi_pmid_library.json'.
         To load this is assumed to be in main directory. 
     :param save_interval: int, default 10, Save progress after this many updates
 
@@ -208,9 +209,9 @@ async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
                             'name': name,
                             'doi': primary_publication.get('doi'), # adding doi here too 
                             'topics': [t.get('term') for t in topic] if topic else None,
-                            'nrPublications':  nr_publications,
-                            'allPublications': all_publications,
-                            'pubDate': pub_date,
+                            'nr_publications':  nr_publications,
+                            'all_publications': all_publications,
+                            'publication_date': pub_date,
                             'pmid': str(primary_publication['pmid'])
 
                         })
@@ -220,9 +221,9 @@ async def get_pmids(topic_id: Optional[str], test_size: Optional[int]) -> tuple:
                             'name': name,
                             'doi': primary_publication.get('doi'),
                             'topics': [t.get('term') for t in topic] if topic else None,
-                            'nrPublications':  nr_publications,
-                            'allPublications': all_publications,
-                            'pubDate': pub_date
+                            'nr_publications':  nr_publications,
+                            'all_publications': all_publications,
+                            'publication_date': pub_date
                         })
 
                 if test_size and len(pmid_tools) + len(doi_tools) >= test_size: # this is not exaxt 
@@ -265,9 +266,9 @@ async def process_publication_dates(tool_metadata: list) -> list:
     pmid_to_tool = {
         tool['pmid']: tool
         for tool in tool_metadata
-        if 'pubDate' not in tool 
-        or not tool['pubDate'] 
-        or tool['pubDate'] == 'null'
+        if 'publication_date' not in tool 
+        or not tool['publication_date'] 
+        or tool['publication_date'] == 'null'
         }
     pmids = list(pmid_to_tool.keys())
 
@@ -283,9 +284,9 @@ async def process_publication_dates(tool_metadata: list) -> list:
 
     for pmid in pmids:
         tool = pmid_to_tool.get(pmid)
-        pub_date = results.get(pmid, {}).get('pubdate', None)
+        pub_date = results.get(pmid, {}).get('publication_date', None)
         if pub_date:
-            tool['pubDate'] = int(str(pub_date).split()[0])
+            tool['publication_date'] = int(str(pub_date).split()[0])
         else:
             tools_without_pubdate += 1
 
@@ -346,7 +347,7 @@ async def get_tool_metadata(outpath: str,
     # If no inpath is specified we recreate the metadatafile
     # Creating json file
     metadata_file = {
-        "creationDate": str(datetime.now()),
+        "creation_date": str(datetime.now()),
         "topic": topic_id
     }
 
@@ -357,15 +358,15 @@ async def get_tool_metadata(outpath: str,
 
     pubmetric.log.step_timer(get_pmids_time, "Downloading pmids")
 
-    metadata_file['totalNrTools'] = tot_nr_tools  
-    metadata_file['biotoolsWOpmid'] = len(doi_tools)
+    metadata_file['total_nr_tools'] = tot_nr_tools  
+    metadata_file['biotools_wo_pmid'] = len(doi_tools)
 
     # Update list of doi_tools to include pmid
     get_pmid_from_doi_time = datetime.now()
     doi_tools = await get_pmid_from_doi(outpath=outpath, inpath=inpath, doi_tools=doi_tools)
 
     pubmetric.log.step_timer(get_pmid_from_doi_time, "Downloading pmids from doi's")
-    metadata_file["pmidFromDoi"] = len(doi_tools)
+    metadata_file["pmid_from_doi"] = len(doi_tools)
 
     all_tools = pmid_tools + doi_tools
 
@@ -494,7 +495,7 @@ async def process_citation_data(metadata_file: list,
     for tool in tqdm(metadata_file['tools'], desc="Processing citations", unit="tool"):
         paper_pmid = tool['pmid']
         citations = saved_data.get(paper_pmid, [])
-        tool['nrCitations'] = len(citations)
+        tool['nr_citations'] = len(citations)
         if citations:
             for citation_pmid in citations:
                 if citation_pmid == paper_pmid:

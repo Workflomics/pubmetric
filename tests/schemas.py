@@ -1,11 +1,11 @@
 from pubmetric.exceptions import SchemaValidationError
 
 required_meta_keys = {
-    "creationDate": str,
+    "creation_date": str,
     "topic": (str, type(None)),
-    "totalNrTools": int,
-    "biotoolsWOpmid": int,
-    "pmidFromDoi": int,
+    "total_nr_tools": int,
+    "biotools_wo_pmid": int,
+    "pmid_from_doi": int,
     "tools": list
 }
 
@@ -13,9 +13,9 @@ required_meta_tool_keys = {
     "name": str,
     "doi": (str, type(None)),
     "topics": list,
-    "nrPublications": int,
-    "allPublications": list,
-    "pubDate": (int, type(None)),
+    "nr_publications": int,
+    "all_publications": list,
+    "publication_date": (int, type(None)),
     "pmid": (str, type(None))
 }
 
