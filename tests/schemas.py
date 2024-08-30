@@ -1,22 +1,22 @@
 from pubmetric.exceptions import SchemaValidationError
 
 required_meta_keys = {
-    "creationDate": str,
-    "topic": str,
-    "totalNrTools": int,
-    "biotoolsWOpmid": int,
-    "nrpmidfromdoi": int,
+    "creation_date": str,
+    "topic": (str, type(None)),
+    "total_nr_tools": int,
+    "biotools_wo_pmid": int,
+    "pmid_from_doi": int,
     "tools": list
 }
 
 required_meta_tool_keys = {
     "name": str,
-    "doi": str,
+    "doi": (str, type(None)),
     "topics": list,
-    "nrPublications": int,
-    "allPublications": list,
-    "pubDate": int,
-    "pmid": str
+    "nr_publications": int,
+    "all_publications": list,
+    "publication_date": (int, type(None)),
+    "pmid": (str, type(None))
 }
 
 def metafile_schema_validation(metadata_file):
@@ -30,7 +30,9 @@ def metafile_schema_validation(metadata_file):
         raise SchemaValidationError("The schema of the top layer of the metadata file is incorrect.")
     
     tool = metadata_file["tools"][0] # check only first cause otherwise it takes too much time 
+    print(tool)
     if not all(key in tool and isinstance(tool[key], required_meta_tool_keys[key]) for key in required_meta_tool_keys):
+        print([(tool[key], required_meta_tool_keys[key]) for key in required_meta_tool_keys])
         raise SchemaValidationError("The schema of the tool metadata is incorrect.")
     
     return True

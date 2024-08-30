@@ -1,27 +1,29 @@
-
-
-import pandas as pd
-import numpy as np
-import json 
+"""
+Functions used for the development and evaluation of Pubmetric
+"""
+import os
+import sys
+import json
 import random
 import copy
 import ast
-from sklearn.model_selection import train_test_split
-import sys
-import os
-import aiohttp
-from tqdm import tqdm       
-import igraph
 from typing import Optional
 
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+import aiohttp
+from tqdm import tqdm
+import igraph
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src')))
-import pubmetric.data 
+import pubmetric.data
+
 
 
 def parse_tuple_workflow(graph: igraph.Graph, pmid_edges: list): # for reading rated dataset
     """"
-    Takes a list of tuples of pmids and turns it into the format produced by the parse_cwl_workflows function. 
+    Takes a list of tuples of pmids and turns it into the format produced by the parse_cwl function. 
     Note that this representation does not take into account if a workflow has tool repetitions. 
 
     :param pmid_workflow: List of tuples of pmids 
@@ -52,20 +54,32 @@ def parse_tuple_workflow(graph: igraph.Graph, pmid_edges: list): # for reading r
 
     return random_workflow   
 
+def get_percentile_bin(degree, percentiles):
+    """
+    Determines the percentile bin for a given degree based on predefined percentile thresholds.
 
+    :param degree: The degree of the tool for which the percentile bin needs to be determined.
+    :param percentiles: A list of percentile thresholds to be used for binning.
+
+    :return: The percentile bin as an integer (0, 10, 20, ..., 90) representing the degree's percentile range.
+    """
+    for i, percentile in enumerate(percentiles):
+        if degree <= percentile:
+            return f'{i*5+5}th'
+    return '100th'
 
 ## tag : next step 
-def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Optional[list] = None, random_seed: int = 42, retain_degree: bool = True) -> list:  # TODO: must be updated to work with the new workflow format
+# TODO: if not retain degree then tyou need to give a tool_lsit
+# random seed? how pass it so it does not just use the same oens all the time?
+def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Optional[list] = None, retain_degree: bool = True) -> list:  # TODO: must be updated to work with the new workflow format
     """
     Generates a workflow of the same structure as the given workflow, but where each tool is replaced with a randomly picked one from the given set.
 
-    :param tool_list: List of tools to pick from. Generally this should be all tools in the domain.
+    :param tool_list: Optional if the user wants to specify the list of tools to pick from (only works if retain degree is set to False). Generally this should be all tools in the domain.
     :param workflow: Dictionary representing the workflow.
 
     :return: List of tuples representing a workflow where each tool has been replaced by another, random, one.  
     """
-
-    np.random.seed(random_seed)
 
     steps = workflow['steps']
     edges = workflow['edges']
@@ -77,37 +91,54 @@ def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Opt
     random_pmid_edges = []
 
 
-    pmid_mapping = {}
+    if retain_degree:
+        degrees = [vs.degree() for vs in graph.vs]
+        percentiles = np.percentile(degrees, np.arange(5, 100, 5)) 
+        tools_by_percentile = {f'{i*5+5}th': [] for i in range(20)}  # Creating bins for every 5 percentiles
+        for vs in graph.vs:
+            degree = vs.degree()
+            bin_percentile = get_percentile_bin(degree, percentiles)
+            tools_by_percentile[bin_percentile].append(vs['pmid'])
+
+
+    pmid_mapping = {None:None} # None will always map back to none
     for step in list(steps.items()):
         pmid = step[1]
         if pmid in pmid_mapping.keys():
             continue
         if retain_degree:
-            degree = next(vs.degree() for vs in graph.vs if vs['pmid']==pmid) # TODO: replace the old list comprehension with next
-            # Binning degrees (1-50 is 50, 51-100 is 100 etc), so the random tools are a bit more fairly chosen
-            binned_degree = ((degree + 49) // 50) * 50
-            tool_list = [vs['pmid'] for vs in graph.vs if  (binned_degree - 50) < vs.degree() <= (binned_degree + 50)]
-            print('nr tools to choose from at degree', degree, len(tool_list))
-
-        
+            degree = next(vs.degree() for vs in graph.vs if vs['pmid'] == pmid)
+            bin_percentile = get_percentile_bin(degree, percentiles)
+            tool_list = tools_by_percentile[bin_percentile]
+   
         random_pmid = np.random.choice(tool_list)
         pmid_mapping[pmid] = random_pmid
 
     for edge in edges:
-        source = edge[0]
-        target = edge[1]
+        source_name = edge[0]
+        target_name = edge[1]
 
-        random_source_pmid = pmid_mapping[steps[source]]
-        random_target_pmid = pmid_mapping[steps[target]]
-        
-        random_source = next(vs['name'] for vs in graph.vs if vs['pmid']== random_source_pmid) + f'_{source.split("_")[1]}' # transfering numbering to random steps
-        random_target = next(vs['name'] for vs in graph.vs if vs['pmid']== random_target_pmid) + f'_{target.split("_")[1]}'
+        if not steps[source_name]:
+            random_source_name = "MISSINGTOOL" + f'_{source_name.split("_")[1]}'
+            random_source_pmid = None
+            random_steps[random_source_name] = random_source_pmid # there is some repetition here
+        else:
+            random_source_pmid = pmid_mapping[steps[source_name]]
+            random_source_name = next(vs['name'] for vs in graph.vs if vs['pmid']== random_source_pmid) + f'_{source_name.split("_")[1]}' # transfering numbering to random steps
 
-        random_edges.append( (random_source, random_target ) )
+        if not steps[target_name]:
+            random_target_name = "MISSINGTOOL" + f'_{target_name.split("_")[1]}' 
+            random_target_pmid = None
+            random_steps[random_target_name] = random_target_pmid
+        else:
+            random_target_pmid = pmid_mapping[steps[target_name]]
+            random_target_name = next(vs['name'] for vs in graph.vs if vs['pmid']== random_target_pmid) + f'_{target_name.split("_")[1]}'
+
+        random_edges.append( (random_source_name, random_target_name ) )
         random_pmid_edges.append( (random_source_pmid, random_target_pmid) )
 
-        random_steps[random_source] = random_source_pmid # there is some repetition here but 
-        random_steps[random_target] = random_target_pmid
+        random_steps[random_source_name] = random_source_pmid # there is some repetition here but 
+        random_steps[random_target_name] = random_target_pmid
 
 
     random_workflow = {
@@ -119,7 +150,35 @@ def generate_random_workflow(graph: igraph.Graph, workflow: dict, tool_list: Opt
     return random_workflow
 
 
+def break_workflow(workflow: list, replacing_tools: list) -> list:
+    """
+    Takes a workflow and randomly exchanges one of its tools with one from an given set
 
+    """
+    tools = set()
+
+    tools = {pmid for tup in workflow for pmid in tup if pmid is not None} # collect what tools are in the workflow, ignoring Nones
+    tool_to_replace = np.random.choice(list(tools))
+    replacing_tool = str(np.random.choice(replacing_tools)) ## do I want too also collect the comparison of their citation counts? 
+
+    broken_workflow = []
+    for source, target in workflow:
+        if source == tool_to_replace:
+            broken_workflow.append( (replacing_tool, target) )
+        elif target == tool_to_replace:
+            broken_workflow.append( (source, replacing_tool) )
+        else:
+            broken_workflow.append( (source, target) )
+    return broken_workflow
+
+def convert_to_tuples(list_of_lists):
+    """
+    Converts a list of lists into a list of tuples.
+
+    :param list_of_lists: List of lists to be converted.
+    :return: List of tuples.
+    """
+    return [tuple(inner_list) for inner_list in list_of_lists]
 
 def reconnect_edges(missing_node, workflow): 
     """
@@ -394,6 +453,6 @@ async def get_citations(filename):
     async with aiohttp.ClientSession() as session:
         citation_list = []
         for article_id in tqdm(pmids, desc='Downloading citations from EuropePMC'):
-            citation_ids = await pubmetric.data.europepmc_request(session, article_id)
+            citation_ids = await pubmetric.data.fetch_citations(session, article_id)
             citation_list.append(citation_ids)
         return citation_list

@@ -1,467 +1,515 @@
-import igraph
-import numpy as np
+"""Various for the calculation of tool-level and workflow-level metric scores, their transformation, aggregation and the addition of optional attributes"""
 import math
 import statistics
-from typing import List
+from typing import Union, Optional, Tuple
 
-#TODO: all metrics that need to think about  workflow structure need to be updated to work with the new workflow representation 
-# for ex: compelte tree needs to take into account the repeated tool several times
+import igraph
+import numpy as np
 
 
-# General functions for interation with graph 
+# General functions for interation with graph
 
 def get_node_ids(graph: igraph.Graph, key:str= "pmid") -> dict:
     """"
     Maps node names to their igraph IDs.
 
-    :param graph: igraph.Graph 
+    :param graph: igraph.Graph
     :param key: String indicating which of ID and name shoudl be used as key in the mapping dictionary
 
     :return: Dictionary mapping names to igraph IDs
 
-    :raises ValueError: if the key is not either name or index 
+    :raises ValueError: if the key is not either name or index
     """
     if key == 'pmid':
         return {v['pmid']:v.index for v in graph.vs}
+    elif key == 'name':
+        return {v['name']:v.index for v in graph.vs}
     elif key == 'index':
         return {v.index:v['pmid'] for v in graph.vs}
     else:
         raise ValueError("Not a valid key")
 
 
-def get_graph_edge_weight(graph: igraph.Graph, edge: tuple) -> float:
+def get_graph_edge_weight(graph: igraph.Graph,
+                        edge: tuple,
+                        id_dict: dict,
+                        key: str = 'pmid',
+                        transform: Optional[str] = None,
+                        age_adjustment: bool = False,
+                        degree_adjustment: bool = False) -> Union[float, None]:
     """
-    Retrieves the weight of an edge between a pair of nodes. 
+    Retrieves and optionally adjusts the weight of an edge between two nodes in a graph.
 
-    :param graph: igraph.Graph object with weighted edges
-    :param edge: A tuple of node names
+    :param graph: igraph.Graph object representing the graph with weighted edges.
+    :param edge: Tuple containing the identifiers (e.g., node names or PMIDs) of
+        the two nodes forming the edge.
+    :param id_dict: Dictionary mapping node identifiers to their corresponding
+        indices in the graph.
+    :param key: String specifying the attribute key used to identify nodes in
+        the graph. Default is 'pmid'.
+    :param transform: Optional string specifying a transformation to apply to
+        the edge weight (e.g., "log" or "sqrt"). Default is None.
+    :param age_adjustment: Boolean indicating whether to adjust the weight based
+        on the age of the nodes. Default is False.
+    :param degree_adjustment: Boolean indicating whether to adjust the weight
+        based on the degree of the nodes. Default is False.
 
-    :return: A float representing the weight of a graph
+    :return: Float representing the (possibly adjusted and transformed) weight of
+        the edge in the graph.
+        Returns None if the nodes do not exist in the graph. Returns 0.0 if the
+        edge does not exist in the graph.
+
+    :raises KeyError: If node identifiers in the edge are not found in the id_dict.
+    :raises ValueError: If the edge cannot be found in the graph.
     """
 
-    id_dict = get_node_ids(graph) # TODO: cnat regen this every time. Move out? 
 
-    if edge[0] not in graph.vs['pmid'] or edge[1] not in graph.vs['pmid']:
-        return None # if either node is not in the graph, then the weight is None
+    if edge[0] not in graph.vs[key] or edge[1] not in graph.vs[key]:
+        return None # If either node is not in the graph, the weight is None
     try:
         source = edge[0]
         target = edge[1]
         weight = graph.es.find(_between=((id_dict[source],), (id_dict[target],)))['weight']
-    except:
-        weight = 0.0 # if node are in the graph but they are not connected, then the weight of an edge between them is None
+    except (KeyError, ValueError):
+        weight = 0.0  # If nodes are in the graph but not connected, the weight between them is 0
+
+    # Transform
+    if transform:
+        weight = transform_weight(weight=weight, transform = transform)
+
+    # Adjust
+    if age_adjustment:
+        weight = age_adjust_weight(edge=edge, weight=weight, graph=graph)
+    if degree_adjustment:
+        weight = degree_adjust_weight(edge=edge, weight=weight, graph=graph, id_dict=id_dict)
 
     return float(weight)
 
+def calculate_desirability(score: float,
+                           thresholds: Tuple[int, int],
+                           inverted:bool = False,
+                           transform: bool = True,
+                           steepness: float = 10.0,
+                           midpoint: float = 0.2) -> float:
+    """
+    Calculates the desirability score of a given score based on specified upper and lower
+        thresholds and a steepness parameter.
+
+    :param score: The score for which the desirability score is to be calculated.
+    :param thresholds: A tuple containing two integers, representing the lower and upper
+        bounds of the desirability range.
+    :param steepness: A float controlling how rapidly the desirability increases. Higher
+        values increase steepness.
+    :param midpoint: A float determining where the rapid increase starts. Should be
+        between 0 and 1.
+
+    :return: A float representing the desirability score. Returns 0 if the score is below
+        the lower threshold, 1 if the score is above or equal to the upper threshold, and
+        a value between 0 and 1 if the score is within the range, scaled according to the
+        steepness and midpoint.
+    """
+    bottom, top = thresholds
+
+    if inverted:
+        score = top - score
+
+    if score < bottom:
+        return 0
+    elif score >= top:
+        return 1
+    else:
+        normalised_score = (score - bottom) / (top - bottom)
+        if transform:
+            # Sigmoid function with an adjustable midpoint, for high resolution in the beginnning
+            return round(1 / (1 + math.exp(-steepness * (normalised_score - midpoint))), 2)
+        return normalised_score
+
+
 # Tool level metric
 
-def tool_average_sum(graph: igraph.Graph, workflow: list) -> float:
+def tool_average_sum(graph: igraph.Graph,
+                     workflow: dict,
+                     aggregation_method: str = "sum",
+                     transform: Optional[str] = None,
+                     age_adjustment: bool = False,
+                     degree_adjustment: bool = False,
+                     workflow_lvl_metric:str="workflow_average") -> float:
     """
-    Calculates the sum (or average if normalised) of edge weights per tool within a workflow.
+    Calculates the sum or average of edge weights per tool within a workflow.
 
-    :param graph: An igraph.Graph co-citation graph.
-    :param workflow: Dictionary with data about the workflow. # TODO reference a certain schema used for this 
-    
+    :param graph: igraph.Graph object representing a co-citation graph.
+    :param workflow: Dictionary containing workflow data. # TODO: Reference the specific schema used for this.
+    :param aggregation_method: String specifying the method for aggregating edge weights.
+        Options are "sum" or "product". Default is "sum".
+    :param transform: Optional string specifying a transformation to apply to edge weights
+        (e.g., "log" or "sqrt"). Default is None.
+    :param age_adjustment: Boolean indicating whether to adjust edge weights based on the
+        age of the nodes. Default is False.
+    :param degree_adjustment: Boolean indicating whether to adjust edge weights based on
+        the degree of the nodes. Default is False.
 
-    :return: Dictionary of the tool level metric score for each step
+    :return: Dictionary where keys are workflow steps and values are the aggregated metric
+        scores for each step.
+
+    :raises ValueError: If the workflow is empty or if an invalid aggregation method is provided.
     """
+
+    if workflow_lvl_metric == 'workflow_average':
+        workflow_score = workflow_average(graph=graph, workflow=workflow)
+    else:
+        workflow_score = complete_average(graph=graph, workflow=workflow)
+
+    workflow_desirability = calculate_desirability(score=workflow_score, thresholds=[0, 400])
 
     steps = list(workflow['steps'].keys())
     edges = workflow['edges']
 
     if not edges: # If it is an empty workflow
         return {}
+    if len(edges) == 1:
+        return {steps[0]: 1*workflow_desirability, steps[1]:1*workflow_desirability}
 
-    step_scores ={}
-    for step in steps: 
+    id_dict = get_node_ids(graph)
+
+    step_scores = {}
+    for step in steps:
         score = []
         for edge in edges:
             if step in edge:
-                pmid_source = next(pmid for step_id, pmid in workflow['steps'].items() if step_id == edge[0] )
-                pmid_target = next(pmid for step_id, pmid in workflow['steps'].items() if step_id == edge[1] )
+                pmid_source = next(
+                    pmid
+                    for step_id, pmid in workflow['steps'].items()
+                    if step_id == edge[0]
+                )
 
-                score.append( get_graph_edge_weight(graph, edge = (pmid_source, pmid_target) ) )
+                pmid_target = next(
+                    pmid
+                    for step_id, pmid in workflow['steps'].items()
+                    if step_id == edge[1]
+                )
+                edge = (pmid_source, pmid_target)
+                weight = get_graph_edge_weight(
+                            graph=graph,
+                            edge=edge,
+                            id_dict=id_dict,
+                            transform=transform,
+                            age_adjustment=age_adjustment,
+                            degree_adjustment=degree_adjustment
+                        ) or 0.0
+
+                score.append(weight)
         if score:
-            step_scores[step] = sum(score)/len(score) 
+            if aggregation_method == "sum":
+                step_scores[step] = round(float(sum(score)/len(score))*workflow_desirability, 2)
+            if aggregation_method == "product":
+                nonzero_scores = [w for w in score if w!=0]  #only use nonzero weights
+                if nonzero_scores:
+                    step_scores[step] = round(
+                        float(np.prod(nonzero_scores) / len(score)) * workflow_desirability,
+                        2
+                    )
+                return 0.0  # If there are no weights
         else:
             step_scores[step] = 0
 
     return step_scores
 
-# Workflow level metric
-def workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
+# Workflow level metrics
+def shortest_path(graph: igraph.Graph, workflow: list, weighted: bool = True) -> dict:
     """
-    Calculates the sum (or average if normalised) of edge weights within a workflow.
+    Computes shortest paths between each pair of nodes that have an edge in the workflow.
 
     :param graph: An igraph.Graph co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    
+    :param weighted: Boolean indicating whether to compute weighted shortest paths
+        (True) or unweighted (False).
 
-    :return: Float value of the average sum metric calculated on the edges of the workflow.
+    :return: Dictionary where keys are node pairs and values are shortest path distances.
+    """
+    if not workflow:
+        return 0
+
+    id_dict = get_node_ids(graph)
+
+    distances = []
+
+    for edge in workflow:
+        u, v = edge
+
+        u_index = id_dict.get(u, None)
+        v_index = id_dict.get(v, None)
+
+        if not u_index or not v_index:
+            distances.append(10)
+            continue
+
+        if weighted:
+            path_length = graph.get_shortest_paths(u_index,
+                                                   to=v_index,
+                                                   weights=graph.es["inverted_weight"],
+                                                   output="epath") or 10
+        else:
+            path_length = graph.get_shortest_paths(u_index, to=v_index, output="epath")
+        distances.append(len(path_length[0]))
+
+    avg_distance = sum(distances)/len(workflow)
+    return 1/avg_distance if avg_distance != 0 else 0
+
+def workflow_average(graph: igraph.Graph,
+                     workflow: Union[list, dict],
+                     aggregation_method: str = "sum",
+                     transform: Optional[str] = None,
+                     age_adjustment: bool = False,
+                     degree_adjustment: bool = False) -> float:
+    """
+    Calculates the sum or average of edge weights within a workflow.
+
+    :param graph: igraph.Graph object representing a co-citation graph.
+    :param workflow: List of edges (tuples of tool PMIDs) or a dictionary containing workflow data
+        with a 'pmid_edges' key.
+    :param aggregation_method: String specifying the method for aggregating edge weights. Options
+        are "sum" or "product". Default is "sum".
+    :param transform: Optional string specifying a transformation to apply to edge weights
+        (e.g., "log" or "sqrt"). Default is None.
+    :param age_adjustment: Boolean indicating whether to adjust edge weights based on the age of
+        the nodes. Default is False.
+    :param degree_adjustment: Boolean indicating whether to adjust edge weights based on the degree
+        of the nodes. Default is False.
+
+    :return: Float value representing the average or aggregated sum of edge weights within the
+        workflow. 
+             Returns 0 if the workflow is empty or if there are no weights.
     """
 
     if not workflow: # if there are no edges
-        return 0 
+        return 0
 
-    aggregated_weight = 0
+    if isinstance(workflow, dict):
+        workflow = workflow['pmid_edges']
+
+    # Get a mapping to the igraph ids
+    id_dict = get_node_ids(graph)
+
+    aggregated_weight = []
     for edge in workflow:
-        weight = get_graph_edge_weight(graph, edge) or 0
-        aggregated_weight += weight
+        weight = get_graph_edge_weight(
+                    graph=graph,
+                    edge=edge,
+                    id_dict=id_dict,
+                    transform=transform,
+                    age_adjustment=age_adjustment,
+                    degree_adjustment=degree_adjustment
+                ) or 0.0  
+        aggregated_weight.append(weight)
 
-    return round(float(aggregated_weight/len(workflow) ), 3)
+    if aggregation_method == "sum":
+        return round(float(sum(aggregated_weight)/len(workflow)), 2)
+    if aggregation_method == "product":
+        nonzero_weights = [w for w in aggregated_weight if w!=0]  #only use nonzero weights
+        if nonzero_weights:
+            score =  np.prod(nonzero_weights) / len(workflow)
+            return round(float(score), 2)
+        return 0.0  # If there are no weights
 
-def connectivity(graph: igraph.Graph, workflow: list) -> float: # obs the repeated workflows will have a disadvantage because there is no edge between them which defaults to 0. This must be adjusted for in the devision of edges! TODO
+def complete_average(graph: igraph.Graph,
+                    workflow: Union[dict,list],
+                    factor: int = 4,
+                    aggregation_method: str = "sum",
+                    transform: Optional[str] = None,
+                    age_adjustment: bool = False,
+                    degree_adjustment: bool = False) -> float:
+    # obs the repeated workflows will have a disadvantage because there is no edge between them which defaults to 0. This must be adjusted for in the devision of edges! TODO
     """
     Calculates the sum of the edge weights between all possible pairs of tools in a workflow.
     Named after the degree of connectivity - how close it is to being a complete graph - though this is weighted.
 
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: Dictionary representing the workflow. TODO reference schema
-    
+    :param graph: igraph.Graph object representing a co-citation graph.
+    :param workflow: List of edges (tuples of tool PMIDs) or a dictionary containing workflow data TODO ref schema
+        with a 'pmid_edges' key.
+    :param aggregation_method: String specifying the method for aggregating edge weights. Options
+        are "sum" or "product". Default is "sum".
+    :param transform: Optional string specifying a transformation to apply to edge weights
+        (e.g., "log" or "sqrt"). Default is None.
+    :param age_adjustment: Boolean indicating whether to adjust edge weights based on the age of
+        the nodes. Default is False.
+    :param degree_adjustment: Boolean indicating whether to adjust edge weights based on the degree
+        of the nodes. Default is False.
 
-    :return: Float value of the logarithmic product metric.
-    """   
+    :return: Float value representing the average or aggregated sum of edge weights within the
+        workflow. 
+             Returns 0 if the workflow is empty or if there are no weights.
+    """
 
-    step_dict = list(workflow['steps'].items())
-    nr_steps = len(step_dict)
+    if isinstance(workflow, dict):
+        step_names = list(workflow['steps'].keys())
+        edges = workflow['edges']
+    elif isinstance(workflow, list):
+        step_names = list(set(element for tup in workflow for element in tup))
+        edges = workflow
 
-    print(step_dict, nr_steps)
-
-    if nr_steps == 0:
+    nr_steps = len(step_names)
+    nr_edges = len(edges)
+    if nr_edges <1: # if there is only one tool there can be no edges
         return 0.0
-
-    total_weight = 0.0
+    workflow_graph =  igraph.Graph.TupleList(edges, directed=False, weights=False)
+    workflow_id_dict = get_node_ids(workflow_graph, key='name')
+    full_graph_id_dict = get_node_ids(graph)
+    
+    aggregated_weight = []
     for i in range( nr_steps ):
         for j in range(i + 1, nr_steps ):
-            print(step_dict[i][1], step_dict[j][1])
-            weight = get_graph_edge_weight(graph, (step_dict[i][1], step_dict[j][1])) or 0.0
-            print(weight)
-            total_weight += weight 
+            if isinstance(workflow, dict):
+                edge = (workflow['steps'][step_names[i]], workflow['steps'][step_names[j]])
+            else:
+                edge = (step_names[i], step_names[j])
+            weight = get_graph_edge_weight(
+                graph=graph,
+                edge=edge,
+                id_dict=full_graph_id_dict,
+                transform=transform,
+                age_adjustment=age_adjustment,
+                degree_adjustment=degree_adjustment
+            ) or 0.0
+            u_index = workflow_id_dict.get(step_names[i], None)
+            v_index = workflow_id_dict.get(step_names[j], None)
+            
+            path = workflow_graph.get_shortest_paths(u_index, to=v_index, output="epath") or None # if there is none then sth is wrong
+            path_length= len(path[0])
+            normalised_weight = weight / factor**(float(path_length)-1) if path_length else 0
+            aggregated_weight.append(normalised_weight)
 
-    nr_possible_edges = nr_steps * (nr_steps - 1) // 2
-
-    return total_weight/nr_possible_edges
-
-def workflow_weighted_connectivity(graph: igraph.Graph, workflow: dict, factor:float = 1.0):
-    """
-    Combination metric of the sum_metric() and complete_tree() metrics, where the edges in the workflow are given more (or less, but I would not recommend that) importance.
-
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: Dictionary representing the workflow. TODO schema
-    :param factor: Float value specifying how much extra weight the edges that are in the workflow are given relative to the rest of the edges between nodes.
-        A factor of 0 gives no extra weight to the workflow edges and thus will give the same value as the regular complete_tree() metric. 
-
-    :return: Float value of the complete three and sum combination metric.
-    """   
-    pmid_workflow = workflow['pmid_edges'] 
-    workflow_edge_score = workflow_average_sum(graph, pmid_workflow)
-    all_possible_edges_score = connectivity(graph, workflow)
-
-    none_workflow_edges_score = all_possible_edges_score - workflow_edge_score
-
-    workflow_weighted_score = none_workflow_edges_score + workflow_edge_score * factor
-    return float( workflow_weighted_score )
-
-def transformed_workflow_average_sum(graph: igraph.Graph, workflow: List[tuple], transform: str = "log") -> float:
-    """
-    Calculates the average sum of the logarithm of edge weights.
-
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-
-    :return: Float value of the log sum metric.
-    """
-    if not workflow: # If workflow is an empty list
-        return 0.0 
-
-    aggregated_weight = 0.0
-    for edge in workflow:
-        weight = get_graph_edge_weight(graph, edge) or 0.0
-        if transform == "log":
-            aggregated_weight += math.log(weight + 1)  # Log of weight + 1 to avoid -inf
-        elif transform == "sqrt":
-            aggregated_weight += math.sqrt(weight)
-        else:
-            raise ValueError(f"Unsupported transformation: {transform}")
-
-    return round(float( aggregated_weight / len(workflow) ), 3)
-
-
-def degree_workflow_average_sum(graph: igraph.Graph, workflow: list) -> float:
-    """
-    'Normalises' edge weights by the average degree of the nodes and sums them up.
-
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    
-
-    :return: Float value of the degree-normalised sum metric.
-    """
-
-    if not workflow: # If workflow is an empty list
-        return 0 
-    
-    aggregated_weight = 0
-    id_dict = get_node_ids(graph)
-    for edge in workflow:
-        if edge[0] not in graph.vs['pmid'] or edge[1] not in graph.vs['pmid']: # igraph attribute "name" stores the pmids
-            continue
-
-        edge_weight = get_graph_edge_weight(graph, edge)
-        if edge_weight is None: # skip the rest of the calculations
-            continue
-        print(edge_weight)
-        source_degree = graph.vs[id_dict[edge[0]]].degree()
-        target_degree = graph.vs[id_dict[edge[1]]].degree()
-
-        avg_degree = np.mean([source_degree, target_degree])
-
-        print(avg_degree, source_degree, target_degree)
-
-        normalised_edge_weight = edge_weight / avg_degree
-        print(normalised_edge_weight)
-        aggregated_weight += normalised_edge_weight
-
-    return round(float(aggregated_weight/len(workflow) ), 3)
-
-def workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
-    """
-    Calculates the product of edge weights in a workflow
-
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    
-
-    :return: Float value of the product metric .
-    """    
-    if not workflow: # If workflow is an empty list
-        return 0.0 
-    
-    weights = []
-    
-    for edge in workflow:
-        weight = get_graph_edge_weight(graph, edge) or 0.0
-        weights.append(weight)
-
-    nonzero_weights = [w for w in weights if w!=0]  #only use nonzero weights
-    if nonzero_weights:
-        score =  np.prod(nonzero_weights) / len(workflow) 
-        return round(float(score), 3)
-    else:
-        return 0.0  # If there are no weights
-    
-
-def log_workflow_edge_product(graph: igraph.Graph, workflow: list) -> float:
-    """ 
-    Calculates the product of the logarithm of the edge weights in a workflow
-
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    
-
-    :return: Float value of the logarithmic product metric.
-    """
-    if not workflow: # If workflow is an empty list
-        return 0.0 
-    
-    weights = []
-    for edge in workflow:
-        weight = get_graph_edge_weight(graph, edge) or 0.0
-
-        weights.append( math.log( weight + 1)) # adding 1 to avoid - inf
-
-    nonzero_weights = [w for w in weights if w!=0]  #only use nonzero weights
-    if nonzero_weights:
-        score =  np.prod(nonzero_weights) / len(workflow) 
-        return round(float(score), 3)
-    else:
+    if aggregation_method == "sum":
+        return round(float(sum(aggregated_weight)/nr_edges), 2)
+    if aggregation_method == "product":
+        nonzero_weights = [w for w in aggregated_weight if w!=0]  #only use nonzero weights
+        if nonzero_weights:
+            score =  np.prod(nonzero_weights) /nr_edges
+            return round(float(score), 2)
         return 0.0  # If there are no weights
 
-
-def workflow_average_sum_age(graph: igraph.Graph, workflow: list, default_age: int = 100) -> float: # no recorded age will ruin this. 100 too big. Might use global average age instead?
+def transform_weight(weight: int, transform: str) -> float:
     """
-    Normalises edge weights by the average ages of the nodes and sums them up.
+    Applies a mathematical transformation to the given weight.
+
+    :param weight: Integer value representing the weight to be transformed.
+    :param transform: String specifying the transformation to apply. 
+        Options include "log" for logarithmic transformation and "sqrt" for
+        square root transformation.
+    :return: Transformed weight as a float.
+    :raises ValueError: If an invalid transformation option is provided.
+    """
+    if transform == "log":
+        return math.log(weight + 1)  # Log of weight + 1 to avoid -inf    
+    elif transform == "sqrt":
+        return math.sqrt(weight)
+    else:
+        raise ValueError("Invalid transformation option")
+
+def degree_adjust_weight(edge: tuple, weight, graph: igraph.Graph, id_dict: dict) -> float:
+    """
+    Adjusts the weight of an edge based on the average degree of its connected nodes.
+
+    :param edge: Tuple representing the edge (source, target).
+    :param weight: Float value of the initial weight of the edge.
+    :param graph: An igraph.Graph object representing the graph.
+    :param id_dict: Dictionary mapping node identifiers to their indices in the graph.
+    :return: Weight adjusted by the average degree of the connected nodes.
+    """
+    source_degree = graph.vs[id_dict[edge[0]]].degree()
+    target_degree = graph.vs[id_dict[edge[1]]].degree()
+
+    min_degree = max(1, min([source_degree, target_degree]))
+    return weight / min_degree
+
+def age_adjust_weight(edge: tuple,
+                      weight: float,
+                      graph: igraph.Graph,
+                      default_age = 10,
+                      key: str = 'pmid') -> float:
+    """
+    Adjusts the weight of an edge based on the age of its connected nodes.
+
+    :param edge: Tuple representing the edge (source, target).
+    :param weight: Float value of the initial weight of the edge.
+    :param graph: An igraph.Graph object representing the graph.
+    :param default_age: Integer value representing the default age to use if node age
+        is not found. Default is 10.
+    :param key: String specifying the attribute key to look up node age in the graph.
+        Default is 'pmid'.
+    :return: Weight adjusted by the minimum age of the connected nodes.
+    """
+
+    source_age = next((vs['age'] for vs in graph.vs if vs[key] == edge[0]), default_age)
+    target_age = next((vs['age'] for vs in graph.vs if vs[key] == edge[1]), default_age)
+    min_age = max(1, min([source_age, target_age]))
+    return weight / min_age
+
+def citation_adjusted_weight(edge: tuple,
+                            weight: float,
+                            graph: igraph.Graph,
+                            default_nr_citations = 100,
+                            key: str = 'pmid') -> float:
+    """
+    Adjusts the weight of an edge based on the number of citations of its connected nodes.
+
+    :param edge: Tuple representing the edge (source, target).
+    :param weight: Float value of the initial weight of the edge.
+    :param graph: An igraph.Graph object representing the graph.
+    :param default_nr_citations: Integer value representing the default number of citations
+        to use if node citation count is not found. Default is 100.
+    :param key: String specifying the attribute key to look up node citation count in the
+        graph. Default is 'pmid'.
+    :return: Weight adjusted by the minimum citation count of the connected nodes.
+    """
+
+    source_citations = next((vs['nr_citations']
+                             for vs in graph.vs
+                             if vs[key] == edge[0]),
+                             default_nr_citations)
+    target_citations = next((vs['nr_citations']
+                             for vs in graph.vs
+                             if vs[key] == edge[1]),
+                             default_nr_citations)
+
+    min_citations = max(1, min([source_citations, target_citations]))
+
+    return weight / min_citations 
+
+def median_citations(graph: igraph.Graph,
+                     workflow:Union[dict,list],
+                     default_nr_citations: int = 0) -> int:
+    """
+    Simply returns the median number citations of all of the primary publications 
+        of tools in the workflow.
 
     :param graph: An igraph.Graph object representing the co-citation graph.
     :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param default_age: An int representing the value one would like to use for tools that dont have a recorded age
-    
-
-    :return: Float value of the age-normalised sum metric.
-
-    """
-    if not workflow: # If workflow is an empty list
-        return 0 
-    aggregated_weight = 0
-    for edge in workflow:
-        if edge[0] not in graph.vs['pmid'] or edge[1] not in graph.vs['pmid']: # igraph attribute "name" stores the pmids
-            continue
-
-        edge_weight = get_graph_edge_weight(graph, edge)
-        if edge_weight is None: # skip the rest of the calculations
-            continue
-
-        source_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == edge[0]), default_age)
-        target_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == edge[1]), default_age)
-
-        avg_age = np.mean([source_age, target_age]) 
-
-        normalised_edge_weight = edge_weight / avg_age # TODO: Should not necessarily devide it by age- look at the curve of the spread to see
-
-        aggregated_weight += normalised_edge_weight
-
-    return round(float(aggregated_weight/len(workflow) ), 3)
-    
-def connectivity_age(graph: igraph.Graph, workflow: dict,  default_age: int = 100):
-    """
-    Combination metric of the age_norm_sum_metric() and complete_tree() metrics, where the edges in the workflow are given more importance.
-
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: Dictionary representing the workflow. #TODO ref schema
-    :param default_age: An int representing the value one would like to use for tools that dont have a recorded age
-    
-    :return: Float value of the age-normalised complete_tree() metric.
-
-    """
-
-    step_dict = list(workflow['steps'].items())
-    nr_steps = len(step_dict)
-
-    if nr_steps == 0:
-        return 0.0
-
-    total_weight = 0
-    for i in range( nr_steps ):
-        for j in range(i + 1, nr_steps ):
-            source = step_dict[i][1]
-            target = step_dict[j][1]
-
-            weight = get_graph_edge_weight(graph, (source, target)) or 0
-
-            if weight == 0:
-                continue # skip the rest of the calculations
-
-            source_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == source), default_age)
-            target_age = next((vs['age'] for vs in graph.vs if vs['pmid'] == target), default_age)
-
-            avg_age = np.mean([source_age, target_age]) 
-
-            normalised_edge_weight = weight / avg_age 
-
-            total_weight += normalised_edge_weight
-
-    nr_possible_edges = nr_steps * (nr_steps - 1) // 2
-
-    return round(total_weight/nr_possible_edges, 3)
-
-def connectivity_min(graph: igraph.Graph, workflow: dict): 
-    """
-    The connectivity() metric which punishes single bad links. 
-
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: Dictionary representing the workflow. # TODO: schema
-    :param default_age: An int representing the value one would like to use for tools that dont have a recorded age
-   
-    :return: Float value of the bad edge penalising complete_tree() metric.
-
-    """
-
-    step_dict = list(workflow['steps'].items())
-    nr_steps = len(step_dict)
-
-    print(nr_steps)
-
-    if nr_steps == 0:
-        return 0.0
-
-    min_weight = 10_000   # larger than max nr citations
-    total_weight = 0
-    for i in range( nr_steps ):
-        for j in range(i + 1, nr_steps ):
-            weight = get_graph_edge_weight(graph, (step_dict[i][1], step_dict[j][1])) or 0
-            if 0 < weight < min_weight:
-                min_weight = weight
-            total_weight += weight 
-
-    nr_possible_edges = nr_steps * (nr_steps - 1) // 2
-    return total_weight/nr_possible_edges*min_weight 
-
-
-def connectivity_citation(graph: igraph.Graph, workflow: dict, default_nr_citations: int = 0): 
-    """
-    A variation of the connectivity() metric, where the edges are divided by the mean number of citations of the source and target.
-
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param default_nr_citations: An int representing the value one would like to use for tools that dont have a recorded citation number. 
-    
-
-    :return: Float value of the citation-normalised complete_tree() metric.
-
-    """
-
-    step_dict = list(workflow['steps'].items())
-    nr_steps = len(step_dict)
-
-    if nr_steps == 0:
-        return 0.0
-
-    total_weight = 0
-    for i in range( nr_steps ):
-        for j in range(i + 1, nr_steps ):
-            source = step_dict[i][1]
-            target = step_dict[j][1]
-
-            weight = get_graph_edge_weight(graph, (source, target)) or 0
-
-            if weight == 0:
-                continue # skip the rest of the calculations
-
-            source_citations = next((vs['nr_citations'] for vs in graph.vs if vs['pmid'] == source), default_nr_citations)
-            target_citations = next((vs['nr_citations'] for vs in graph.vs if vs['pmid'] == target), default_nr_citations)
-
-            avg_citations = np.mean([source_citations, target_citations]) 
-
-            print(avg_citations, weight)
-            normalised_edge_weight = weight / avg_citations 
-
-            total_weight += normalised_edge_weight
-
-    nr_possible_edges = nr_steps * (nr_steps - 1) // 2
-
-    print(nr_possible_edges, total_weight)
-    return round(total_weight/nr_possible_edges, 3)
-
-def citations(graph: igraph.Graph, workflow:dict, default_nr_citations: int = 0) -> int:
-    """
-    Simply returns the median number citations of all of the primary publications of tools in the workflow.
-    
-    :param graph: An igraph.Graph object representing the co-citation graph.
-    :param workflow: List of edges (tuples of tool PmIDs) representing the workflow.
-    :param default_nr_citations: An int representing the value one would like to use for tools that dont have a recorded citation number. 
+    :param default_nr_citations: An int representing the value one would like to use 
+        for tools that dont have a recorded citation number. 
 
     :return: Integer value of the median number of citations.
     
     """
-
-    steps = list(workflow['steps'].items())
+    if isinstance(workflow, dict):
+        pmids = list(workflow['steps'].values())
+    elif isinstance(workflow, list):
+        pmids = list(set(element for tup in workflow for element in tup))
+    else:
+        raise TypeError
 
     total_citations = []
-    n = len(steps)
-    
-    if n==0:
+
+    if len(pmids)==0:
         return 0
-    print(graph.vs['nr_citations'])
-    for step in steps:
-        pmid = step[1] # the values are pmids
-        citation_number = next((vs['nr_citations'] for vs in graph.vs if vs['pmid'] == pmid), default_nr_citations)
-        print(citation_number)
+
+    for pmid in pmids:
+        citation_number = next((vs['nr_citations']
+                                for vs in graph.vs
+                                if vs['pmid'] == pmid),
+                                default_nr_citations)
         if citation_number:
             total_citations.append(citation_number)
 
     if total_citations:
         return statistics.median(total_citations)
-    else: 
-        return None
-    
-
-
+    return None
