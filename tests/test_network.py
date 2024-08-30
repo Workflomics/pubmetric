@@ -1,96 +1,59 @@
-import igraph
-import numpy as np
-import json
-import os
+from collections import defaultdict
 import asyncio
-import shutil
-### Creating a test network to confirm the functions are working ###
-import igraph
-from wfqc import network as nw
+from pubmetric import network 
+import example_graph as ex_graph
 
-# Define the nodes 
-tools = ['TA', 'TB', 'TC', 'TD', # connected cluster - included in final graph 
-        # Separate cluster - included in final graph 
-         'TE', 'TF',
-        # Single disconnected cited - not included in final graph 
-         'TG', 
-        # Single disconnected not cited - not included in final graph 
-         'TH']
-
-citations = ['CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'CH', 'CI', 'CJ', 'CK', 'CL', 'CM', 'CN', 'CO', 'CP', 'CQ']
-
-
-edges = [
-
-    # Single citations of tools
-    ('CA', 'TA'), ('CB', 'TB'), ('CC', 'TC'), ('CD', 'TD'), 
-    ('CE', 'TE'), ('CF', 'TF'), ('CG', 'TG'),
-
-    # Citations to multiple tools
-    ('CJ', 'TA'), ('CJ', 'TB'),  
-    ('CK', 'TA'), ('CK', 'TB'), ('CK', 'TC'),
-    ('CL', 'TA'), ('CL', 'TB'), ('CL', 'TC'), ('CL', 'TD'), 
-    
-    # Duplicate edges
-    ('CP', 'TE'), ('CP', 'TE'),
-
-    # Tools citing each other
-    ('TB', 'TC'), 
-
-    # Tools citing themselves
-    ('TA', 'TA'),
-
-    # Disconnected cluster
-    ('CQ', 'TE'), ('CQ', 'TF'), ('CO', 'TE'),
-    ('CO', 'TF') 
-]
-
-nodes_in_final_network = ['TA', 'TB', 'TC', 'TD', 'TE', 'TF', 'CJ', 'CK', 'CL', 'CO', 'CQ' ]
-tools_in_final_network = ['TA', 'TB', 'TC', 'TD', 'TE', 'TF']
-tools_in_final_network = ['TA', 'TB', 'TC', 'TD', 'TE', 'TF']
-tool_metadata = {
-    "tools": [
-        {'name': 'TA', 'pmid': 'TA'},
-        {'name': 'TB', 'pmid': 'TB'},
-        {'name': 'TC', 'pmid': 'TC'},
-        {'name': 'TD', 'pmid': 'TD'},
-        {'name': 'TE', 'pmid': 'TE'},
-        {'name': 'TF', 'pmid': 'TF'}
-    ]
-}
-
-
-
-Graph = igraph.Graph.TupleList(edges, directed=True)
-
-
-#### TESTING ###
-
-# TODO: test on  fake data also or instead
-
-def test_testsize_citation_network(shared_datadir): 
-    filename = os.path.join(shared_datadir, "tool_metadata_test20_topic_0121_20250705.json")
-    G = nw.create_citation_network(loadData=False, testSize=20, filepath=filename) 
-    assert len(G.vs['name']) > 0 
+def test_citation_network_testsize(shared_datadir):
+    """Test creating a graph from scratch"""
+    graph = asyncio.run(network.create_network(load_graph=False,
+                                               test_size=20,
+                                               inpath=shared_datadir))
+    assert len(graph.vs['pmid']) > 0
+    assert sorted(graph.es.attributes()) == sorted(['weight',
+                                                    'inverted_weight'])
+    assert sorted(graph.vs.attributes()) == sorted(['age',
+                                                    'name',
+                                                    'pmid',
+                                                    'nr_citations',
+                                                    'degree'])  
 
 def test_load_citation_network(shared_datadir):
-    G = nw.create_citation_network(loadData=True, inpath = shared_datadir) 
-    assert len(G.vs['name']) > 0 
+    """Test loading a citation graph and extracting information from it"""
+    graph = asyncio.run(network.create_network(load_graph=True, inpath = shared_datadir))
+    assert len(graph.vs['pmid']) > 1200
+
+def test_create_cocitation_graph():
+    """Tests generating the example graph from the paper_citations dictionary"""
+    graph = network.create_cocitation_graph(paper_citations=ex_graph.paper_citations)
+    assert sorted(ex_graph.cocitation_expected_nodes) == sorted(graph.vs['name'])
+
+def test_create_cocitation_graph_sizes():
+    """Tests generating the example graph from the paper_citations dictionary,
+    using the batch creation and the simple creation for smaller graph to make sure they
+    are the same"""
+    big_graph = network.create_cocitation_graph(paper_citations=ex_graph.paper_citations)
+    small_graph = network.create_small_cocitation_graph(paper_citations=ex_graph.paper_citations)
+    assert sorted(ex_graph.cocitation_expected_nodes) == sorted(big_graph.vs['name'])
+    assert sorted(ex_graph.cocitation_expected_nodes) == sorted(small_graph.vs['name'])
+    assert big_graph.isomorphic(small_graph)
 
 
-def test_cocitation_graph():
-    incuded_tools = [tool for tool in Graph.vs['name'] if tool in tools] #could do interrsection    
-    G = nw.cocitation_graph(Graph,incuded_tools)
-    assert sorted(tools_in_final_network) == sorted(G.vs['name'])
+def test_combine_counts():
+    counts_list = [
+        {('A', 'B'): 1, ('B', 'C'): 2},
+        {('A', 'B'): 3, ('D', 'E'): 4}
+    ]
+    expected = defaultdict(int, {('A', 'B'): 4, ('B', 'C'): 2, ('D', 'E'): 4})
+    assert network.combine_counts(counts_list) == expected
 
-def test_create_graph():
-    G, included_tools, node_degree_dict = nw.create_graph(edges, tool_metadata, cocitation=False)
-    print(np.sort(nodes_in_final_network), np.sort(G.vs['name']))
-    assert sorted(nodes_in_final_network) == sorted(G.vs['name'])
-
-# need to add download data but bio.tools is down so I cant test 
-
-# def test_download_data():
-
-
-
+def test_add_attributes():
+    """Tests the attribute addition after the cocitation graph is created"""
+    no_attribute_graph = network.create_cocitation_graph(ex_graph.paper_citations)
+    attribute_graph = network.add_graph_attributes(graph=no_attribute_graph, metadata_file=ex_graph.tool_metadata)
+    assert sorted(attribute_graph.es['inverted_weight']) == sorted([0.5, 1.0, 1.0])
+    assert 'weight' in attribute_graph.es.attributes()
+    assert 'inverted_weight' in attribute_graph.es.attributes()
+    assert 'age' in attribute_graph.vs.attributes()
+    assert 'pmid' in attribute_graph.vs.attributes()
+    assert 'nr_citations' in attribute_graph.vs.attributes()
+    assert 'degree' in attribute_graph.vs.attributes()

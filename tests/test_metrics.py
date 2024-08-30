@@ -1,127 +1,77 @@
 
-import pytest
-from wfqc import network as nw
-from wfqc.metrics import *
-from wfqc.workflow import parse_cwl_workflows
-from wfqc.network import create_citation_network
-
-import igraph
-import numpy as np
-import json
+import pickle
 import os
-import asyncio
-import shutil
 import math
+from datetime import datetime
+import statistics
 
-# The network
+import example_graph as ex_graph
 
-# Define the nodes 
-tools = ['TA', 'TB', 'TC', 'TD', # connected cluster - included in final graph 
-        # Separate cluster - included in final graph 
-         'TE', 'TF',
-        # Single disconnected cited - not included in final graph 
-         'TG', 
-        # Single disconnected not cited - not included in final graph 
-         'TH']
+import pubmetric.metrics as met
+from pubmetric.workflow import parse_cwl
+from pubmetric.network import create_network
 
-citations = ['CA', 'CB', 'CC', 'CD', 'CE', 'CF', 'CG', 'CH', 'CI', 'CJ', 'CK', 'CL', 'CM', 'CN', 'CO', 'CP', 'CQ']
-
-
-edges = [
-
-    # Single citations of tools
-    ('CA', 'TA'), ('CB', 'TB'), ('CC', 'TC'), ('CD', 'TD'), 
-    ('CE', 'TE'), ('CF', 'TF'), ('CG', 'TG'),
-
-    # Citations to multiple tools
-    ('CJ', 'TA'), ('CJ', 'TB'),  
-    ('CK', 'TA'), ('CK', 'TB'), ('CK', 'TC'),
-    ('CL', 'TA'), ('CL', 'TB'), ('CL', 'TC'), ('CL', 'TD'), 
-    
-    # Duplicate edges
-    ('CP', 'TE'), ('CP', 'TE'),
-
-    # Tools citing each other
-    ('TB', 'TC'), 
-
-    # Tools citing themselves
-    ('TA', 'TA'),
-
-    # Disconnected cluster
-    ('CQ', 'TE'), ('CQ', 'TF'), ('CO', 'TE'),
-    ('CO', 'TF') 
-]
-
-nodes_in_final_network = ['TA', 'TB', 'TC', 'TD', 'TE', 'TF', 'CJ', 'CK', 'CL', 'CO', 'CQ' ]
-tools_in_final_network = ['TA', 'TB', 'TC', 'TD', 'TE', 'TF']
-expected_edge_weights = {('TA', 'TB'): 3, ('TA', 'TC'): 2, ('TA', 'TD'): 1,
-('TB', 'TC'): 3, ('TB', 'TD'): 1,
-('TC', 'TD'): 1, 
-('TE', 'TF'): 2, 
-('TE', 'TG'): None, # G not in graph
-('TA', 'TE'): 0} # both nodes in graph, but no connection
-
-
-testgraph = igraph.Graph.TupleList(edges, directed=True)
-incuded_tools = [tool for tool in testgraph.vs['name'] if tool in tools] #could do interrsection    
-test_coG = nw.cocitation_graph(testgraph,incuded_tools)
-
-
-
-def test_get_node_ids():
-    id_dict = get_node_ids(test_coG)
-    
-    assert test_coG.vs[id_dict['TA']].degree() == 3 # using id dict to get the degree of a node
-    assert test_coG.vs[id_dict['TB']].degree() == 3 
-    assert test_coG.vs[id_dict['TF']].degree() == 1 
-
-def test_get_graph_edge_weight():
-    for edge, expected_weight in expected_edge_weights.items():
-        weight = get_graph_edge_weight(test_coG, edge)
-        assert weight == expected_weight
  
-
-def test_workflow_level_average_sum():
-    test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
-    expected_scores = [2, 3]    # obs see the problem here where this metrics prefers single edged nw with good connection (msConvert to Comet for ex will always be best then)
-    for i, workflow in enumerate(test_workflows):
-        assert workflow_level_average_sum(test_coG, workflow) == expected_scores[i]
-
-def test_log_sum_metric():
-    test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
-    expected_scores = [sum([ math.log(ew) for ew in [2+1,3+1,1+1]] )/3 , math.log(3+1)]    # obs see the problem here where this metrics prefers single edged nw with good connection (msConvert to Comet for ex will always be best then)
-    for i, workflow in enumerate(test_workflows):
-        assert log_sum_metric(test_coG, workflow) == expected_scores[i]
-
-def test_degree_norm_sum_metric():
-    test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
-    expected_scores = [2/3, 1]    # obs see the problem here where this metrics prefers single edged nw with good connection (msConvert to Comet for ex will always be best then)
-    for i, workflow in enumerate(test_workflows):
-        assert degree_norm_sum_metric(test_coG, workflow) == expected_scores[i]
-
-def test_prod_metric():
-    test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
-    expected_scores = [2, 3]    # obs see the problem here where this metrics prefers single edged nw with good connection (msConvert to Comet for ex will always be best then)
-    for i, workflow in enumerate(test_workflows):
-        assert prod_metric(test_coG, workflow) == expected_scores[i]
-
-def test_logprod_metric():
-    test_workflows = [ [('TA', 'TC'), ('TC', 'TB'), ('TB', 'TD')],[('TA', 'TB')] ]
-    expected_scores = [(math.log(3+1)*math.log(2+1)*math.log(1+1)/3), math.log(3+1)]    # obs see the problem here where this metrics prefers single edged nw with good connection (msConvert to Comet for ex will always be best then)
-    for i, workflow in enumerate(test_workflows):
-        assert logprod_metric(test_coG, workflow) == round(expected_scores[i], 3)
-
-def test_complete_tree():
-    assert complete_tree(test_coG, [('TA', 'TB'), ('TA', 'TC'), ('TA', 'TD')], normalise=True) == 2.75
-    assert complete_tree(test_coG, [('TA', 'TB'), ('TA', 'TC'), ('TA', 'TD')], normalise=False) == 11
-
-
 def test_tool_level_average_sum(shared_datadir):
     cwl_filename = os.path.join(shared_datadir, "candidate_workflow_repeated_tool.cwl")
-    metadata_filename = os.path.join(shared_datadir, "tool_metadata_test20_topic_0121_20250705.json")
+    graph_path = os.path.join(shared_datadir, "graph.pkl")
+    with open(graph_path, 'rb') as f:
+        graph = pickle.load(f) 
+    workflow = parse_cwl(graph=graph , cwl_filename=cwl_filename)
+    # graph = asyncio.run(create_network(inpath=shared_datadir, test_size=20, load_graph=True))
+    tool_scores = met.tool_average_sum(graph, workflow)
+    assert list(tool_scores.keys()) == ['ProteinProphet_02', 'StPeter_04', 'XTandem_01', 'XTandem_03'] # note this only tests the format is right
+    assert tool_scores['XTandem_01'] != tool_scores['XTandem_03']
 
-    workflow = parse_cwl_workflows(cwl_filename,metadata_filename )  
-    graph = create_citation_network(inpath=shared_datadir)
+# The rest of the tests are based on the example graph
+def test_get_graph_edge_weight():
+    id_dict = met.get_node_ids(ex_graph.cocitation_graph)
+    print(ex_graph.cocitation_graph.vs['name'])
+    for edge, expected_weight in ex_graph.expected_edge_weights.items():
+        weight = met.get_graph_edge_weight(graph=ex_graph.cocitation_graph, edge=edge, id_dict=id_dict)
+        assert weight == expected_weight
 
-    tool_scores = tool_level_average_sum(graph, workflow)
-    assert list(tool_scores.keys()) == ['ProteinProphet_02', 'StPeter_04', 'XTandem_01', 'XTandem_03'] # note this only tests the format is right 
+def test_workflow_average_base():
+    # obs see the problem here where this metrics prefers single edged nw with good connection (msConvert to Comet for ex will always be best then)
+    assert met.workflow_average(graph=ex_graph.cocitation_graph, workflow=ex_graph.pmid_workflow) == (2 + 1 + 0) / 3
+    assert met.workflow_average(graph=ex_graph.cocitation_graph, workflow=[('TA', 'TB')] ) == 0/1 # not connected
+
+def test_complete_average_base():
+    score = met.complete_average(graph=ex_graph.cocitation_graph, workflow= ex_graph.dictionary_workflow)
+    assert score == round(( 2 + 1 + 2/4 + 0 + 0 + 0 ) / 3, 2)
+
+def test_sqrt_workflow_average_sum():
+    sqrt_score = met.workflow_average(graph = ex_graph.cocitation_graph, workflow=ex_graph.pmid_workflow, transform='sqrt')
+    assert sqrt_score == round(( math.sqrt(2) + math.sqrt(1) + math.sqrt(0) ) / 3, 2)
+
+def test_log_workflow_average_sum():
+    log_score = met.workflow_average(ex_graph.cocitation_graph, workflow=ex_graph.pmid_workflow, transform='log')
+    assert log_score == round((math.log(2 + 1) + math.log(1 + 1) + math.log(0 + 1)) / 3, 2)
+
+def test_degree_workflow_average_sum():
+    assert met.workflow_average(graph=ex_graph.cocitation_graph, workflow=ex_graph.pmid_workflow, degree_adjustment=True) == round((2 / min(1, 2) + 1 / min(1, 2) + 0/1 ) / 3, 2)
+
+def test_workflow_product_aggregation():
+    assert met.workflow_average(graph=ex_graph.cocitation_graph, workflow=ex_graph.pmid_workflow, aggregation_method="product") == round(2*1/3, 2) # 0 values are not included
+
+def test_log_product_aggregation():
+    assert met.workflow_average(graph=ex_graph.cocitation_graph, workflow=ex_graph.pmid_workflow, aggregation_method="product", transform='log') == round(math.log(2+1) * math.log(1+1)/3, 2) # 0 values are not included
+
+def test_workflow_average_sum_age():
+    TA_age = datetime.now().year-2015
+    TC_age = datetime.now().year-2017
+    TD_age = datetime.now().year-2018
+    score = met.workflow_average(graph=ex_graph.cocitation_graph, workflow=ex_graph.pmid_workflow, age_adjustment=True)
+    print(score)
+    assert score == round(( 2 / (min(TA_age, TC_age))  +  1 / (min(TC_age, TD_age)) ) / 3, 2)
+
+def test_complete_average_age():
+    TA_age = datetime.now().year-2015 # 9
+    TC_age = datetime.now().year-2017 # 7
+    TD_age = datetime.now().year-2018 # 6
+    score = met.complete_average(ex_graph.cocitation_graph, workflow= ex_graph.dictionary_workflow, age_adjustment=True)
+    assert score ==  round(( 2 / (min(TA_age, TC_age))  +  (2 / min(TA_age, TC_age) ) /4  + 1 / (min(TD_age, TC_age))  ) / 3, 2)
+
+def test_citations():
+    score = met.median_citations(ex_graph.cocitation_graph, workflow= ex_graph.dictionary_workflow)
+    assert score == statistics.median([1, 1, 3, 4]) # TA is counted twice. Cant argue what is more or less reasonable as it is not a reasonable metric

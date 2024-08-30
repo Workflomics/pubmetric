@@ -1,0 +1,264 @@
+{
+    "creation_date": "2024-07-03 13:23:06.173361",
+    "total_nr_tools": 1873,
+    "biotools_wo_pmid": 500,
+    "pmid_from_doi": 457,
+    "tools": [
+        {
+            "name": "xMarkerFinder",
+            "doi": "10.1038/s41596-024-00999-9",
+            "topic": "Biomarkers",
+            "nr_publications": 1,
+            "all_publications": [
+                "38745111"
+            ],
+            "publication_date": "2024",
+            "pmid": "38745111"
+        },
+        {
+            "name": "PEPMatch",
+            "doi": "10.1186/S12859-023-05606-4",
+            "topic": "Immunology",
+            "nr_publications": 1,
+            "all_publications": [
+                "38110863"
+            ],
+            "publication_date": null,
+            "pmid": "38110863"
+        },
+        {
+            "name": "ProteoWizard",
+            "doi": "10.1038/nbt.2377",
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                null
+            ],
+            "publication_date": "2012",
+            "pmid": "23051804"
+        },
+        {
+            "name": "msConvert",
+            "doi": "10.1038/nbt.2377",
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "23051804"
+            ],
+            "publication_date": "2012",
+            "pmid": "23051804"
+        },
+        {
+            "name": "Comet",
+            "doi": "10.1002/pmic.201200439",
+            "topic": "Proteomics",
+            "nr_publications": 2,
+            "all_publications": [
+                null,
+                null
+            ],
+            "publication_date": "2013",
+            "pmid": "23148064"
+        },
+        {
+            "name": "FlexStat",
+            "doi": "10.1093/bioadv/vbae056",
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "38681522"
+            ],
+            "publication_date": "2024",
+            "pmid": "38681522"
+        },
+        {
+            "name": "CLIPPER 2.0",
+            "doi": "10.1016/j.mcpro.2024.100781",
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "38703894"
+            ],
+            "publication_date": null,
+            "pmid": "38703894"
+        },
+        {
+            "name": "OmicNavigator",
+            "doi": "10.1186/s12859-024-05743-4",
+            "topic": "Metabolomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "38658834"
+            ],
+            "publication_date": "2024",
+            "pmid": "38658834"
+        },
+        {
+            "name": "CLAUDIO",
+            "doi": "10.1093/bioinformatics/btae146",
+            "topic": "Small molecules",
+            "nr_publications": 1,
+            "all_publications": [
+                "38498849"
+            ],
+            "publication_date": null,
+            "pmid": "38498849"
+        },
+        {
+            "name": "SperMD",
+            "doi": "10.1186/s12859-024-05631-x",
+            "topic": "Metabolomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "38233783"
+            ],
+            "publication_date": null,
+            "pmid": "38233783"
+        },
+        {
+            "name": "shinyExprPortal",
+            "doi": "10.1093/bioinformatics/btae172",
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "38552327"
+            ],
+            "publication_date": null,
+            "pmid": "38552327"
+        },
+        {
+            "name": "DDK-Linker",
+            "doi": "10.1093/bib/bbae111",
+            "topic": "Pathology",
+            "nr_publications": 1,
+            "all_publications": [
+                "38517698"
+            ],
+            "publication_date": "2024",
+            "pmid": "38517698"
+        },
+        {
+            "name": "Bento",
+            "doi": "10.1186/s13059-024-03217-7",
+            "topic": "Transcriptomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "38566187"
+            ],
+            "publication_date": "2024",
+            "pmid": "38566187"
+        },
+        {
+            "name": "hybrid-DIA",
+            "doi": "10.1038/s41467-023-39347-y",
+            "topic": "Proteomics experiment",
+            "nr_publications": 1,
+            "all_publications": [
+                "37328457"
+            ],
+            "publication_date": "2023",
+            "pmid": "37328457"
+        },
+        {
+            "name": "DEGRONOPEDIA",
+            "doi": "10.1093/nar/gkae238",
+            "topic": "Protein modifications",
+            "nr_publications": 1,
+            "all_publications": [
+                "38567734"
+            ],
+            "publication_date": "2024",
+            "pmid": "38567734"
+        },
+        {
+            "name": "MASSef",
+            "doi": "10.1016/j.mec.2024.e00234",
+            "topic": "Enzymes",
+            "nr_publications": 1,
+            "all_publications": [
+                "38711578"
+            ],
+            "publication_date": null,
+            "pmid": "38711578"
+        },
+        {
+            "name": "kmerDB",
+            "doi": "10.1016/j.csbj.2024.04.050",
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "38711760"
+            ],
+            "publication_date": null,
+            "pmid": "38711760"
+        },
+        {
+            "name": "MS Amanda",
+            "doi": "10.1021/pr500202e",
+            "topic": "Proteomics",
+            "nr_publications": 3,
+            "all_publications": [
+                "24909410",
+                "33759252",
+                "29863353"
+            ],
+            "publication_date": "2014",
+            "pmid": "24909410"
+        },
+        {
+            "name": "Tandem2XML",
+            "doi": "10.1002/prca.201400164",
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "25631240"
+            ],
+            "publication_date": null,
+            "pmid": "25631240"
+        },
+        {
+            "name": "ProteinProphet",
+            "doi": null,
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "14632076"
+            ],
+            "publication_date": null,
+            "pmid": "14632076"
+        },
+        {
+            "name": "PeptideProphet",
+            "doi": null,
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "12403597"
+            ],
+            "publication_date": "2002",
+            "pmid": "12403597"
+        },
+        {
+            "name": "XTandem",
+            "doi": "10.1093/bioinformatics/bth092",
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                null
+            ],
+            "publication_date": "2004",
+            "pmid": "14976030"
+        },
+        {
+            "name": "StPeter",
+            "doi": "10.1021/acs.jproteome.7b00786",
+            "topic": "Proteomics",
+            "nr_publications": 1,
+            "all_publications": [
+                "29400476"
+            ],
+            "publication_date": "2018",
+            "pmid": "29400476"
+        }
+
+        ]}

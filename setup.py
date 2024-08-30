@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='wfqc',
+    name='pubmetric',
     version='0.1.0',
     description='Cocitation based metric for workflow evaluation',
-    author='Alma Nilsson',
-    author_email='your.email@example.com',
+    author='Alma Nilsson, Vedran Kasalica, Magnus Palmblad ',
+    author_email='alma.as.nilsson@gmail.com',
     license='Apache License 2.0',
     packages=find_packages(),
     install_requires=[
@@ -21,7 +21,9 @@ setup(
         'jsonpath-ng',
         'ruamel.yaml',
         'cwl_utils',
-        'fastapi'
+        'fastapi',
+        'scikit-learn',
+        'apscheduler'
     ],
     extras_require={
         'test': [
