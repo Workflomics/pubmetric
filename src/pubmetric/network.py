@@ -19,6 +19,35 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src'))) #TODO this
 import pubmetric.data
 import pubmetric.log
 
+def parse_domain_annotations(tools: list, annotations: str = "full") -> list:
+    """
+    Downloads a JSON file containing domain annotations from workflomics repository.
+
+    This function retrieves the JSON file from the provided URL, parses the JSON content,
+    and extracts the 'label' (name) for each tool to pick out only the tools in the metadatafile
+    within the specified domain.
+
+    :param tools: A list of the tools already downloaded from bio.tools.
+    :param annotations: A label for which pregenerated domain annotation set that should be 
+        downloaded. 
+
+    :return: A set of tool names bio.tools domain annotaion JSON file.
+             Returns None if the file could not be retrieved.
+    """
+    if annotations == "full":
+        annotation_path = "domain_annotations/bio.tools_full.json"
+    elif annotations == "workflomics":
+        annotation_path = "domain_annotations/bio.tools_workflomics.json"
+    else:
+        raise TypeError("Invalid type for tool_selection string, expected 'full' or 'workflomics'.")    
+
+    with open(annotation_path, 'r', encoding='utf-8') as f:
+        dommain_annotations = json.load(f)
+    
+    tool_selection = list({tool['label'] for tool in dommain_annotations["functions"]})
+
+    return [tool for tool in tools if tool['name'] in tool_selection]
+
 def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
     """
     Adds attributes to the vertices and edges of the graph using metadata.
@@ -191,9 +220,16 @@ async def create_network(outpath: Optional[str] = None,
         will be saved. If not provided, a timestamped directory will be created in
         the current working directory.
     :param save_files: Determines if the newly generated graph is saved.
+    :param tool_selection: A specific selection of tools, should be used with topic_ID == None 
+        unless the tools are known to be within the specified topic. The selection can be 
+        made using premade collections "full" which contains all well annotated tools in
+        bio.tools, or "workflomics" which contains all tools currently in workflomics.
+        The selection can also be made by providing a list of tool names, in the format of
+        bio.tools tool names. 
 
     :raises FileNotFoundError: If no inpath is given despite asking to load.
     :raises FileNotFoundError: If input directory is not found
+    :raises: ValueError: If none of the tools specified using tool_selection are found.  
 
     :return: The citation network graph created using igraph.
     """
@@ -232,7 +268,7 @@ async def create_network(outpath: Optional[str] = None,
         if tool_selection:
             if tool_selection == "full":
                 selected_tools = pubmetric.data.download_domain_annotations(
-                                                                annotations="full", 
+                                                                annotations="full",
                                                                 tools=metadata_file["tools"])
                 if not selected_tools:
                     raise ValueError("No tools were downloaded; please check the download source.")
@@ -242,7 +278,8 @@ async def create_network(outpath: Optional[str] = None,
                                                                 tools=metadata_file["tools"])
                 if not selected_tools:
                     raise ValueError("No tools were downloaded; please check the download source.")
-            elif isinstance(tool_selection, (list, set)):
+            elif isinstance(tool_selection, list):
+                # can potentially put pmid as an option for input here too
                 selected_tools = [tool
                                   for tool in metadata_file['tools']
                                   if tool['name'] in tool_selection]

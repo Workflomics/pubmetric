@@ -1,5 +1,9 @@
 from collections import defaultdict
+import os
+
+import json
 import asyncio
+
 from pubmetric import network 
 import example_graph as ex_graph
 
@@ -57,3 +61,29 @@ def test_add_attributes():
     assert 'pmid' in attribute_graph.vs.attributes()
     assert 'nr_citations' in attribute_graph.vs.attributes()
     assert 'degree' in attribute_graph.vs.attributes()
+
+
+def test_parse_domain_annotations(shared_datadir):
+    """Tests if annotation fiels are parsed correctly"""
+    # commented tools are not downloaded from bio.tools, or are not in dom. ann.
+    # Former indicates there is no pmid linked to them, or somethign went wrong
+    workflomics_tools = ["Comet",
+    "PeptideProphet",
+    "ProteinProphet",
+    "StPeter",
+    "mzRecal",
+    # "idconvert", # not in domain annotations
+    "msConvert",
+    # "GOEnrichment",
+    # "gProfiler",
+    "XTandem",
+    # "protXml2IdList",
+    # "ms_amanda",
+    # "msfragger" # not in domain annotations
+    ]
+    with open(os.path.join(shared_datadir, "tool_metadata_test20.json"), "r", encoding='utf-8') as f:
+        metadata_file = json.load(f)
+    
+    selected_tools = network.parse_domain_annotations(metadata_file['tools'], 'workflomics')
+
+    assert sorted([tool['name'] for tool in selected_tools]) == sorted(workflomics_tools)

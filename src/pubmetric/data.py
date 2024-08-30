@@ -18,33 +18,6 @@ from .exceptions import SchemaValidationError
 import pubmetric.log
 
 
-def download_domain_annotations(tools: list, annotations: str = "full") -> list:
-    """
-    Downloads a JSON file containing domain annotations from workflomics repository.
-
-    This function retrieves the JSON file from the provided URL, parses the JSON content,
-    and extracts the 'label' (name) for each tool to pick out only the tools in the metadatafile
-    within the specified domain.
-
-    :return: A set of tool names bio.tools domain annotaion JSON file.
-             Returns None if the file could not be retrieved.
-    """
-    if annotations == "full":
-        url = "https://raw.githubusercontent.com/Workflomics/domain-annotations/main/genomics/bio.tools.json" # TODO move this into won repo 
-    elif annotations == "workflomics":
-        url = "path/to/workflomicstools"
-    else:
-        raise TypeError("Invalid type for tool_selection string, expected 'full' or 'workflomics'.")    
-
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        biotools = response.json()
-        tool_selection = list({tool['label'] for tool in biotools["functions"]})
-        return [tool for tool in tools if tool['name'] in tool_selection]
-    else:
-        print(f"Failed to retrieve file: {response.status_code}")
-
 async def aggregate_requests(session: aiohttp.ClientSession,
                              url: str,
                              retries: int = 3,
