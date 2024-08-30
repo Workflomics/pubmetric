@@ -248,6 +248,20 @@
             ],
             "publication_date": "2004",
             "pmid": "14976030"
+        },        
+        {
+            "name": "mzRecal",
+            "doi": "10.1093/bioinformatics/btab056",
+            "topics": [
+                "Proteomics"
+            ],
+            "nrPublications": 1,
+            "allPublications": [
+                "33538780"
+            ],
+            "pubDate": 2021,
+            "pmid": "33538780",
+            "nrCitations": 1
         },
         {
             "name": "StPeter",

@@ -1,22 +1,30 @@
 from pubmetric.exceptions import SchemaValidationError
 
 required_meta_keys = {
+    "tools": list
+}
+
+
+required_meta_tool_keys = {
+    "name": str,
+    "publication_date": (int, type(None)),
+    "pmid": (str, type(None))
+}
+
+# checks could be added to have these too, though they are not necessary for fucntionality
+preferred_meta_tool_keys = {
+    "doi": (str, type(None)),
+    "topics": list,
+    "nr_publications": int,
+    "all_publications": list,
+}
+
+preferred_meta_keys = {
     "creation_date": str,
     "topic": (str, type(None)),
     "total_nr_tools": int,
     "biotools_wo_pmid": int,
     "pmid_from_doi": int,
-    "tools": list
-}
-
-required_meta_tool_keys = {
-    "name": str,
-    "doi": (str, type(None)),
-    "topics": list,
-    "nr_publications": int,
-    "all_publications": list,
-    "publication_date": (int, type(None)),
-    "pmid": (str, type(None))
 }
 
 def metafile_schema_validation(metadata_file):
@@ -36,4 +44,3 @@ def metafile_schema_validation(metadata_file):
         raise SchemaValidationError("The schema of the tool metadata is incorrect.")
     
     return True
-

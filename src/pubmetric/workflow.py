@@ -3,8 +3,6 @@ import igraph
 
 from cwl_utils.parser import load_document_by_uri
 
-
-
 def parse_cwl(graph: igraph.Graph, cwl_filename: str) -> list:
     """
     Function that turns a CWL representation of a workflow into a list of node tuples 
