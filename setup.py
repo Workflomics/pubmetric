@@ -23,7 +23,8 @@ setup(
         'cwl_utils',
         'fastapi',
         'scikit-learn',
-        'apscheduler'
+        'apscheduler',
+        'fastapi[standard]'
     ],
     extras_require={
         'test': [

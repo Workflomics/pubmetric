@@ -21,7 +21,7 @@ jobstores = {
 
 scheduler = AsyncIOScheduler(jobstores=jobstores, timezone='Europe/Berlin')
 
-latest_output_path = "out_20240801231111"
+latest_output_path = "data/out"
 
 
 @asynccontextmanager
