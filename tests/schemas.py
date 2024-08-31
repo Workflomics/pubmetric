@@ -31,7 +31,9 @@ def metafile_schema_validation(metadata_file):
     """
     Checks that the metadatafile follows the correct 
 
-    :param metadata_file: The dictionary of tool matadata. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
+    :param metadata_file: Dictionary containing metadata about the tools. 
+        For a description of the schema see 
+        https://workflomics.readthedocs.io/en/latest/basics/pubmetric.html
     
     """
     if not all(key in metadata_file and isinstance(metadata_file[key], required_meta_keys[key]) for key in required_meta_keys):

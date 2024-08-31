@@ -8,7 +8,7 @@ import json
 import pickle
 from datetime import datetime
 from collections import defaultdict
-from typing import Optional, Union
+from typing import Optional, Union, List
 import itertools
 from multiprocessing import Pool
 
@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'src'))) #TODO this
 import pubmetric.data
 import pubmetric.log
 
-def parse_domain_annotations(tools: list, annotations: str = "full") -> list:
+def parse_domain_annotations(annotations:str) -> list:
     """
     Downloads a JSON file containing domain annotations from workflomics repository.
 
@@ -27,11 +27,10 @@ def parse_domain_annotations(tools: list, annotations: str = "full") -> list:
     and extracts the 'label' (name) for each tool to pick out only the tools in the metadatafile
     within the specified domain.
 
-    :param tools: A list of the tools already downloaded from bio.tools.
     :param annotations: A label for which pregenerated domain annotation set that should be 
         downloaded. 
 
-    :return: A set of tool names bio.tools domain annotaion JSON file.
+    :return: A set of tool names from the bio.tools domain annotaion JSON file.
              Returns None if the file could not be retrieved.
     """
     if annotations == "full":
@@ -44,16 +43,17 @@ def parse_domain_annotations(tools: list, annotations: str = "full") -> list:
     with open(annotation_path, 'r', encoding='utf-8') as f:
         dommain_annotations = json.load(f)
     
-    tool_selection = list({tool['label'] for tool in dommain_annotations["functions"]})
-
-    return [tool for tool in tools if tool['name'] in tool_selection]
+    return list({tool['label'] for tool in dommain_annotations["functions"]})
+    
 
 def add_graph_attributes(graph: igraph.Graph, metadata_file: dict):
     """
     Adds attributes to the vertices and edges of the graph using metadata.
 
     :param graph: The co-citation igraph.Graph to be updated.
-    :param metadata_file: Dictionary containing metadata with a 'tools' key. # TODO ref the schema  
+    :param metadata_file: Dictionary containing metadata about the tools. 
+        For a description of the schema see 
+        https://workflomics.readthedocs.io/en/latest/basics/pubmetric.html 
 
     :return: The updated co-citaiton igraph.Graph with added vertex and edge attributes.
     """
@@ -197,12 +197,12 @@ def process_chunk(chunk: dict):
 
 async def create_network(outpath: Optional[str] = None,
                         test_size: Optional[int] = None,
-                        topic_id: Optional[str] = "topic_0121",
+                        topic_id: Optional[str] = None,
                         random_seed: int = 42,
                         load_graph: bool = False,
                         inpath: str = '',
                         save_files: bool = True,
-                        tool_selection: Union[list, str, None]=None) -> igraph.Graph:
+                        tool_selection: Union[ List[str], str, None ] = None) -> igraph.Graph:
     """
     Creates a citation network given a topic and returns a graph and the tools 
     included in the graph.
@@ -228,8 +228,7 @@ async def create_network(outpath: Optional[str] = None,
         bio.tools tool names. 
 
     :raises FileNotFoundError: If no inpath is given despite asking to load.
-    :raises FileNotFoundError: If input directory is not found
-    :raises: ValueError: If none of the tools specified using tool_selection are found.  
+    :raises FileNotFoundError: If input directory is not found 
 
     :return: The citation network graph created using igraph.
     """
@@ -260,46 +259,31 @@ async def create_network(outpath: Optional[str] = None,
         pubmetric.log.log_with_timestamp(f"Output directory created at {outpath}.")
         pubmetric.log.log_with_timestamp("Downloading tool metadata from bio.tools")
         metadata_start_time = datetime.now()
-        metadata_file = await pubmetric.data.get_tool_metadata(outpath=outpath, 
-                                                               inpath=inpath, 
-                                                               topic_id=topic_id, 
-                                                               test_size=test_size, 
-                                                               random_seed=random_seed)
+
         if tool_selection:
             if tool_selection == "full":
-                selected_tools = pubmetric.data.download_domain_annotations(
-                                                                annotations="full",
-                                                                tools=metadata_file["tools"])
-                if not selected_tools:
-                    raise ValueError("No tools were downloaded; please check the download source.")
+                tool_selection = parse_domain_annotations(annotations="full")
             elif tool_selection == "workflomics":
-                selected_tools = pubmetric.data.download_domain_annotations(
-                                                                annotations="workflomics",
-                                                                tools=metadata_file["tools"])
-                if not selected_tools:
-                    raise ValueError("No tools were downloaded; please check the download source.")
-            elif isinstance(tool_selection, list):
-                # can potentially put pmid as an option for input here too
-                selected_tools = [tool
-                                  for tool in metadata_file['tools']
-                                  if tool['name'] in tool_selection]
-                if not selected_tools:
-                    raise ValueError(
-                        "No matching tools found; check the tool names in tool_selection.")
-            else:
+                tool_selection = parse_domain_annotations(annotations="workflomics")        
+            elif not isinstance(tool_selection, list):
                 raise TypeError(
                     "Invalid type for tool_selection. Expected str, list, or set.")
-
+            
+            if not tool_selection:
+                raise ValueError(
+                    "No tools were downloaded; please check your input or the download source.")
             pubmetric.log.log_with_timestamp("Selecting specified subsection of tools")
-            pubmetric.log.log_with_timestamp(f"Number of selected tools: {len(selected_tools)}")
-            metadata_file['tools'] = selected_tools
-            tool_selection = True
+            pubmetric.log.log_with_timestamp(f"Number of selected tools: {len(tool_selection)}")
 
-        metadata_file_name = (
-            f'tool_metadata_test{test_size}.json'
-            if test_size
-            else 'tool_metadata.json'
-        )
+
+        metadata_file = await pubmetric.data.get_tool_metadata(outpath=outpath,
+                                                               inpath=inpath,
+                                                               topic_id=topic_id,
+                                                               test_size=test_size,
+                                                               random_seed=random_seed,
+                                                               tool_selection=tool_selection)
+
+        metadata_file_name = 'tool_metadata.json'
         metadata_file_path = os.path.join(outpath, metadata_file_name)
         pubmetric.log.log_with_timestamp(f"Saving metadata file to {metadata_file_path}.")
         with open(metadata_file_path, 'w', encoding='utf-8') as f:
@@ -344,7 +328,7 @@ async def create_network(outpath: Optional[str] = None,
     # Graph level attributes
     graph["creation_date"] = datetime.now()
     graph["topic"] = topic_id
-    graph["tool_selection"] = tool_selection
+    graph["tool_selection"] = bool(tool_selection)
     graph["graph_creation_time"] = datetime.now() - start_time # TODO not func? 
 
     return graph
