@@ -320,7 +320,7 @@ async def create_network(outpath: Optional[str] = None,
             graph_path = os.path.join(outpath, 'graph.pkl')
             with open(graph_path, 'wb') as f:
                 pickle.dump(graph, f)
-        pubmetric.log.log_with_timestamp(f"Graph creation complete. Graph contains"
+        pubmetric.log.log_with_timestamp(f"Graph creation complete. Graph contains "
                                          f"{len(graph.vs)} vertices and {len(graph.es)} edges.")
 
     pubmetric.log.step_timer(start_time, "Complete data download and graph creation")

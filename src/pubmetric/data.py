@@ -215,44 +215,32 @@ async def get_pmids(topic_id: Optional[str],
 
     page = 1
     async with aiohttp.ClientSession() as session:
-        if tool_selection:
-            for tool_name in tool_selection:
-                biotools_url = f'https://bio.tools/api/tool/{tool_name}/?format=json'
-                try: # with a user specified list there may be tools which are not present in bio.tools
-                    tool_data = await aggregate_requests(session, biotools_url)
-                except:
-                    continue
-                if 'name' in tool_data:
-                    process_biotools_data(tool=tool_data,
-                                        pmid_tools=pmid_tools,
-                                        doi_tools=doi_tools)
-            total_nr_tools = len(tool_selection)
-        else:
-            while page:
-                # Sends request for tools on the page,
-                # await further requests and return resonse in json format
-                biotools_url = base_url + str(page)
-                biotool_data = await aggregate_requests(session, biotools_url)
-                if 'list' in biotool_data: 
-                        biotools_list = biotool_data['list']
-                        for tool in biotools_list:
-                            process_biotools_data(tool=tool,
-                                                pmid_tools=pmid_tools,
-                                                doi_tools=doi_tools)
-                # this is not exaxt since dois might not give pmid
-                if test_size and len(pmid_tools) + len(doi_tools) >= test_size:                                                    
-                    break
+        while page:
+            # Sends request for tools on the page,
+            # await further requests and return resonse in json format
+            biotools_url = base_url + str(page)
+            biotool_data = await aggregate_requests(session, biotools_url)
+            if 'list' in biotool_data:
+                    biotools_list = biotool_data['list']
+                    for tool in biotools_list:
+                        if tool['name'] not in tool_selection:
+                            continue
+                        process_biotools_data(tool=tool,
+                                            pmid_tools=pmid_tools,
+                                            doi_tools=doi_tools)
+            # this is not exaxt since dois might not give pmid
+            if test_size and len(pmid_tools) + len(doi_tools) >= test_size:                                                    
+                break
 
-                page = biotool_data.get('next')
-                if page: # else page will be None and loop will stop
-                    page = page.split('=')[-1] # only want the page number
-                else:
-                    pubmetric.log.log_with_timestamp(
-                        f'Error while fetching tool names from page {page}')
-                    break
+            page = biotool_data.get('next')
+            if page and page != "None": # else page will be None and loop will stop
+                page = page.split('=')[-1] # only want the page number
+            else:
+                pubmetric.log.log_with_timestamp(
+                    f'Error while fetching tool names from page {page}')
+                break
         
             total_nr_tools = int(biotool_data['count']) if biotool_data and 'count' in biotool_data else 0
-
     return (pmid_tools, doi_tools, total_nr_tools)
 
 
