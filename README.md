@@ -15,8 +15,17 @@ First start Cytoscape, then open your notebook environment and run the code.
 
 ## Dependencies
 
-Python packages listed in the `setup.py` file. You can install them using the following command: `pip install .`
-For the development, you can include the test dependencies by running `pip install .[test]`
+Python packages listed in the `pyproject.toml` file. You can install them using the following command: 
+
+```bash
+    poetry install
+```
+
+If you're setting up the project for development and need the test dependencies, you can include them by running:
+
+```bash
+    poetry install --with dev
+```
 
 Cytoscape software, which can be downloaded from [https://cytoscape.org/](https://cytoscape.org/). Please make sure Cytoscape is open and running when executing the code.
 
