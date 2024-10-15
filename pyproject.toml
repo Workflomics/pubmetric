@@ -20,7 +20,7 @@ python = ">=3.10"
 aiohttp = "^3.9.5"
 asyncio = "^3.4.3"
 igraph = "^0.11.6"
-requests = "*"
+requests = "^2.32"
 py4cytoscape = "^1.9.0"
 pandas = "^2.2.3"
 tqdm = "^4.66.2"
@@ -30,13 +30,17 @@ jsonpath-ng = "^1.7.0"
 cwl_utils = "^0.15"
 fastapi = "^0.115.2"
 scikit-learn = "^1.5.2"
-apscheduler = "*"
+apscheduler = "^3.10"
 uvicorn = "^0.31.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.2"
 pytest-datadir = "^1.3.1"
 pytest-asyncio = "^0.14.0"
+
+[tool.poetry.scripts]
+dev-app = "uvicorn src.pubmetric.api_controller:app --reload"
+
 
 
 [build-system]
