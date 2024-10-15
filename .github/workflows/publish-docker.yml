@@ -1,0 +1,35 @@
+name: Build and Publish Docker Image to GitHub Packages
+
+on:
+  push:
+    branches:
+      - main 
+  pull_request: # This should be removed once testing is complete
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 3: Log in to the GitHub Docker registry (ghcr.io)
+      - name: Log in to GitHub Docker Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 4: Build the Docker image and tag it for GitHub Packages
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/pubmetric:latest .
+
+      # Step 5: Push the Docker image to GitHub Packages
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/pubmetric:latest
