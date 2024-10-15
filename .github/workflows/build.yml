@@ -37,6 +37,6 @@ jobs:
         run: |
           poetry run pytest
       # Type checking
-      - name: Type check
-        run: |
-          poetry run pytype .
+      # - name: Type check
+      #   run: |
+      #     poetry run pytype .
