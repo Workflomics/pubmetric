@@ -12,7 +12,6 @@ import pubmetric.metrics
 import pubmetric.network
 import pubmetric.workflow
 
-app = FastAPI()
 
 jobstores = {"default": MemoryJobStore()}
 
@@ -29,8 +28,12 @@ async def lifespan(application: FastAPI):
     finally:
         scheduler.shutdown()
 
-
 app = FastAPI(lifespan=lifespan)
+
+
+@app.get("/")
+async def read_main():
+    return {"msg": "Welcome to Pubmetric!"}
 
 
 class ScoreResponse(BaseModel):
