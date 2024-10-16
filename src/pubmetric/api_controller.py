@@ -17,7 +17,7 @@ jobstores = {"default": MemoryJobStore()}
 
 scheduler = AsyncIOScheduler(jobstores=jobstores, timezone="Europe/Berlin")
 
-latest_output_path = "out_20240801231111"
+latest_output_path = "data/out_default"
 
 
 @asynccontextmanager
@@ -37,7 +37,7 @@ async def read_main():
 
 
 class ScoreResponse(BaseModel):
-    workflow_scores: List
+    benchmarks: List
 
 
 class GraphRequest(BaseModel):
@@ -60,7 +60,7 @@ async def periodic_graph_generation():
     global latest_output_path
     try:
         new_output_path = await pubmetric.network.create_network(
-            topic_id="default", test_size=20
+            topic_id="default", test_size=50
         )  # TODO: rm test size
         if os.path.exists(new_output_path + "/graph.pkl"):
             latest_output_path = new_output_path
@@ -183,7 +183,7 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
 
     benchmarks = [metric_benchmark, age_benchmark]
 
-    return ScoreResponse(workflow_scores=benchmarks)
+    return ScoreResponse(benchmarks=benchmarks)
 
 
 @app.post("/recreate_graph/")
@@ -206,7 +206,7 @@ async def recreate_graph(
     global latest_output_path
     try:
         new_output_path = await pubmetric.network.create_network(
-            topic_id=graph_request.topic_id, test_size=20
+            topic_id=graph_request.topic_id, test_size=50
         )
         if os.path.exists(os.path.join(new_output_path, "graph.pkl")):
             latest_output_path = new_output_path
