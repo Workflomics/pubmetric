@@ -5,6 +5,8 @@ description = "Cocitation based metric for workflow evaluation"
 authors = ["Alma Nilsson <alma.as.nilsson@gmail.com>", "Vedran Kasalica", "Magnus Palmblad"]
 license = "Apache-2.0"
 readme = "README.md"
+packages = [
+    { include = "pubmetric", from = "src" }]
 homepage = "https://github.com/Workflomics/pubmetric"
 repository = "https://github.com/Workflomics/pubmetric"
 documentation = "https://workflomics.readthedocs.io/en/latest/developer-guide/pubmetric.html"
