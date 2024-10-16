@@ -6,7 +6,7 @@ import example_graph as ex_graph
 def test_citation_network_testsize(shared_datadir):
     """Test creating a graph from scratch"""
     graph = asyncio.run(network.create_network(load_graph=False,
-                                               test_size=20,
+                                               test_size=100,
                                                inpath=shared_datadir))
     assert len(graph.vs['pmid']) > 0
     assert sorted(graph.es.attributes()) == sorted(['weight',
