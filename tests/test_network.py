@@ -65,25 +65,22 @@ def test_add_attributes():
 
 def test_parse_domain_annotations(shared_datadir):
     """Tests if annotation fiels are parsed correctly"""
-    # commented tools are not downloaded from bio.tools, or are not in dom. ann.
-    # Former indicates there is no pmid linked to them, or somethign went wrong
+
     workflomics_tools = ["Comet",
     "PeptideProphet",
     "ProteinProphet",
     "StPeter",
     "mzRecal",
-    # "idconvert", # not in domain annotations
+    "idconvert", 
     "msConvert",
-    # "GOEnrichment",
-    # "gProfiler",
+    "GOEnrichment",
+    "gProfiler",
     "XTandem",
-    # "protXml2IdList",
-    # "ms_amanda",
-    # "msfragger" # not in domain annotations
+    "protXml2IdList",
+    #"ms_amanda", # not in domain annotations?
+    #"msfragger" # not in domain annotations
     ]
-    with open(os.path.join(shared_datadir, "tool_metadata_test20.json"), "r", encoding='utf-8') as f:
-        metadata_file = json.load(f)
     
-    selected_tools = network.parse_domain_annotations(metadata_file['tools'], 'workflomics')
-
-    assert sorted([tool['name'] for tool in selected_tools]) == sorted(workflomics_tools)
+    selected_tools = network.parse_domain_annotations('workflomics')
+    print(selected_tools)
+    assert sorted(selected_tools) == sorted(workflomics_tools)

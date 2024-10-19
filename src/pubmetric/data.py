@@ -223,8 +223,9 @@ async def get_pmids(topic_id: Optional[str],
             if 'list' in biotool_data:
                     biotools_list = biotool_data['list']
                     for tool in biotools_list:
-                        if tool['name'] not in tool_selection:
-                            continue
+                        if tool_selection:
+                            if not tool['name'] or tool['name'] not in tool_selection:
+                                continue
                         process_biotools_data(tool=tool,
                                             pmid_tools=pmid_tools,
                                             doi_tools=doi_tools)
@@ -240,7 +241,7 @@ async def get_pmids(topic_id: Optional[str],
                     f'Error while fetching tool names from page {page}')
                 break
         
-            total_nr_tools = int(biotool_data['count']) if biotool_data and 'count' in biotool_data else 0
+    total_nr_tools = int(biotool_data['count']) if biotool_data and 'count' in biotool_data else 0
     return (pmid_tools, doi_tools, total_nr_tools)
 
 
