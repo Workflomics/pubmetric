@@ -53,7 +53,7 @@ def parse_cwl(graph: igraph.Graph, cwl_filename: str) -> list:
         pmid_edges.append((str(source_pmid), str(target_pmid)))
 
     workflow = {"edges": edges,
-                "steps": workflow_steps, # steps and correspoding pmids
+                "steps": dict(sorted(workflow_steps.items(), key=lambda item: item[0][-2:])),   # steps and correspoding pmids, now ordered 
                 "pmid_edges": pmid_edges
     }
     return workflow
