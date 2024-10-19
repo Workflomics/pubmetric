@@ -15,25 +15,25 @@ inputs:
     format: "http://edamontology.org/format_1929" # FASTA
 steps:
   XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+    run: https://raw.githubusercontent.com/Workflomics/tools-and-domains/main/cwl-tools/xtandem/xtandem.cwl
     in:
       XTandem_in_1: input_1
       XTandem_in_2: input_2
     out: [XTandem_out_1]
   ProteinProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+    run: https://raw.githubusercontent.com/Workflomics/tools-and-domains/main/cwl-tools/proteinprophet/proteinprophet.cwl
     in:
       ProteinProphet_in_1: XTandem_01/XTandem_out_1
       ProteinProphet_in_2: input_2
     out: [ProteinProphet_out_1, ProteinProphet_out_2]
   XTandem_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+    run: https://raw.githubusercontent.com/Workflomics/tools-and-domains/main/cwl-tools/xtandem/xtandem.cwl
     in:
       XTandem_in_1: input_1
       XTandem_in_2: input_2
     out: [XTandem_out_1]
   StPeter_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+    run: https://raw.githubusercontent.com/Workflomics/tools-and-domains/main/cwl-tools/stpeter/stpeter.cwl
     in:
       StPeter_in_1: ProteinProphet_02/ProteinProphet_out_1
       StPeter_in_2: XTandem_03/XTandem_out_1
