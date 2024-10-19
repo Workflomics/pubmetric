@@ -122,7 +122,7 @@ def calculate_desirability(score: float,
         if transform:
             # Sigmoid function with an adjustable midpoint, for high resolution in the beginnning
             return round(1 / (1 + math.exp(-steepness * (normalised_score - midpoint))), 2)
-        return normalised_score
+        return round(normalised_score, 2)
 
 
 # Tool level metric

@@ -5,7 +5,7 @@ This code is currently under development.
 
 ## Overview
 
-pubmetric is a library for benchmarking workflows based on the co-citation network connectivity of the publications describing the tools making up the workflow.
+pubmetric is a library for generation of bibliometric networks and benchmarking of workflows.
 
 
 ## Usage

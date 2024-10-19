@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: 'Pubmetric: Bibliographic Network Generation and Benchmarking of Workflows'
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Alma
+    family-names: Nilsson
+    email: alma.as.nilsson@gmail.com
+    affiliation: Uppsala universitet, Sweden
+    orcid: 'https://orcid.org/0009-0004-8501-642X'
+  - given-names: Vedran
+    family-names: Kasalica
+    email: v.kasalica@esciencecenter.nl
+    affiliation: Netherlands eScience Center, Netherlands
+    orcid: 'https://orcid.org/0000-0002-0097-1056'
+  - given-names: Magnus
+    family-names: Palmblad
+    email: n.m.palmblad@lumc.nl
+    affiliation: Leiden University Medical Center, Netherlands
+    orcid: 'https://orcid.org/0000-0002-5865-8994'
+identifiers:
+  - type: doi
+    value: 
+repository-code: 'https://github.com/workflomics/pubmetric'
+url: 'https://github.com/workflomics/pubmetric'
+abstract: >-
+  Pubmetric is a tool for benchmarking workflows, based on bibliographic networks. TODO: add abstract once report finished 
+keywords:
+  - bioinformatics
+  - benchmarking
+  - bibliometrics
+  - CWL
+  - workflow analysis
+license: Apache-2.0
+commit: 
+version: 
+date-released: 

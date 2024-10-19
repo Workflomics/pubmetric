@@ -1,7 +1,9 @@
 import os
+
 import pytest
 import asyncio
 import aiohttp
+
 import pubmetric.data as data
 from schemas import metafile_schema_validation
 
