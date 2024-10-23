@@ -1,12 +1,13 @@
 import os
 import tempfile
+from typing import List, Optional
 from contextlib import asynccontextmanager
 
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
-from typing import List, Optional
+import numpy as np
 
 import pubmetric.metrics
 import pubmetric.network
@@ -21,7 +22,6 @@ jobstores = {
 
 scheduler = AsyncIOScheduler(jobstores=jobstores, timezone='Europe/Berlin')
 
-latest_output_path = "out_20240801231111"
 
 
 @asynccontextmanager
@@ -34,13 +34,18 @@ async def lifespan(application: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
+
 class ScoreResponse(BaseModel):
     workflow_scores: List
 
 class GraphRequest(BaseModel):
-    topic_id: str
-    test_size: str
-    tool_list: Optional[list]
+    topic_id: Optional[str] = None
+    test_size: Optional[int] = None
+    tool_selection: Optional[List[str]] = None
+    inpath: Optional[str] = ''
+
+
 
 @scheduler.scheduled_job('interval', days=30)
 async def periodic_graph_generation():
@@ -53,21 +58,21 @@ async def periodic_graph_generation():
         or an error message if the graph file is not found.
 
     """
-    global latest_output_path
+    temporary_path = "new_cocitation_graph/"
     try:
-        new_output_path = await pubmetric.network.create_network(topic_id="default",
-                                                                 test_size=20,
-                                                                 return_path = True) # TODO: rm test size
-        if os.path.exists(new_output_path + "/graph.pkl"):
-            latest_output_path = new_output_path
-            return {"message": f"Graph and metadata file recreated "
-                    f"successfully New graph path: {latest_output_path}."}
-        else:
-            return {"error": "Error: Generated graph file not found."} #TODO error type 
+        await pubmetric.network.create_network(topic_id = None,
+                                               test_size = 20, # TODO rm
+                                               outpath = temporary_path)
+
+        check_graph_creation(temporary_path=temporary_path)
+
+        return {"message":
+            f"Graph and metadata file recreated successfully!"}
     except Exception as e:
-        return {"error": f"An error occurred while recreating the graph: {e}." 
+        return {"error": f"An error occurred while recreating the graph: {e}."
                 "The previous graph will continue to be used."}
 scheduler.add_job(periodic_graph_generation, 'interval', days=30)
+
 
 @app.post("/score_workflow/", response_model=ScoreResponse)
 async def score_workflow(cwl_file: UploadFile = File(None)):
@@ -80,9 +85,13 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
     :return: ScoreResponse
         A response model containing the computed scores for the workflow;
         metric and age benchmarks accoring to the Workflomics JSON Schema for Benchmarks.
+        See https://workflomics.readthedocs.io/en/latest/dev/standards.html for a detailed
+        description. 
     """
 
-    graph = await pubmetric.network.create_network(inpath=latest_output_path, load_graph=True) 
+    graph = await pubmetric.network.create_network(inpath="data/out", load_graph=True) 
+    # data/out used as the latest created graph
+    # TODO: should be configurable
     with tempfile.TemporaryDirectory() as temp_dir:
 
         cwl_file_path = os.path.join(temp_dir, cwl_file.filename)
@@ -92,13 +101,13 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
             f.write(cwl_file.file.read())
 
         
-        workflow = pubmetric.workflow.parse_cwl(cwl_filename=cwl_file_path, 
-                                                graph=graph)  
+        workflow = pubmetric.workflow.parse_cwl(cwl_filename=cwl_file_path,
+                                                graph=graph)
         pmid_workflow = workflow['pmid_edges']
 
         # Metrics
         workflow_level_score =  pubmetric.metrics.workflow_average(graph=graph,
-                                                                   workflow=pmid_workflow)
+                                                                workflow=pmid_workflow)
         workflow_desirability = pubmetric.metrics.calculate_desirability(score=workflow_level_score,
                                                                          thresholds= [0, 400])
         tool_level_scores = pubmetric.metrics.tool_average_sum(graph, workflow)
@@ -156,7 +165,7 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
             "steps": ages_output,
             "aggregate_value": {
                 "desirability": 1.0, # unclear what to put here
-                "value": f'{len([age for age in ages_output if age["value"] != "Unknown"])}/{len(ages_output)}'
+                "value": str(np.median([int(age['value']) for age in ages_output if age["value"] != "Unknown"]))
             }
         }
 
@@ -179,20 +188,48 @@ async def recreate_graph(graph_request: GraphRequest): # if you want to recreate
 
 
     """
-    global latest_output_path
+    temporary_path = "new_cocitation_graph/"
     try:
-        new_output_path = await pubmetric.network.create_network(topic_id=graph_request.topic_id,
-                                                                 test_size=20,
-                                                                 return_path=True)
-        if os.path.exists(os.path.join(new_output_path, "graph.pkl")):
-            latest_output_path = new_output_path
-            return {"message": 
-                    f"Graph and metadata file recreated successfully New graph path: {latest_output_path}."}
-        else:
-            return {"error": "Error: Generated graph file not found."}
+        await pubmetric.network.create_network(topic_id = graph_request.topic_id,
+                                               tool_selection = graph_request.tool_selection,
+                                               test_size = graph_request.test_size,
+                                               inpath = graph_request.inpath,
+                                               outpath = temporary_path)
+        check_graph_creation(temporary_path=temporary_path)
+        return {"message":
+            f"Graph and metadata file recreated successfully!"}
     except Exception as e:
-        return {"error": f"An error occurred while recreating the graph: {e}." 
+        return {"error": f"An error occurred while recreating the graph: {e}."
                 "The previous graph will continue to be used."}
     
-    
 
+
+def check_graph_creation(temporary_path: str):
+    """
+    Checks that the new files have been created. If successful, removes the old ones and updates the
+    new ones to have the 'base' name.
+
+    :param temporary_path: The directory currently storing the newly generated graph
+    
+    :raises FileNotFoundError: If the new graph files were not created correctly. This error is raised
+        when the expected files (`graph.pkl` and `tool_metadata.json`) are not found in the
+        `temporary_path` directory.
+    """
+    graph_file_path = os.path.join(temporary_path, "graph.pkl")
+    metadata_file_path = os.path.join(temporary_path, "tool_metadata.json")
+    if os.path.exists(graph_file_path) and os.path.exists(metadata_file_path):
+        base_path = "cocitation_graph/"
+        if os.path.exists(base_path):
+            # Remove old files and the old directory, to rename the new one to the old
+            # TODO: should only be removed when th temp one is already renamed?
+            for file in os.listdir(base_path):
+                os.remove(os.path.join(base_path, file))
+            os.rmdir(base_path)
+        os.rename(temporary_path, base_path)
+        return
+    else: # remove the temporary folder if graph creation did not work
+        if os.path.exists(temporary_path):
+            for file in os.listdir(temporary_path):
+                os.remove(os.path.join(temporary_path, file))
+            os.rmdir(temporary_path)
+        raise FileNotFoundError("New graph files were not created correctly.")

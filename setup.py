@@ -3,8 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name='pubmetric',
     version='0.1.0',
-    description='Cocitation based metric for workflow evaluation',
-    author='Alma Nilsson, Vedran Kasalica, Magnus Palmblad ',
+    description='Bibliographic Network Generation and Benchmarking of Workflows',
+    author='Alma Nilsson, Vedran Kasalica, Magnus Palmblad',
     author_email='alma.as.nilsson@gmail.com',
     license='Apache License 2.0',
     packages=find_packages(),
@@ -23,7 +23,8 @@ setup(
         'cwl_utils',
         'fastapi',
         'scikit-learn',
-        'apscheduler'
+        'apscheduler',
+        'fastapi[standard]'
     ],
     extras_require={
         'test': [

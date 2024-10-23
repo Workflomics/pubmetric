@@ -1,29 +1,39 @@
 from pubmetric.exceptions import SchemaValidationError
 
 required_meta_keys = {
+    "tools": list
+}
+
+
+required_meta_tool_keys = {
+    "name": str,
+    "publication_date": (int, type(None)),
+    "pmid": (str, type(None))
+}
+
+# checks could be added to have these too, though they are not necessary for fucntionality
+preferred_meta_tool_keys = {
+    "doi": (str, type(None)),
+    "topics": list,
+    "nr_publications": int,
+    "all_publications": list,
+}
+
+preferred_meta_keys = {
     "creation_date": str,
     "topic": (str, type(None)),
     "total_nr_tools": int,
     "biotools_wo_pmid": int,
     "pmid_from_doi": int,
-    "tools": list
-}
-
-required_meta_tool_keys = {
-    "name": str,
-    "doi": (str, type(None)),
-    "topics": list,
-    "nr_publications": int,
-    "all_publications": list,
-    "publication_date": (int, type(None)),
-    "pmid": (str, type(None))
 }
 
 def metafile_schema_validation(metadata_file):
     """
     Checks that the metadatafile follows the correct 
 
-    :param metadata_file: The dictionary of tool matadata. TODO: QUESTION: some specific way of referencing a file with a certain type/format of contents?
+    :param metadata_file: Dictionary containing metadata about the tools. 
+        For a description of the schema see 
+        https://workflomics.readthedocs.io/en/latest/basics/pubmetric.html
     
     """
     if not all(key in metadata_file and isinstance(metadata_file[key], required_meta_keys[key]) for key in required_meta_keys):
@@ -36,4 +46,3 @@ def metafile_schema_validation(metadata_file):
         raise SchemaValidationError("The schema of the tool metadata is incorrect.")
     
     return True
-

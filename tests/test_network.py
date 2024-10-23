@@ -1,5 +1,9 @@
 from collections import defaultdict
+import os
+
+import json
 import asyncio
+
 from pubmetric import network 
 import example_graph as ex_graph
 
@@ -57,3 +61,26 @@ def test_add_attributes():
     assert 'pmid' in attribute_graph.vs.attributes()
     assert 'nr_citations' in attribute_graph.vs.attributes()
     assert 'degree' in attribute_graph.vs.attributes()
+
+
+def test_parse_domain_annotations(shared_datadir):
+    """Tests if annotation fiels are parsed correctly"""
+
+    workflomics_tools = ["Comet",
+    "PeptideProphet",
+    "ProteinProphet",
+    "StPeter",
+    "mzRecal",
+    "idconvert", 
+    "msConvert",
+    "GOEnrichment",
+    "gProfiler",
+    "XTandem",
+    "protXml2IdList",
+    #"ms_amanda", # not in domain annotations?
+    #"msfragger" # not in domain annotations
+    ]
+    
+    selected_tools = network.parse_domain_annotations('workflomics')
+    print(selected_tools)
+    assert sorted(selected_tools) == sorted(workflomics_tools)

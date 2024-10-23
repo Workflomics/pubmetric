@@ -1,0 +1,493 @@
+{
+    "creation_date": "2024-08-31 01:54:01.359326",
+    "topic": "topic_3172",
+    "total_nr_tools": 695,
+    "biotools_wo_pmid": 4,
+    "pmid_from_doi": 4,
+    "tools": [
+        {
+            "name": "xcms",
+            "doi": "10.1093/bioinformatics/btq441",
+            "topics": [
+                "Biological imaging",
+                "Data visualisation",
+                "Metabolomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "20671148"
+            ],
+            "publication_date": 2010,
+            "pmid": "20671148"
+        },
+        {
+            "name": "OpenChrom",
+            "doi": null,
+            "topics": [
+                "Proteomics experiment",
+                "Proteomics",
+                "Metabolomics",
+                "Data visualisation"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "20673335"
+            ],
+            "publication_date": 2010,
+            "pmid": "20673335"
+        },
+        {
+            "name": "METLIN",
+            "doi": "10.1097/01.ftd.0000179845.53213.39",
+            "topics": [
+                "Metabolomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "16404815"
+            ],
+            "publication_date": 2005,
+            "pmid": "16404815"
+        },
+        {
+            "name": "X-omics ACTION demonstrator multi-omics analysis workflow",
+            "doi": "10.1093/gigascience/giad115",
+            "topics": [
+                "Omics",
+                "Metabolomics",
+                "Epigenomics",
+                "Machine learning",
+                "Data visualisation"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38217405"
+            ],
+            "publication_date": 2024,
+            "pmid": "38217405"
+        },
+        {
+            "name": "Expasy",
+            "doi": null,
+            "topics": [
+                "Proteomics",
+                "Phylogeny",
+                "Transcriptomics",
+                "Population genetics",
+                "Genomics",
+                "Metagenomics",
+                "Evolutionary biology",
+                "Structural biology",
+                "Drug discovery",
+                "Systems biology",
+                "Biochemistry",
+                "Metabolomics",
+                "Natural language processing",
+                "Machine learning"
+            ],
+            "nr_publications": 4,
+            "all_publications": [
+                "12824418",
+                "22661580",
+                "8073505",
+                "33849055"
+            ],
+            "publication_date": 2021,
+            "pmid": "33849055"
+        },
+        {
+            "name": "OmicNavigator",
+            "doi": "10.1186/s12859-024-05743-4",
+            "topics": [
+                "Metabolomics",
+                "Proteomics",
+                "Genomics",
+                "Bioinformatics",
+                "Sequence analysis"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38658834"
+            ],
+            "publication_date": 2024,
+            "pmid": "38658834"
+        },
+        {
+            "name": "shu",
+            "doi": "10.1093/bioinformatics/btae140",
+            "topics": [
+                "Endocrinology and metabolism",
+                "Small molecules",
+                "Molecular interactions, pathways and networks",
+                "Metabolomics",
+                "Workflows"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38452346"
+            ],
+            "publication_date": 2024,
+            "pmid": "38452346"
+        },
+        {
+            "name": "SperMD",
+            "doi": "10.1186/s12859-024-05631-x",
+            "topics": [
+                "Metabolomics",
+                "Proteomics",
+                "Transcriptomics",
+                "Biomarkers",
+                "Genotype and phenotype"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38233783"
+            ],
+            "publication_date": 2024,
+            "pmid": "38233783"
+        },
+        {
+            "name": "LogoMotif",
+            "doi": "10.1016/j.jmb.2024.168558",
+            "topics": [
+                "Transcription factors and regulatory sites",
+                "Molecular interactions, pathways and networks",
+                "Gene regulation",
+                "Chemistry",
+                "Metabolomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38580076"
+            ],
+            "publication_date": 2024,
+            "pmid": "38580076"
+        },
+        {
+            "name": "scTensor",
+            "doi": "10.1186/s12859-023-05490-y",
+            "topics": [
+                "RNA-Seq",
+                "Cell biology",
+                "Epigenomics",
+                "Metabolomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "37936079"
+            ],
+            "publication_date": 2023,
+            "pmid": "37936079"
+        },
+        {
+            "name": "PyCoMo",
+            "doi": "10.1093/bioinformatics/btae153",
+            "topics": [
+                "Small molecules",
+                "Endocrinology and metabolism",
+                "Metabolomics",
+                "Microbial ecology",
+                "Molecular interactions, pathways and networks"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38532295"
+            ],
+            "publication_date": 2024,
+            "pmid": "38532295"
+        },
+        {
+            "name": "openNAU",
+            "doi": "10.21147/j.issn.1000-9604.2023.05.11",
+            "topics": [
+                "Metabolomics",
+                "Small molecules",
+                "Endocrinology and metabolism",
+                "Proteomics experiment",
+                "NMR"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "37969962"
+            ],
+            "publication_date": 2023,
+            "pmid": "37969962"
+        },
+        {
+            "name": "MoTrPAC",
+            "doi": "10.1038/s41467-024-45966-w",
+            "topics": [
+                "Epigenomics",
+                "Immunomics",
+                "Physics",
+                "Metabolomics",
+                "Proteomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38693125"
+            ],
+            "publication_date": 2024,
+            "pmid": "38693125"
+        },
+        {
+            "name": "MetDIT",
+            "doi": "10.1021/acs.analchem.3c04607",
+            "topics": [
+                "Metabolomics",
+                "Machine learning",
+                "Personalised medicine",
+                "Imaging"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38324756"
+            ],
+            "publication_date": 2023,
+            "pmid": "38324756"
+        },
+        {
+            "name": "MINNO",
+            "doi": "10.1021/acs.analchem.3c04501",
+            "topics": [
+                "Metabolomics",
+                "Endocrinology and metabolism",
+                "Molecular interactions, pathways and networks",
+                "Fluxomics",
+                "Nutritional science"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38359900"
+            ],
+            "publication_date": 2024,
+            "pmid": "38359900"
+        },
+        {
+            "name": "IDSL_MINT",
+            "doi": "10.1186/s13321-024-00804-5",
+            "topics": [
+                "Metabolomics",
+                "Proteomics experiment",
+                "Lipids",
+                "Natural language processing",
+                "Machine learning"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38238779"
+            ],
+            "publication_date": 2024,
+            "pmid": "38238779"
+        },
+        {
+            "name": "SAND",
+            "doi": "10.1021/acs.analchem.3c03078",
+            "topics": [
+                "NMR",
+                "Metabolomics",
+                "Mathematics",
+                "Small molecules",
+                "MRI"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38273718"
+            ],
+            "publication_date": 2024,
+            "pmid": "38273718"
+        },
+        {
+            "name": "RT-Transformer",
+            "doi": "10.1093/bioinformatics/btae084",
+            "topics": [
+                "Metabolomics",
+                "Small molecules",
+                "Machine learning",
+                "Molecular biology"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38402516"
+            ],
+            "publication_date": 2024,
+            "pmid": "38402516"
+        },
+        {
+            "name": "AutonoMS",
+            "doi": "10.1021/jasms.3c00396",
+            "topics": [
+                "Metabolomics",
+                "Proteomics experiment",
+                "Workflows",
+                "Biology",
+                "Proteomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38310603"
+            ],
+            "publication_date": 2024,
+            "pmid": "38310603"
+        },
+        {
+            "name": "MRMPro",
+            "doi": "10.1186/s12859-024-05685-x",
+            "topics": [
+                "Proteomics experiment",
+                "Proteomics",
+                "Metabolomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38321388"
+            ],
+            "publication_date": 2024,
+            "pmid": "38321388"
+        },
+        {
+            "name": "imputomics",
+            "doi": "10.1093/bioinformatics/btae098",
+            "topics": [
+                "Metabolomics",
+                "Proteomics experiment",
+                "Proteomics",
+                "Machine learning"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38377398"
+            ],
+            "publication_date": 2024,
+            "pmid": "38377398"
+        },
+        {
+            "name": "IBDIRP",
+            "doi": "10.1093/database/baad097",
+            "topics": [
+                "Pathology",
+                "Gastroenterology",
+                "Endocrinology and metabolism",
+                "Metabolomics",
+                "Biobank"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38227799"
+            ],
+            "publication_date": 2024,
+            "pmid": "38227799"
+        },
+        {
+            "name": "BiG-SCAPE",
+            "doi": "10.1038/S41589-019-0400-9",
+            "topics": [
+                "Phylogeny",
+                "Microbial ecology",
+                "Mapping",
+                "Metabolomics",
+                "Bioinformatics",
+                "Gene and protein families"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "31768033"
+            ],
+            "publication_date": 2020,
+            "pmid": "31768033"
+        },
+        {
+            "name": "PathIntegrate",
+            "doi": "10.1371/journal.pcbi.1011814",
+            "topics": [
+                "Molecular interactions, pathways and networks",
+                "Metabolomics",
+                "Proteomics",
+                "Transcriptomics",
+                "Small molecules"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "38527092"
+            ],
+            "publication_date": 2024,
+            "pmid": "38527092"
+        },
+        {
+            "name": "AntDAS-DDA",
+            "doi": "10.1021/ACS.ANALCHEM.2C01795",
+            "topics": [
+                "Metabolomics",
+                "Proteomics experiment",
+                "Plant biology"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                "36599407"
+            ],
+            "publication_date": 2023,
+            "pmid": "36599407"
+        },
+        {
+            "name": "MetaboLights",
+            "doi": "10.1093/nar/gks1004",
+            "topics": [
+                "Metabolomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                null
+            ],
+            "publication_date": 2013,
+            "pmid": "23109552"
+        },
+        {
+            "name": "Sirius",
+            "doi": "10.1093/bioinformatics/btn603",
+            "topics": [
+                "Proteomics",
+                "Proteomics experiment",
+                "Metabolomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                null
+            ],
+            "publication_date": 2009,
+            "pmid": "19015140"
+        },
+        {
+            "name": "ExfilMS",
+            "doi": "10.5281/zenodo.10976761",
+            "topics": [
+                "Metabolomics",
+                "Proteomics"
+            ],
+            "nr_publications": 1,
+            "all_publications": [
+                null
+            ],
+            "publication_date": 2024,
+            "pmid": "39179250"
+        },
+        {
+            "name": "Goslin",
+            "doi": "10.1021/acs.analchem.0c01690",
+            "topics": [
+                "Lipids",
+                "Computational chemistry",
+                "Metabolomics",
+                "Bioinformatics",
+                "Ontology and terminology",
+                "Cheminformatics"
+            ],
+            "nr_publications": 2,
+            "all_publications": [
+                null,
+                null
+            ],
+            "publication_date": 2020,
+            "pmid": "32589019"
+        }
+    ]
+}
