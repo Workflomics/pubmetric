@@ -42,3 +42,7 @@ def test_recreate_graph():
         assert "message" in response.json()
         assert response.json()['message'] == ("Graph and metadata file recreated successfully!")
 
+    if os.path.exists('new_cocitation_graph'):
+        for file in os.listdir('new_cocitation_graph'):
+            os.remove(os.path.join('new_cocitation_graph', file))
+        os.rmdir('new_cocitation_graph')  

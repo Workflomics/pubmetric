@@ -22,7 +22,6 @@ jobstores = {
 
 scheduler = AsyncIOScheduler(jobstores=jobstores, timezone='Europe/Berlin')
 
-latest_output_path = "data/out"
 
 
 @asynccontextmanager
@@ -90,7 +89,9 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
         description. 
     """
 
-    graph = await pubmetric.network.create_network(inpath=latest_output_path, load_graph=True) 
+    graph = await pubmetric.network.create_network(inpath="data/out", load_graph=True) 
+    # data/out used as the latest created graph
+    # TODO: should be configurable
     with tempfile.TemporaryDirectory() as temp_dir:
 
         cwl_file_path = os.path.join(temp_dir, cwl_file.filename)
@@ -220,10 +221,15 @@ def check_graph_creation(temporary_path: str):
         base_path = "cocitation_graph/"
         if os.path.exists(base_path):
             # Remove old files and the old directory, to rename the new one to the old
-            os.remove(os.path.join(base_path, "graph.pkl"))
-            os.remove(os.path.join(base_path, "tool_metadata.json"))
+            # TODO: should only be removed when th temp one is already renamed?
+            for file in os.listdir(base_path):
+                os.remove(os.path.join(base_path, file))
             os.rmdir(base_path)
         os.rename(temporary_path, base_path)
         return
-    else:
+    else: # remove the temporary folder if graph creation did not work
+        if os.path.exists(temporary_path):
+            for file in os.listdir(temporary_path):
+                os.remove(os.path.join(temporary_path, file))
+            os.rmdir(temporary_path)
         raise FileNotFoundError("New graph files were not created correctly.")
