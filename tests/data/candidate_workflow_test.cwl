@@ -15,26 +15,26 @@ inputs:
     format: "http://edamontology.org/format_1929" # FASTA
 steps:
   XTandem_01:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/XTandem/XTandem.cwl
+    run: https://raw.githubusercontent.com/Workflomics/tools-and-domains/main/cwl-tools/xtandem/xtandem.cwl
     in:
       XTandem_in_1: input_1
       XTandem_in_2: input_2
     out: [XTandem_out_1]
   ProteinProphet_02:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/ProteinProphet/ProteinProphet.cwl
+    run: https://raw.githubusercontent.com/Workflomics/tools-and-domains/main/cwl-tools/proteinprophet/proteinprophet.cwl
     in:
       ProteinProphet_in_1: XTandem_01/XTandem_out_1
       ProteinProphet_in_2: input_2
     out: [ProteinProphet_out_1, ProteinProphet_out_2]
   PeptideProphet_03:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/PeptideProphet/PeptideProphet.cwl
+    run: https://raw.githubusercontent.com/Workflomics/tools-and-domains/main/cwl-tools/peptideprophet/peptideprophet.cwl
     in:
       PeptideProphet_in_1: XTandem_01/XTandem_out_1
       PeptideProphet_in_2: input_1
       PeptideProphet_in_3: input_2
     out: [PeptideProphet_out_1, PeptideProphet_out_2]
   StPeter_04:
-    run: https://raw.githubusercontent.com/Workflomics/containers/main/cwl/tools/StPeter/StPeter.cwl
+    run: https://raw.githubusercontent.com/Workflomics/tools-and-domains/main/cwl-tools/stpeter/stpeter.cwl
     in:
       StPeter_in_1: ProteinProphet_02/ProteinProphet_out_1
       StPeter_in_2: PeptideProphet_03/PeptideProphet_out_1

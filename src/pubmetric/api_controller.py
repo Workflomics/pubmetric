@@ -139,11 +139,9 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
 
         ages_output = []
         ages = []
-        for tool_name, pmid in workflow["steps"].items():
-            age = next(tool["age"] for tool in graph.vs if tool["pmid"] == pmid)
-            if (
-                not age or age > 40
-            ):  # igraph requires all values of same type, hence >40 is None
+        for tool_name, pmid in workflow['steps'].items():
+            age = next((tool['age'] for tool in graph.vs if tool['pmid'] == pmid), None)
+            if not age or age > 40: # igraph requires all values of same type, hence >40 is None
                 age = "Unknown"
                 desirability = 0
             else:
