@@ -6,7 +6,7 @@ import os
 import json
 from datetime import datetime
 from collections import defaultdict, Counter
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import asyncio
@@ -298,7 +298,7 @@ def get_specific_tools_by_id(biotools_ids) -> list:
     return tools
 
 
-def get_pmids_workflomics() -> tuple:
+def get_pmids_workflomics() -> Tuple[list, list, int]:
     """
     Downloads all (or a specified amount) of the bio.tools tools for a specific
     topic and returns metadata about the tools.

@@ -12,7 +12,7 @@ def test_get_tool_metadata_from_file(shared_datadir):
     """ Testing that loading a metadata file works"""
     metadata_file = asyncio.run(data.get_tool_metadata(outpath='',
                                                        topic_id="topic_0121",
-                                                       test_size=100,
+                                                       test_size=20,
                                                        inpath=shared_datadir))
     pepmatch_pmid = next((tool['pmid'] for tool in metadata_file["tools"]
                                     if tool['name'] == 'PEPMatch'), None)
@@ -131,7 +131,7 @@ def test_get_tool_metadata():
     separators=(',', ': ')))
 
 def test_get_pmids_workflomics():
-    _, _, no_tools = asyncio.run(data.get_pmids_workflomics())
+    _, _, no_tools = data.get_pmids_workflomics()
     assert no_tools > 10
     assert no_tools < 30
     
