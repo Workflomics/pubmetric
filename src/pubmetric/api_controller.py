@@ -160,8 +160,9 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
 
         metric_benchmark = {
             "unit": "metric",
-            "description": "The tool- and workflow-level metric",
-            "title": "Pubmetric",
+            "category": "Bibliometrics",
+            "description": "The tool- and workflow-level co-citation metric",
+            "title": "Co-citation score",
             "steps": tool_level_output,
             "aggregate_value": {
                 "desirability": workflow_desirability,
@@ -170,8 +171,9 @@ async def score_workflow(cwl_file: UploadFile = File(None)):
         }
         age_benchmark = {
             "unit": "age",
-            "description": "Time since release of primary publications",
-            "title": "Age",
+            "category": "Bibliometrics",
+            "description": "Time since release of primary publication",
+            "title": "Tool age",
             "steps": ages_output,
             "aggregate_value": {
                 "desirability": 1.0,  # unclear what to put here
