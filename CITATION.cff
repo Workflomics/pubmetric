@@ -20,9 +20,6 @@ authors:
     email: n.m.palmblad@lumc.nl
     affiliation: Leiden University Medical Center, Netherlands
     orcid: 'https://orcid.org/0000-0002-5865-8994'
-identifiers:
-  - type: doi
-    value: -
 repository-code: 'https://github.com/Workflomics/pubmetric'
 url: 'https://github.com/Workflomics/pubmetric'
 abstract: >-
